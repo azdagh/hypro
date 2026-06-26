@@ -11,8 +11,21 @@ export async function getAuthHeaders(customHeaders: Record<string, string> = {})
 
   try {
     const supabase = await getSupabaseClient();
+    // First try to get existing session
     const { data: { session } } = await supabase.auth.getSession();
+    
     if (session?.access_token) {
+      // Check if token expires in less than 60 seconds
+      const expiresAt = session.expires_at ?? 0;
+      const nowSecs = Math.floor(Date.now() / 1000);
+      if (expiresAt - nowSecs < 60) {
+        // Proactively refresh
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        if (refreshed.session?.access_token) {
+          headers['Authorization'] = `Bearer ${refreshed.session.access_token}`;
+          return headers;
+        }
+      }
       headers['Authorization'] = `Bearer ${session.access_token}`;
     }
   } catch (err) {
@@ -33,8 +46,25 @@ export async function secureFetch(url: string, options: RequestInit = {}): Promi
     delete authHeaders['Content-Type'];
   }
 
-  return fetch(url, {
-    ...options,
-    headers: authHeaders
-  });
+  const response = await fetch(url, { ...options, headers: authHeaders });
+
+  // On 401, try to refresh session and retry once
+  if (response.status === 401) {
+    try {
+      const supabase = await getSupabaseClient();
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      if (refreshed.session?.access_token) {
+        const retryHeaders = {
+          ...authHeaders,
+          'Authorization': `Bearer ${refreshed.session.access_token}`
+        };
+        if (options.body instanceof FormData) delete retryHeaders['Content-Type'];
+        return fetch(url, { ...options, headers: retryHeaders });
+      }
+    } catch (e) {
+      console.error('[secureFetch] Token refresh failed:', e);
+    }
+  }
+
+  return response;
 }
