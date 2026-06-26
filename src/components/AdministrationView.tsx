@@ -406,7 +406,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
               <div className="p-12 text-center text-xs text-slate-400">Chargement des comptes...</div>
             ) : (
               <div className="overflow-x-auto">
-                <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+                <div className="overflow-x-auto w-full">
 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
@@ -561,7 +561,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto">
-              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+              <div className="overflow-x-auto w-full">
 <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
@@ -680,7 +680,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto">
-              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+              <div className="overflow-x-auto w-full">
 <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
@@ -779,7 +779,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-xl">
-              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+              <div className="overflow-x-auto w-full">
 <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold text-[9px] uppercase tracking-wider">
