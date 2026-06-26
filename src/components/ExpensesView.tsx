@@ -149,7 +149,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           });
           
           if (error) {
-             throw new Error(error.message || 'Echec de l\\'upload vers Supabase Storage');
+             throw new Error(error.message || "Echec de l'upload vers Supabase Storage");
           }
           
           const { data: publicUrlData } = supabase.storage.from('receipts').getPublicUrl(uniqueFilename);
