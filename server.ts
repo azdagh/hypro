@@ -247,10 +247,6 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/dev-superadmin-login', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(404).json({ error: 'Connexion automatique indisponible en production.' });
-  }
-
   const email = process.env.INITIAL_ADMIN_EMAIL;
   const password = process.env.INITIAL_ADMIN_PASSWORD;
 
