@@ -466,8 +466,7 @@ export const SupabaseDbService = {
         company_name: subData.name || subData.company_name,
         contact_name: subData.contact_name || '',
         phone: subData.phone || '',
-        email: subData.email || '',
-        specialty: subData.specialty || subData.activity_area || ''
+        email: subData.email || ''
       }])
       .select()
       .single();
@@ -531,7 +530,12 @@ export const SupabaseDbService = {
       .select('*, suppliers(company_name), projects(name)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return data;
+    return data.map((item: any) => ({
+      ...item,
+      supplier_name: item.suppliers?.company_name,
+      project_name: item.projects?.name,
+      total_amount_dzd: item.amount_dzd
+    }));
   },
 
   async createPurchaseOrder(poData: any, userId: string) {
@@ -541,7 +545,7 @@ export const SupabaseDbService = {
       .insert([{
         supplier_id: poData.supplier_id,
         project_id: poData.project_id,
-        amount_dzd: Number(poData.amount_dzd),
+        amount_dzd: Number(poData.total_amount_dzd || poData.amount_dzd || 0),
         receipt_file_id: poData.receipt_file_id || null,
         receipt_url: poData.receipt_url || null,
         status: 'Pending'
@@ -560,7 +564,13 @@ export const SupabaseDbService = {
       .select('*, subcontractors(company_name), projects(name)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return data;
+    return data.map((item: any) => ({
+      ...item,
+      contractor_name: item.subcontractors?.company_name,
+      project_name: item.projects?.name,
+      total_amount_dzd: item.amount_dzd,
+      subcontractor_id: item.contractor_id
+    }));
   },
 
   async createContract(contractData: any, userId: string) {
@@ -569,8 +579,8 @@ export const SupabaseDbService = {
       .from('contracts')
       .insert([{
         project_id: contractData.project_id,
-        contractor_id: contractData.contractor_id,
-        amount_dzd: Number(contractData.amount_dzd),
+        contractor_id: contractData.subcontractor_id || contractData.contractor_id,
+        amount_dzd: Number(contractData.total_amount_dzd || contractData.amount_dzd || 0),
         receipt_file_id: contractData.receipt_file_id || null,
         receipt_url: contractData.receipt_url || null,
         start_date: contractData.start_date,
