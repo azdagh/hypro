@@ -616,7 +616,7 @@ export const SupabaseDbService = {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('purchase_orders')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status })
       .eq('id', id)
       .select()
       .single();
@@ -628,7 +628,7 @@ export const SupabaseDbService = {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('contracts')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status })
       .eq('id', id)
       .select()
       .single();
