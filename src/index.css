@@ -8,11 +8,15 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+/* ========================================================================
+   BASE THEME COLORS
+   ======================================================================== */
+
 html,
 body,
 #root {
   min-height: 100%;
-  background: #f8fafc;
+  background: #f1f5f9; /* slate-100 — softer than #f8fafc */
   color-scheme: light;
 }
 
@@ -27,17 +31,187 @@ body {
   overflow: hidden;
 }
 
-html,
-body,
-#root,
-button,
-input,
-select,
-textarea {
-  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+/* ========================================================================
+   TELEGRAM-STYLE VIEW TRANSITION ANIMATION
+   Uses the View Transition API — the circle reveals the ACTUAL new theme
+   content underneath (not a solid color overlay).
+   ======================================================================== */
+
+/* Disable default crossfade */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
-/* Custom smooth transition presets */
+/* The old screenshot stays as a static background */
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+/* The new theme is revealed through a growing circle clip-path */
+::view-transition-new(root) {
+  z-index: 9999;
+  animation: themeCircleReveal 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes themeCircleReveal {
+  from {
+    clip-path: circle(0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh));
+  }
+  to {
+    clip-path: circle(var(--theme-transition-radius, 150vmax) at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh));
+  }
+}
+
+/* ========================================================================
+   LIGHT MODE — COMPREHENSIVE VISUAL OVERHAUL
+   Softer backgrounds, proper shadows/depth, better contrast, no eye-strain
+   ======================================================================== */
+
+/* ---- Global Light Mode Foundations ---- */
+:root:not(.dark) {
+  --light-bg-primary: #f1f5f9;
+  --light-bg-card: #ffffff;
+  --light-border: #e2e8f0;
+  --light-border-subtle: #f1f5f9;
+  --light-text-primary: #0f172a;
+  --light-text-secondary: #475569;
+  --light-text-muted: #94a3b8;
+  --light-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04), 0 1px 3px 0 rgba(15, 23, 42, 0.06);
+  --light-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --light-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+}
+
+/* ---- Light Mode Cards — Shadows, Depth, and Distinct Borders ---- */
+:root:not(.dark) .bg-white {
+  box-shadow: var(--light-shadow-sm);
+  border-color: var(--light-border) !important;
+}
+
+/* Larger cards get deeper shadows */
+:root:not(.dark) .shadow-xs {
+  box-shadow: var(--light-shadow-md) !important;
+}
+
+/* ---- Light Mode Header — Subtle bottom shadow instead of just a border ---- */
+:root:not(.dark) #app-header-bar {
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  background: #ffffff;
+}
+
+/* ---- Light Mode Content Area — Slight tint to differentiate from cards ---- */
+:root:not(.dark) #app-content-box {
+  background: var(--light-bg-primary);
+}
+
+/* ---- Light Mode Tables — Header styling and alternating rows ---- */
+:root:not(.dark) thead tr {
+  background: #f8fafc !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+:root:not(.dark) tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+:root:not(.dark) tbody tr:hover {
+  background: #f1f5f9 !important;
+}
+
+/* ---- Light Mode Form Inputs — Clearer borders, better focus ---- */
+:root:not(.dark) input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+:root:not(.dark) select,
+:root:not(.dark) textarea {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+:root:not(.dark) input:focus,
+:root:not(.dark) select:focus,
+:root:not(.dark) textarea:focus {
+  border-color: #64748b !important;
+  outline: 2px solid rgba(100, 116, 139, 0.15) !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.08) !important;
+}
+
+/* ---- Light Mode Stat Cards — Visible depth ---- */
+:root:not(.dark) [id*="stat-card"],
+:root:not(.dark) .rounded-xl.bg-white {
+  box-shadow: var(--light-shadow-md);
+  border: 1px solid #e2e8f0;
+}
+
+/* ---- Light Mode Modals — Stronger backdrop and card shadow ---- */
+:root:not(.dark) [id*="overlay"] {
+  background: rgba(15, 23, 42, 0.35) !important;
+}
+
+:root:not(.dark) [id*="container"],
+:root:not(.dark) .shadow-xl {
+  box-shadow: var(--light-shadow-lg), 0 20px 40px -12px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* ---- Light Mode Status Badges — Better contrast ---- */
+:root:not(.dark) .bg-emerald-50 {
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0;
+}
+:root:not(.dark) .bg-amber-50 {
+  background: #fffbeb !important;
+  border: 1px solid #fcd34d;
+}
+:root:not(.dark) .bg-rose-50 {
+  background: #fff1f2 !important;
+  border: 1px solid #fda4af;
+}
+
+/* ---- Light Mode Sidebar Stays Dark (Professional ERP pattern) ---- */
+/* No changes needed — sidebar uses hardcoded bg-[#0f172a] */
+
+/* ---- Light Mode Scrollbar ---- */
+:root:not(.dark) ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+:root:not(.dark) ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+:root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ---- Light Mode Chart containers ---- */
+:root:not(.dark) .recharts-wrapper {
+  filter: saturate(0.95);
+}
+
+/* ========================================================================
+   ANIMATION PRESETS
+   ======================================================================== */
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
@@ -50,6 +224,10 @@ textarea {
     opacity: 1;
   }
 }
+
+/* ========================================================================
+   MODAL OVERLAY SYSTEM
+   ======================================================================== */
 
 #project-form-overlay,
 #expense-form-overlay,
@@ -172,36 +350,14 @@ textarea {
   isolation: isolate;
 }
 
-.theme-transition-circle {
-  --x: 50vw;
-  --y: 50vh;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  will-change: clip-path;
+/* ========================================================================
+   LIGHT MODE RECEIPT PREVIEW
+   ======================================================================== */
+:root:not(.dark) .receipt-preview-thumb {
+  border: 2px solid #e2e8f0;
+  box-shadow: var(--light-shadow-sm);
 }
 
-.theme-transition-circle.to-dark {
-  background: #020617;
-  clip-path: circle(0 at var(--x) var(--y));
-  animation: themeCircleOpen 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.theme-transition-circle.to-light {
-  background: #f8fafc;
-  clip-path: circle(150vmax at var(--x) var(--y));
-  animation: themeCircleClose 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes themeCircleOpen {
-  to {
-    clip-path: circle(150vmax at var(--x) var(--y));
-  }
-}
-
-@keyframes themeCircleClose {
-  to {
-    clip-path: circle(0 at var(--x) var(--y));
-  }
+.dark .receipt-preview-thumb {
+  border: 2px solid #334155;
 }

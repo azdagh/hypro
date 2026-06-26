@@ -60,6 +60,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [expDescription, setExpDescription] = useState('');
   const [expReceiptFileId, setExpReceiptFileId] = useState('');
   const [expReceiptUrl, setExpReceiptUrl] = useState('');
+  const [localImageForScan, setLocalImageForScan] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -144,40 +145,12 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           // Save uploaded references
           setExpReceiptUrl(receiptUrl);
           setExpReceiptFileId(uploadData.drive_file_id);
+          setLocalImageForScan(compressedBase64);
 
           // Save references for allocations as well if that form is open
           setAllocReceiptUrl(receiptUrl);
           setAllocReceiptFileId(uploadData.drive_file_id);
 
-          // 3. Trigger Gemini Smart Scan
-          if (isOnline) {
-            try {
-              const geminiRes = await secureFetch('/api/gemini/scan-receipt', {
-                method: 'POST',
-                body: JSON.stringify({ imageBase64: compressedBase64 })
-              });
-
-              if (geminiRes.ok) {
-                const geminiData = await geminiRes.json();
-                if (geminiData.amount_dzd) {
-                  setExpAmount(geminiData.amount_dzd.toString());
-                }
-                if (geminiData.description) {
-                  setExpDescription(geminiData.description);
-                }
-                if (geminiData.category_id) {
-                  setExpCategory(geminiData.category_id);
-                }
-                setScanStatus('success');
-              } else {
-                setScanStatus('error');
-              }
-            } catch (err) {
-              setScanStatus('error');
-            }
-          } else {
-            setScanStatus('error'); // Offline scanning isn't supported, fill manually
-          }
         } catch (err) {
           console.error(err);
           setScanStatus('error');
@@ -191,6 +164,32 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       setScanStatus('error');
       setIsScanning(false);
       setSubmitting(false);
+    }
+  };
+
+  // Trigger Gemini AI scanning manually
+  const handleAutoScan = async () => {
+    if (!localImageForScan || !isOnline) return;
+    setIsScanning(true);
+    setScanStatus('idle');
+    try {
+      const geminiRes = await secureFetch('/api/gemini/scan-receipt', {
+        method: 'POST',
+        body: JSON.stringify({ imageBase64: localImageForScan })
+      });
+      if (geminiRes.ok) {
+        const geminiData = await geminiRes.json();
+        if (geminiData.amount_dzd) setExpAmount(geminiData.amount_dzd.toString());
+        if (geminiData.description) setExpDescription(geminiData.description);
+        if (geminiData.category_id) setExpCategory(geminiData.category_id);
+        setScanStatus('success');
+      } else {
+        setScanStatus('error');
+      }
+    } catch (err) {
+      setScanStatus('error');
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -247,6 +246,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       setExpDescription('');
       setExpReceiptFileId('');
       setExpReceiptUrl('');
+      setLocalImageForScan('');
       setScanStatus('idle');
     } catch (err: any) {
       alert(err.message || 'Erreur lors de la soumission');
@@ -667,11 +667,19 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               {/* Justification Upload Card with Camera capture="environment" */}
               <div className="border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-slate-50 dark:bg-slate-950/20 text-center space-y-3">
                 <div className="flex flex-col items-center">
-                  <Camera className="w-8 h-8 text-slate-400 mb-2" />
-                  <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu de Chantier</p>
-                  <p className="text-[10px] text-slate-400 mt-1 max-w-[320px]">
-                    Capturez directement via la caméra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
-                  </p>
+                  {localImageForScan ? (
+                    <div className="relative w-full max-w-[200px] mb-2 mx-auto">
+                      <img src={localImageForScan} alt="Preview" className="w-full h-auto rounded-lg receipt-preview-thumb" />
+                    </div>
+                  ) : (
+                    <>
+                      <Camera className="w-8 h-8 text-slate-400 mb-2" />
+                      <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu de Chantier</p>
+                      <p className="text-[10px] text-slate-400 mt-1 max-w-[320px]">
+                        Capturez directement via la caméra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-center gap-2">
@@ -690,8 +698,20 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     disabled={submitting}
                   >
                     {submitting ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5" />}
-                    Prendre Photo / Charger
+                    {localImageForScan ? 'Changer Photo' : 'Prendre Photo / Charger'}
                   </button>
+
+                  {localImageForScan && isOnline && (
+                    <button
+                      type="button"
+                      onClick={handleAutoScan}
+                      className="inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 rounded-lg py-2 px-4 font-semibold text-indigo-700 dark:text-indigo-400"
+                      disabled={isScanning}
+                    >
+                      {isScanning ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+                      Auto-scan avec IA
+                    </button>
+                  )}
                 </div>
 
                 {/* Scan Status banner */}

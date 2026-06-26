@@ -76,11 +76,20 @@ export async function uploadReceiptToDrive(
     body: bufferStream,
   };
 
-  const uploadRes = await drive.files.create({
-    requestBody: fileMetadata,
-    media: media,
-    fields: 'id, webViewLink, webContentLink',
-  });
+  let uploadRes;
+  try {
+    uploadRes = await drive.files.create({
+      requestBody: fileMetadata,
+      media: media,
+      fields: 'id, webViewLink, webContentLink',
+      supportsAllDrives: true,
+    });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('has not been used in project') || error.message.includes('is disabled'))) {
+      throw new Error("L'API Google Drive n'est pas activée sur votre projet Google Cloud (1025711996228). Veuillez l'activer via la console Google Cloud (https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=1025711996228), attendre 3 minutes, puis réessayer.");
+    }
+    throw error;
+  }
 
   const fileId = uploadRes.data.id;
   if (!fileId) {

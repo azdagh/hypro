@@ -27,7 +27,7 @@ import { secureFetch } from './lib/api';
 // Root App layout component
 function MainLayout() {
   const { t, lang, setLang } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, animatedSetTheme } = useTheme();
   const { isOnline, queue, enqueue, syncQueue } = useOnlineStatus();
 
   // Authentication State
@@ -356,6 +356,19 @@ function MainLayout() {
       const supabase = await getSupabaseClient();
       await supabase.auth.signOut();
     } catch (e) {
+      setAuthMode('login');
+      setEmailInput(forgotEmail);
+      setForgotEmail('');
+      setResetCode('');
+      setNewPassword('');
+    }, 1000);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const supabase = await getSupabaseClient();
+      await supabase.auth.signOut();
+    } catch (e) {
       console.error('Error signing out:', e);
     }
     setCurrentUser(null);
@@ -369,15 +382,8 @@ function MainLayout() {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
-    const circle = document.createElement('div');
-
-    circle.className = `theme-transition-circle ${nextTheme === 'dark' ? 'to-dark' : 'to-light'}`;
-    circle.style.setProperty('--x', `${x}px`);
-    circle.style.setProperty('--y', `${y}px`);
-    document.body.appendChild(circle);
-
-    window.requestAnimationFrame(() => setTheme(nextTheme));
-    window.setTimeout(() => circle.remove(), 720);
+    
+    animatedSetTheme(nextTheme, x, y);
   };
 
   const handleRoleChange = (newRole: string) => {
