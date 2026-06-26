@@ -239,7 +239,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   outerRadius={80}
                   paddingAngle={4}
                   dataKey="value"
-                  label={({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                  label={hasData ? ({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : '' : false}
                   labelLine={false}
                 >
                   {pieData.map((entry, index) => (
