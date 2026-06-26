@@ -6,6 +6,7 @@ import {
 import { Expense, Project, ExpenseCategory, Allocation } from '../types';
 import { formatCurrencyDZD, useTranslation } from '../i18n';
 import { secureFetch } from '../lib/api';
+import { getSupabaseClient } from '../lib/supabase';
 
 interface ExpensesViewProps {
   expenses: Expense[];
@@ -126,21 +127,34 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           const compressedBase64 = await compressPhoto(originalBase64);
           const uploadFilename = file.name.replace(/\.[^.]+$/, '') + '.jpg';
 
-          // 2. Upload photo to server API (Simulating Google Drive edge function)
-          const uploadRes = await secureFetch('/api/upload', {
-            method: 'POST',
-            body: JSON.stringify({
-              imageBase64: compressedBase64,
-              filename: uploadFilename
-            })
-          });
-
-          if (!uploadRes.ok) {
-            const uploadError = await uploadRes.json().catch(() => ({}));
-            throw new Error(uploadError.error || 'Photo upload failed');
+          // 2. Upload photo to Supabase Storage
+          const base64Data = compressedBase64.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteArrays = [];
+          for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+              byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
           }
-          const uploadData = await uploadRes.json();
-          const receiptUrl = uploadData.webContentLink || uploadData.webViewLink || '';
+          const blob = new Blob(byteArrays, { type: 'image/jpeg' });
+          
+          const uniqueFilename = `${Date.now()}-${uploadFilename}`;
+          const supabase = await getSupabaseClient();
+          const { data, error } = await supabase.storage.from('receipts').upload(uniqueFilename, blob, {
+             contentType: 'image/jpeg'
+          });
+          
+          if (error) {
+             throw new Error(error.message || 'Echec de l\\'upload vers Supabase Storage');
+          }
+          
+          const { data: publicUrlData } = supabase.storage.from('receipts').getPublicUrl(uniqueFilename);
+          const receiptUrl = publicUrlData.publicUrl;
+          const uploadData = { drive_file_id: uniqueFilename };
 
           // Save uploaded references
           setExpReceiptUrl(receiptUrl);
@@ -154,7 +168,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         } catch (err: any) {
           console.error(err);
           setScanStatus('error');
-          alert(err.message || "Erreur de sauvegarde de l'image sur Google Drive.");
+          alert(err.message || "Erreur de sauvegarde de l'image.");
         } finally {
           setIsScanning(false);
           setSubmitting(false);

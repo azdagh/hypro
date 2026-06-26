@@ -55,6 +55,7 @@ function MainLayout() {
 
   // Tab State
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Business Data States
   const [projects, setProjects] = useState<Project[]>([]);
@@ -729,8 +730,16 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors" id="applet-shell">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[90] md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar navigation */}
-      <aside className="w-full md:w-64 bg-[#0f172a] text-slate-300 border-r border-slate-800 shrink-0 flex flex-col justify-between" id="app-sidebar">
+      <aside className={`fixed inset-y-0 left-0 z-[100] w-64 bg-[#0f172a] text-slate-300 border-r border-slate-800 shrink-0 flex flex-col justify-between transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} id="app-sidebar">
         <div className="space-y-6">
           {/* Logo Brand bar */}
           <div className="p-5 border-b border-slate-800 flex items-center gap-3">
@@ -748,21 +757,21 @@ function MainLayout() {
             <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold px-3 py-2">Principal</div>
             
             <button 
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <LayoutDashboard className="w-4 h-4" /> {t('home')}
             </button>
             
             <button 
-              onClick={() => setActiveTab('projects')}
+              onClick={() => { setActiveTab('projects'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'projects' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <Layers className="w-4 h-4" /> {t('projects')}
             </button>
 
             <button 
-              onClick={() => setActiveTab('expenses')}
+              onClick={() => { setActiveTab('expenses'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'expenses' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <Wallet className="w-4 h-4" /> {t('expenses')}
@@ -771,28 +780,28 @@ function MainLayout() {
             <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold px-3 py-4">Logistique</div>
 
             <button 
-              onClick={() => setActiveTab('procurement')}
+              onClick={() => { setActiveTab('procurement'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'procurement' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <ShoppingBag className="w-4 h-4" /> Achats & Contrats
             </button>
 
             <button 
-              onClick={() => setActiveTab('inventory')}
+              onClick={() => { setActiveTab('inventory'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'inventory' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <Building2 className="w-4 h-4" /> Stocks & Équipements
             </button>
 
             <button 
-              onClick={() => setActiveTab('reports')}
+              onClick={() => { setActiveTab('reports'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'reports' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <FileSpreadsheet className="w-4 h-4" /> {t('reports')}
             </button>
 
             <button 
-              onClick={() => setActiveTab('audit')}
+              onClick={() => { setActiveTab('audit'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'audit' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <Activity className="w-4 h-4" /> {t('auditLogs')}
@@ -800,7 +809,7 @@ function MainLayout() {
 
             {activeRole === 'Super Admin' && (
               <button 
-                onClick={() => setActiveTab('admin')}
+                onClick={() => { setActiveTab('admin'); setIsMobileMenuOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400" /> Contrôle & Sécurité
@@ -808,7 +817,7 @@ function MainLayout() {
             )}
 
             <button 
-              onClick={() => setActiveTab('settings')}
+              onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'settings' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
             >
               <SettingsIcon className="w-4 h-4" /> {t('settings')}
@@ -839,8 +848,14 @@ function MainLayout() {
       {/* Main Container */}
       <main className="flex-1 flex flex-col min-w-0" id="app-main-container">
         {/* Header Bar */}
-        <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between z-10" id="app-header-bar">
+        <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between z-10 sticky top-0" id="app-header-bar">
           <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <h2 className="text-sm font-semibold capitalize text-slate-500 dark:text-slate-400">{activeTab}</h2>
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
             {/* Online Status Monitor */}
