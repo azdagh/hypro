@@ -149,7 +149,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     }
 
     return (
-      <div className="space-y-6 animate-fade-in" id="project-details-page">
+      <div className="space-y-6" id="project-details-page">
         <button 
           onClick={() => setSelectedProjectId(null)}
           className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-sm font-medium transition-colors"
@@ -361,7 +361,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   }
 
   return (
-    <div className="space-y-6 animate-fade-in" id="projects-list-page">
+    <div className="space-y-6" id="projects-list-page">
       {/* Upper header controls */}
       <div className="flex items-center justify-between" id="projects-list-controls">
         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{t('projects')} ({projects.length})</h2>

@@ -46,7 +46,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in" id="settings-view-panel">
+    <div className="space-y-6" id="settings-view-panel">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Card Form */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs lg:col-span-2" id="settings-profile-card">

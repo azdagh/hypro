@@ -739,7 +739,7 @@ function MainLayout() {
       )}
 
       {/* Sidebar navigation */}
-      <aside className={`fixed inset-y-0 left-0 z-[100] w-64 bg-[#0f172a] text-slate-300 border-r border-slate-800 shrink-0 flex flex-col justify-between transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} id="app-sidebar">
+      <aside className={`fixed inset-y-0 left-0 z-[100] w-[80vw] md:w-64 bg-[#0f172a] text-slate-300 border-r border-slate-800 shrink-0 flex flex-col justify-between transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} id="app-sidebar">
         <div className="space-y-6">
           {/* Logo Brand bar */}
           <div className="p-5 border-b border-slate-800 flex items-center gap-3">

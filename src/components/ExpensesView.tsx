@@ -346,7 +346,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   }).sort((a,b) => b.created_at.localeCompare(a.created_at));
 
   return (
-    <div className="space-y-6 animate-fade-in" id="expenses-and-pettycash-panel">
+    <div className="space-y-6" id="expenses-and-pettycash-panel">
       {/* Sub Tabs */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2" id="expenses-header">
         <div className="flex gap-4">

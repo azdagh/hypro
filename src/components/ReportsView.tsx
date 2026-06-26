@@ -218,7 +218,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in" id="report-center-container">
+    <div className="space-y-6" id="report-center-container">
       {/* Configuration Box */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="report-center-config">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
@@ -301,7 +301,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
       {/* Generated Report Display Preview panel */}
       {generatedReport ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-6 animate-fade-in" id="report-results-panel">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-6" id="report-results-panel">
           {/* Action header bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-4" id="report-results-header">
             <div>

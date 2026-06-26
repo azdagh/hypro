@@ -234,7 +234,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
   };
 
   return (
-    <div className="space-y-6 animate-fade-in" id="admin-view-root">
+    <div className="space-y-6" id="admin-view-root">
       {/* Top Banner */}
       <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-md border border-slate-800" id="admin-hero">
         <div className="space-y-1">

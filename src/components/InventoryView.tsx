@@ -104,7 +104,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const filteredEquip = equipment.filter(e => filterProject === 'ALL' || e.project_id === filterProject);
 
   return (
-    <div className="space-y-6 animate-fade-in" id="inventory-panel-container">
+    <div className="space-y-6" id="inventory-panel-container">
       {/* Sub tabs */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2" id="inventory-header">
         <div className="flex gap-4">

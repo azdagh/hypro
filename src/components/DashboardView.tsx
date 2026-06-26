@@ -92,7 +92,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const hasData = projectAllocationsShare.length > 0;
 
   return (
-    <div className="space-y-6 animate-fade-in" id="dashboard-view-container">
+    <div className="space-y-6" id="dashboard-view-container">
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="dashboard-stats-grid">
         {/* Total Allocations */}

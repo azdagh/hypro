@@ -237,7 +237,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in" id="procurement-main-panel">
+    <div className="space-y-6" id="procurement-main-panel">
       {/* Sub tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 gap-4">
         <div className="flex flex-wrap gap-4" id="procurement-tabs-bar">
