@@ -590,8 +590,9 @@ function MainLayout() {
         <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 space-y-6 shadow-xl relative overflow-hidden" id="login-container">
           {/* Top Brand Tag */}
           <div className="text-center space-y-2">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-xl mb-1 shadow-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <img src="/logo.png" alt="HYPRO ERP" className="hypro-logo-img h-12 w-12" />
+            <div className="bg-white/10 dark:bg-white/5 p-4 rounded-3xl backdrop-blur-md border border-white/20 dark:border-white/10 shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-400/20 to-teal-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+              <img src="/logo.webp" alt="HYPRO ERP" className="hypro-logo-img h-12 w-12" />
             </div>
             <h1 className="text-2xl font-bold font-sans tracking-tight text-slate-900 dark:text-slate-50">HYPRO ERP</h1>
             <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
@@ -781,7 +782,7 @@ function MainLayout() {
           {/* Logo Brand bar */}
           <div className="p-5 border-b border-slate-800 flex items-center gap-3">
             <div className="w-9 h-9 bg-white rounded flex items-center justify-center border border-slate-700 overflow-hidden">
-              <img src="/logo.png" alt="HYPRO ERP" className="hypro-logo-img w-8 h-8" />
+              <img src="/logo.webp" alt="HYPRO ERP" className="hypro-logo-img w-8 h-8" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-white tracking-wider font-sans leading-none">HYPRO ERP</h1>
