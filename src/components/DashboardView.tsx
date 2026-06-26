@@ -79,16 +79,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   });
 
   // Allocation distribution for PieChart
-  const COLORS = ['#0f172a', '#10b981', '#059669', '#34d399', '#64748b'];
+  const COLORS = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'];
   const projectAllocationsShare = projects.map(p => {
     const amt = allocations.filter(a => a.project_id === p.id).reduce((sum, a) => sum + a.amount_dzd, 0);
     return {
-      name: p.code,
+      name: p.code || p.name,
       value: amt
     };
   }).filter(v => v.value > 0);
 
-  // Default fallback charts data if empty
+  // Fallback demo data when no allocations exist yet
+  const pieData = projectAllocationsShare.length > 0
+    ? projectAllocationsShare
+    : [{ name: 'Aucune allocation', value: 1 }];
+
   const hasData = projectAllocationsShare.length > 0;
 
   return (
@@ -215,31 +219,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <PieChartIcon className="w-4 h-4 text-slate-500" /> Répartition des Allocations
           </h3>
           <div className="flex-1 min-h-0 relative flex items-center justify-center" id="allocations-share-pie-container">
-            {hasData ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={projectAllocationsShare}
-                    cx="50%"
-                    cy="45%"
-                    innerRadius={60}
-                    outerRadius={85}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {projectAllocationsShare.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => formatCurrencyDZD(value)} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
-                  <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-10 text-slate-400 text-xs">
-                Aucune donnée d'allocation disponible
-              </div>
-            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="45%"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={4}
+                  dataKey="value"
+                  label={({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                  labelLine={false}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => hasData ? formatCurrencyDZD(value) : 'Aucune allocation'} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
+                <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

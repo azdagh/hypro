@@ -729,7 +729,7 @@ function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors" id="applet-shell">
+    <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors" id="applet-shell">
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div 

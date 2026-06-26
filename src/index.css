@@ -28,7 +28,7 @@ html.dark #root {
 }
 
 body {
-  overflow: hidden;
+  /* overflow:hidden removed — let #app-content-box handle scrolling */
 }
 
 /* ========================================================================
