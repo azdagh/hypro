@@ -74,9 +74,9 @@ function MainLayout() {
   const [loading, setLoading] = useState(true);
 
   // Fetch all business data
-  const fetchData = async () => {
+  const fetchData = async (showLoader = true) => {
     if (!currentUser) return;
-    setLoading(true);
+    if (showLoader) setLoading(true);
     try {
       const [
         resProjects, resAllocations, resExpenses, resCategories,
@@ -118,7 +118,7 @@ function MainLayout() {
 
   useEffect(() => {
     fetchData();
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   const resolveProfileForAuthUser = async (authUser: any, emailFallback?: string) => {
     const email = authUser?.email || emailFallback;
@@ -395,7 +395,7 @@ function MainLayout() {
         const err = await res.json();
         throw new Error(err.error);
       }
-      await fetchData();
+      await fetchData(false);
     } catch (e: any) {
       alert(e.message);
     }
@@ -411,7 +411,7 @@ function MainLayout() {
         const err = await res.json();
         throw new Error(err.error);
       }
-      await fetchData();
+      await fetchData(false);
     } catch (e: any) {
       alert(e.message);
     }
@@ -427,7 +427,7 @@ function MainLayout() {
         const err = await res.json();
         throw new Error(err.error);
       }
-      await fetchData();
+      await fetchData(false);
     } catch (e: any) {
       alert(e.message);
     }
@@ -443,7 +443,7 @@ function MainLayout() {
       const err = await res.json();
       throw new Error(err.error);
     }
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleSubmitAllocation = async (allocPayload: any) => {
@@ -455,7 +455,7 @@ function MainLayout() {
       const err = await res.json();
       throw new Error(err.error);
     }
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleUpdateExpenseStatus = async (id: string, status: 'Approved' | 'Rejected', reason?: string) => {
@@ -467,7 +467,7 @@ function MainLayout() {
       const err = await res.json();
       throw new Error(err.error);
     }
-    await fetchData();
+    await fetchData(false);
   };
 
   // 3. Procurement Supply Chain
@@ -476,7 +476,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(supp)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleAddSubcontractor = async (sub: any) => {
@@ -484,7 +484,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(sub)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleAddPurchaseRequest = async (req: any) => {
@@ -492,7 +492,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(req)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleAddPurchaseOrder = async (order: any) => {
@@ -500,7 +500,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(order)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleAddContract = async (ctr: any) => {
@@ -508,7 +508,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(ctr)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleUpdatePRStatus = async (id: string, status: 'Approved' | 'Rejected') => {
@@ -516,7 +516,7 @@ function MainLayout() {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   // 4. Warehouse & Stocks
@@ -525,7 +525,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(item)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleAddEquipment = async (eq: any) => {
@@ -533,7 +533,7 @@ function MainLayout() {
       method: 'POST',
       body: JSON.stringify(eq)
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   const handleUpdateEquipmentStatus = async (id: string, status: any) => {
@@ -541,7 +541,7 @@ function MainLayout() {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
-    await fetchData();
+    await fetchData(false);
   };
 
   // -------------------------------------------------------------------------

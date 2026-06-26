@@ -59,16 +59,17 @@ html:not(.dark)::view-transition-new(root) {
 }
 html:not(.dark)::view-transition-old(root) {
   z-index: 9999;
-  animation: themeCircleReveal 600ms cubic-bezier(0.4, 0, 0.2, 1) reverse forwards;
+  animation: themeCircleShrink 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes themeCircleReveal {
-  from {
-    clip-path: circle(0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh));
-  }
-  to {
-    clip-path: circle(var(--theme-transition-radius, 150vmax) at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh));
-  }
+  from { clip-path: circle(0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)); }
+  to { clip-path: circle(var(--theme-transition-radius, 150vmax) at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)); }
+}
+
+@keyframes themeCircleShrink {
+  from { clip-path: circle(var(--theme-transition-radius, 150vmax) at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)); }
+  to { clip-path: circle(0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)); }
 }
 
 /* ========================================================================
@@ -291,7 +292,7 @@ html:not(.dark)::view-transition-old(root) {
   }
 
   #app-sidebar {
-    max-height: 40dvh;
+    max-height: 100dvh;
     overflow-y: auto;
   }
 

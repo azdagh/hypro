@@ -196,6 +196,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <XAxis dataKey="code" fontSize={11} stroke="#94a3b8" />
                 <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
                 <Tooltip 
+                  cursor={{fill: "transparent"}}
                   formatter={(value: any) => [formatCurrencyDZD(value), '']}
                   contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }}
                 />
@@ -230,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: any) => formatCurrencyDZD(value)} />
+                  <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => formatCurrencyDZD(value)} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
                   <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -272,7 +273,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} stroke="#94a3b8" />
                   <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
-                  <Tooltip formatter={(value: any) => formatCurrencyDZD(value)} />
+                  <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => formatCurrencyDZD(value)} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
                   <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
                   <Area type="monotone" dataKey="expenses" name="Dépenses Actuelles" stroke="#0f172a" fillOpacity={1} fill="url(#colorExp)" strokeWidth={2} />
                   <Area type="monotone" dataKey="forecast" name="Trajectoire Prévisionnelle" stroke="#10b981" strokeDasharray="5 5" fillOpacity={1} fill="url(#colorFore)" strokeWidth={2} />

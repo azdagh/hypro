@@ -355,6 +355,23 @@ export const SupabaseDbService = {
       .select('*')
       .order('name', { ascending: true });
     if (error) throw error;
+    
+    // Auto-seed if empty
+    if (data.length === 0) {
+      const defaultCategories = [
+        { name: 'Gros Œuvre & Fondations' },
+        { name: 'Second Œuvre & Plâtre' },
+        { name: 'Matériaux & Ciment' },
+        { name: 'Main d\'Œuvre & Journaliers' },
+        { name: 'Location Engins & Camions' },
+        { name: 'Carburant & Logistique' },
+        { name: 'Sécurité & Équipements (EPI)' },
+        { name: 'Frais Administratifs & Bureau' }
+      ];
+      await supabase.from('expense_categories').insert(defaultCategories);
+      const { data: newData } = await supabase.from('expense_categories').select('*').order('name', { ascending: true });
+      return newData || [];
+    }
     return data;
   },
 
@@ -411,7 +428,7 @@ export const SupabaseDbService = {
       .select('*')
       .order('company_name', { ascending: true });
     if (error) throw error;
-    return data;
+    return data.map((s: any) => ({ ...s, name: s.company_name }));
   },
 
   async createSupplier(supplierData: any, userId: string) {
@@ -419,7 +436,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('suppliers')
       .insert([{
-        company_name: supplierData.company_name,
+        company_name: supplierData.name || supplierData.company_name,
         contact_name: supplierData.contact_name || '',
         phone: supplierData.phone || '',
         email: supplierData.email || '',
@@ -438,7 +455,7 @@ export const SupabaseDbService = {
       .select('*')
       .order('company_name', { ascending: true });
     if (error) throw error;
-    return data;
+    return data.map((s: any) => ({ ...s, name: s.company_name }));
   },
 
   async createSubcontractor(subData: any, userId: string) {
@@ -446,10 +463,11 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('subcontractors')
       .insert([{
-        company_name: subData.company_name,
+        company_name: subData.name || subData.company_name,
         contact_name: subData.contact_name || '',
         phone: subData.phone || '',
-        email: subData.email || ''
+        email: subData.email || '',
+        specialty: subData.specialty || subData.activity_area || ''
       }])
       .select()
       .single();
@@ -465,7 +483,13 @@ export const SupabaseDbService = {
       .select('*, projects(name), profiles(full_name)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return data;
+    return data.map((item: any) => ({
+      ...item,
+      item_description: item.description,
+      estimated_amount_dzd: item.amount_dzd,
+      requested_by_name: item.profiles?.full_name,
+      name: item.company_name
+    }));
   },
 
   async createPurchaseRequest(prData: any, userId: string) {
@@ -475,8 +499,8 @@ export const SupabaseDbService = {
       .insert([{
         project_id: prData.project_id,
         requester_id: userId,
-        description: prData.description,
-        amount_dzd: Number(prData.amount_dzd),
+        description: prData.item_description + (prData.quantity ? '\nQuantité: ' + prData.quantity + ' ' + prData.unit : '') + (prData.suggested_supplier_name ? '\nFournisseur Suggéré: ' + prData.suggested_supplier_name : ''),
+        amount_dzd: Number(prData.estimated_amount_dzd || 0),
         receipt_file_id: prData.receipt_file_id || null,
         receipt_url: prData.receipt_url || null,
         status: 'Pending'
