@@ -375,6 +375,26 @@ export const SupabaseDbService = {
     return data;
   },
 
+  async createCategory(catData: { name: string }) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('expense_categories')
+      .insert([{ name: catData.name }])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCategory(id: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('expense_categories')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
   // Expenses with TRANSACTION-SAFE BUDGET VALIDATION RPC
   async getExpenses() {
     const supabase = getSupabase();

@@ -544,6 +544,27 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const handleAddCategory = async (name: string) => {
+    const res = await secureFetch('/api/categories', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Erreur ajout catégorie');
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const res = await secureFetch(`/api/categories/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Erreur suppression catégorie');
+    }
+    await fetchData(false);
+  };
+
   // -------------------------------------------------------------------------
   // RENDER SELECTION SCREEN (IF NOT AUTHENTICATED)
   // -------------------------------------------------------------------------
@@ -1071,6 +1092,9 @@ function MainLayout() {
                   currentRole={activeRole}
                   onChangeRole={handleRoleChange}
                   currentUser={currentUser}
+                  categories={categories}
+                  onAddCategory={handleAddCategory}
+                  onDeleteCategory={handleDeleteCategory}
                 />
               )}
 

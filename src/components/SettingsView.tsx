@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   User, Shield, Settings, Monitor, Globe, Bell, 
-  Smartphone, Laptop, Compass, Key 
+  Smartphone, Laptop, Compass, Key, Tag, Plus, Trash2
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useTheme } from '../theme';
@@ -15,12 +15,18 @@ interface SettingsViewProps {
     full_name: string;
     phone?: string;
   };
+  categories?: { id: string; name: string }[];
+  onAddCategory?: (name: string) => Promise<any>;
+  onDeleteCategory?: (id: string) => Promise<any>;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   currentRole,
   onChangeRole,
-  currentUser
+  currentUser,
+  categories = [],
+  onAddCategory,
+  onDeleteCategory,
 }) => {
   const { t, lang, setLang } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -213,6 +219,107 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Expense Categories Management */}
+      {onAddCategory && (
+        <CategoriesPanel
+          categories={categories}
+          onAddCategory={onAddCategory}
+          onDeleteCategory={onDeleteCategory}
+        />
+      )}
+    </div>
+  );
+};
+
+// ── Categories sub-panel ──────────────────────────────────────────────────────
+const CategoriesPanel: React.FC<{
+  categories: { id: string; name: string }[];
+  onAddCategory: (name: string) => Promise<any>;
+  onDeleteCategory?: (id: string) => Promise<any>;
+}> = ({ categories, onAddCategory, onDeleteCategory }) => {
+  const [newCatName, setNewCatName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    setSaving(true);
+    try {
+      await onAddCategory(newCatName.trim());
+      setNewCatName('');
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de l\'ajout de la catégorie');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!onDeleteCategory) return;
+    if (!confirm(`Supprimer la catégorie "${name}" ?`)) return;
+    try {
+      await onDeleteCategory(id);
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs" id="settings-categories-panel">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+          <Tag className="w-4 h-4 text-emerald-500" />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Catégories de Dépenses</h3>
+          <p className="text-[11px] text-slate-400">Gérez les catégories utilisées dans les notes de frais</p>
+        </div>
+      </div>
+
+      {/* Add form */}
+      <form onSubmit={handleAdd} className="flex gap-2 mb-4">
+        <input
+          type="text"
+          value={newCatName}
+          onChange={e => setNewCatName(e.target.value)}
+          placeholder="Nom de la nouvelle catégorie..."
+          className="flex-1 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+        <button
+          type="submit"
+          disabled={saving || !newCatName.trim()}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Ajouter
+        </button>
+      </form>
+
+      {/* List */}
+      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+        {categories.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-4">Aucune catégorie. Ajoutez-en une ci-dessus.</p>
+        ) : (
+          categories.map(cat => (
+            <div key={cat.id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 group">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{cat.name}</span>
+              </div>
+              {onDeleteCategory && (
+                <button
+                  onClick={() => handleDelete(cat.id, cat.name)}
+                  className="opacity-0 group-hover:opacity-100 p-1 text-rose-400 hover:text-rose-500 transition-all"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

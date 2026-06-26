@@ -512,6 +512,24 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+app.post('/api/categories', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
+  try {
+    const data = await SupabaseDbService.createCategory(req.body);
+    res.status(201).json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/categories/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  try {
+    await SupabaseDbService.deleteCategory(req.params.id);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Expenses
 app.get('/api/expenses', async (req, res) => {
   try {
