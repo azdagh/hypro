@@ -348,19 +348,7 @@ function MainLayout() {
       setForgotEmail('');
       setResetCode('');
       setNewPassword('');
-    }, 1000);
-  };
 
-  const handleLogout = async () => {
-    try {
-      const supabase = await getSupabaseClient();
-      await supabase.auth.signOut();
-    } catch (e) {
-      setAuthMode('login');
-      setEmailInput(forgotEmail);
-      setForgotEmail('');
-      setResetCode('');
-      setNewPassword('');
     }, 1000);
   };
 
