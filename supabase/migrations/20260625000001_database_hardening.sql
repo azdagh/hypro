@@ -595,3 +595,22 @@ CREATE POLICY "User Invitations DELETE policy"
 -- Attach Audit trigger to invitations and assignments
 CREATE TRIGGER audit_trigger_project_assignments AFTER INSERT OR UPDATE OR DELETE ON public.project_assignments FOR EACH ROW EXECUTE FUNCTION public.proc_audit_logger();
 CREATE TRIGGER audit_trigger_user_invitations AFTER INSERT OR UPDATE OR DELETE ON public.user_invitations FOR EACH ROW EXECUTE FUNCTION public.proc_audit_logger();
+
+-- =========================================================================
+-- EXPENSE CATEGORIES RLS POLICIES
+-- =========================================================================
+DROP POLICY IF EXISTS "Everyone can read expense categories" ON public.expense_categories;
+DROP POLICY IF EXISTS "Admins can manage expense categories" ON public.expense_categories;
+
+CREATE POLICY "Everyone can read expense categories"
+  ON public.expense_categories
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Admins can manage expense categories"
+  ON public.expense_categories
+  FOR ALL
+  TO authenticated
+  USING (public.has_role('Super Admin') OR public.has_role('Financial Director') OR public.has_role('Accountant'))
+  WITH CHECK (public.has_role('Super Admin') OR public.has_role('Financial Director') OR public.has_role('Accountant'));
