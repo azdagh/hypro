@@ -1076,7 +1076,7 @@ async function startServer() {
     console.log(`HYPRO ERP Server running on port ${PORT}`);
 
     // Keep-alive ping for Render free tier (spins down after 15 min inactivity)
-    const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+    const RENDER_URL = (process.env.RENDER_EXTERNAL_URL || '').replace(/\/$/, '');
     if (RENDER_URL) {
       const pingUrl = `${RENDER_URL}/api/health`;
       setInterval(async () => {
