@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, LayoutDashboard, Wallet, ShoppingBag, 
   Settings as SettingsIcon, FileSpreadsheet, Activity, 
@@ -559,7 +559,7 @@ function MainLayout() {
           {/* Top Brand Tag */}
           <div className="text-center space-y-2">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-xl mb-1 shadow-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <img src="/assets/logo.png" alt="HYPRO ERP" className="hypro-logo-img h-12 w-12" />
+              <img src="/logo.png" alt="HYPRO ERP" className="hypro-logo-img h-12 w-12" />
             </div>
             <h1 className="text-2xl font-bold font-sans tracking-tight text-slate-900 dark:text-slate-50">HYPRO ERP</h1>
             <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
@@ -741,7 +741,7 @@ function MainLayout() {
           {/* Logo Brand bar */}
           <div className="p-5 border-b border-slate-800 flex items-center gap-3">
             <div className="w-9 h-9 bg-white rounded flex items-center justify-center border border-slate-700 overflow-hidden">
-              <img src="/assets/logo.png" alt="HYPRO ERP" className="hypro-logo-img w-8 h-8" />
+              <img src="/logo.png" alt="HYPRO ERP" className="hypro-logo-img w-8 h-8" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-white tracking-wider font-sans leading-none">HYPRO ERP</h1>
