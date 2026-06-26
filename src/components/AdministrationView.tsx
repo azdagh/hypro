@@ -486,7 +486,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                     ))}
                   </tbody>
                 </table>
-</div></div>
+</div>
               </div>
             )}
           </div>
@@ -603,7 +603,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   )}
                 </tbody>
               </table>
-</div></div>
+</div>
             </div>
           </div>
         </div>
@@ -729,7 +729,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   )}
                 </tbody>
               </table>
-</div></div>
+</div>
             </div>
           </div>
         </div>
@@ -880,7 +880,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   </tr>
                 </tbody>
               </table>
-</div></div>
+</div>
             </div>
 
             {/* Audit and SQL definitions details */}
