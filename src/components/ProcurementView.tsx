@@ -584,7 +584,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </td>
                       {canApprove && (
                         <td className="p-4">
-                          {c.status === 'Pending' ? (
+                          {(!c.status || c.status === 'Pending') ? (
                             <div className="flex gap-1.5">
                               <button
                                 onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Approved')}

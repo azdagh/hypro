@@ -198,7 +198,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <BarChart data={projectUtilizationData} margin={{ top: 10, right: 10, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="code" fontSize={11} stroke="#94a3b8" />
-                <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
+                <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v.toString()} />
                 <Tooltip 
                   cursor={{fill: "transparent"}}
                   formatter={(value: any) => [formatCurrencyDZD(value), '']}
@@ -207,7 +207,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
                 <Bar dataKey="budget" name="Budget Initial" fill="#cbd5e1" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="allocations" name="Allocations Injectées" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" name="Dépenses Justifiées" fill="#0f172a" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -272,7 +271,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} stroke="#94a3b8" />
-                  <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
+                  <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v.toString()} />
                   <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => formatCurrencyDZD(value)} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
                   <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
                   <Area type="monotone" dataKey="expenses" name="Dépenses Actuelles" stroke="#0f172a" fillOpacity={1} fill="url(#colorExp)" strokeWidth={2} />
