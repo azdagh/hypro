@@ -44,15 +44,22 @@ body {
   mix-blend-mode: normal;
 }
 
-/* The old screenshot stays as a static background */
-::view-transition-old(root) {
+/* Going to DARK mode: html has .dark */
+html.dark::view-transition-old(root) {
   z-index: 1;
 }
-
-/* The new theme is revealed through a growing circle clip-path */
-::view-transition-new(root) {
+html.dark::view-transition-new(root) {
   z-index: 9999;
   animation: themeCircleReveal 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Going to LIGHT mode: html does not have .dark */
+html:not(.dark)::view-transition-new(root) {
+  z-index: 1;
+}
+html:not(.dark)::view-transition-old(root) {
+  z-index: 9999;
+  animation: themeCircleReveal 600ms cubic-bezier(0.4, 0, 0.2, 1) reverse forwards;
 }
 
 @keyframes themeCircleReveal {

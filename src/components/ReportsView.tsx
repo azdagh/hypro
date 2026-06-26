@@ -178,7 +178,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
           </div>
 
-          <table>
+          <div className="overflow-x-auto w-full">
+<table>
             <thead>
               ${generatedReport.type === 'budget' || generatedReport.type === 'annual' ? `
                 <tr>
@@ -202,6 +203,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               ${tableRowsHtml}
             </tbody>
           </table>
+</div>
 
           <div class="summary-box">
             <div class="summary-title">Total des décaissements consolidés</div>
@@ -350,7 +352,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {/* Report Data Table Preview */}
           <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs" id="report-preview-table-container">
             {generatedReport.type === 'budget' || generatedReport.type === 'annual' ? (
-              <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto w-full">
+<table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Chantier de Construction</th>
@@ -375,8 +378,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   ))}
                 </tbody>
               </table>
+</div>
             ) : (
-              <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto w-full">
+<table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Date</th>
@@ -405,6 +410,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   )}
                 </tbody>
               </table>
+</div>
             )}
           </div>
         </div>

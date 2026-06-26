@@ -354,7 +354,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       {procTab === 'requests' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="da-table-panel">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Projet</th>
@@ -433,6 +434,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 )}
               </tbody>
             </table>
+</div>
           </div>
         </div>
       )}
@@ -441,7 +443,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       {procTab === 'orders' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="bc-table-panel">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Réf BC</th>
@@ -492,6 +495,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 )}
               </tbody>
             </table>
+</div>
           </div>
         </div>
       )}
@@ -500,7 +504,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       {procTab === 'contracts' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="contracts-table-panel">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Réf / Projet</th>
@@ -551,6 +556,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 )}
               </tbody>
             </table>
+</div>
           </div>
         </div>
       )}

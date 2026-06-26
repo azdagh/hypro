@@ -294,7 +294,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <Wallet className="w-4 h-4 text-slate-500" /> Versements de caisse récents
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400">
                     <th className="py-2">Date</th>
@@ -317,6 +318,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   )}
                 </tbody>
               </table>
+</div>
             </div>
           </div>
 
@@ -326,7 +328,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <CheckSquare className="w-4 h-4 text-slate-500" /> Dépenses de chantier payées
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400">
                     <th className="py-2">Date</th>
@@ -349,6 +352,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   )}
                 </tbody>
               </table>
+</div>
             </div>
           </div>
         </div>

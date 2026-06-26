@@ -151,9 +151,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           setAllocReceiptUrl(receiptUrl);
           setAllocReceiptFileId(uploadData.drive_file_id);
 
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
           setScanStatus('error');
+          alert(err.message || "Erreur de sauvegarde de l'image sur Google Drive.");
         } finally {
           setIsScanning(false);
           setSubmitting(false);
@@ -410,7 +411,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       {activeSubTab === 'expenses' ? (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="expenses-table-container">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Projet & Catégorie</th>
@@ -510,13 +512,15 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 )}
               </tbody>
             </table>
+</div>
           </div>
         </div>
       ) : (
         // Allocations Table
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="allocations-table-container">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Projet Destinataire</th>
@@ -573,6 +577,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 )}
               </tbody>
             </table>
+</div>
           </div>
         </div>
       )}

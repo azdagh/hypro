@@ -406,7 +406,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
               <div className="p-12 text-center text-xs text-slate-400">Chargement des comptes...</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
                       <th className="p-4">Utilisateur</th>
@@ -485,6 +486,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                     ))}
                   </tbody>
                 </table>
+</div></div>
               </div>
             )}
           </div>
@@ -559,7 +561,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
                     <th className="p-4">Collaborateur</th>
@@ -600,6 +603,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   )}
                 </tbody>
               </table>
+</div></div>
             </div>
           </div>
         </div>
@@ -676,7 +680,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[9px] font-semibold">
                     <th className="p-4">Projet HYPRO</th>
@@ -724,6 +729,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   )}
                 </tbody>
               </table>
+</div></div>
             </div>
           </div>
         </div>
@@ -773,7 +779,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
             </div>
 
             <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-xl">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className=" overflow-x-auto w-full\><div className="overflow-x-auto w-full">
+<table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold text-[9px] uppercase tracking-wider">
                     <th className="p-4">Table PostgreSQL</th>
@@ -873,6 +880,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   </tr>
                 </tbody>
               </table>
+</div></div>
             </div>
 
             {/* Audit and SQL definitions details */}
