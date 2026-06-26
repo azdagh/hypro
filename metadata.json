@@ -1,0 +1,6 @@
+{
+  "name": "HYPRO ERP",
+  "description": "Fonds de Roulement, Petty Cash & Construction Management System for HYPRO Promotion Immobilière (Algeria)",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

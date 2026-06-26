@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: #f8fafc;
+  color-scheme: light;
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background: #020617;
+  color-scheme: dark;
+}
+
+body {
+  overflow: hidden;
+}
+
+html,
+body,
+#root,
+button,
+input,
+select,
+textarea {
+  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+/* Custom smooth transition presets */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#project-form-overlay,
+#expense-form-overlay,
+#alloc-form-overlay,
+#pr-form-overlay,
+#po-form-overlay,
+#contract-form-overlay,
+#partner-form-overlay,
+#stock-form-overlay,
+#equip-form-overlay,
+#rejection-form-overlay,
+#password-reset-modal,
+#role-update-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(18px, 3vh, 32px) clamp(10px, 2vw, 24px) !important;
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+  background: rgba(2, 6, 23, 0.56) !important;
+  backdrop-filter: blur(8px);
+}
+
+#project-form-container,
+#expense-form-container,
+#alloc-form-container,
+#pr-form-container,
+#po-form-container,
+#contract-form-container,
+#partner-form-container,
+#stock-form-container,
+#equip-form-container,
+#rejection-form-container,
+#password-reset-modal > div,
+#role-update-modal > div {
+  margin: auto !important;
+  width: min(100%, 72rem) !important;
+  height: calc(100dvh - clamp(36px, 6vh, 64px)) !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 767px) {
+  #applet-shell {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  #app-sidebar {
+    max-height: 40dvh;
+    overflow-y: auto;
+  }
+
+  #app-main-container {
+    min-height: 0;
+  }
+
+  #app-header-bar {
+    padding: 0.75rem;
+  }
+
+  #app-content-box {
+    padding: 1rem;
+  }
+
+  #admin-subtabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  #project-form-overlay,
+  #expense-form-overlay,
+  #alloc-form-overlay,
+  #pr-form-overlay,
+  #po-form-overlay,
+  #contract-form-overlay,
+  #partner-form-overlay,
+  #stock-form-overlay,
+  #equip-form-overlay,
+  #rejection-form-overlay,
+  #password-reset-modal,
+  #role-update-modal {
+    padding: 0 !important;
+  }
+
+  #project-form-container,
+  #expense-form-container,
+  #alloc-form-container,
+  #pr-form-container,
+  #po-form-container,
+  #contract-form-container,
+  #partner-form-container,
+  #stock-form-container,
+  #equip-form-container,
+  #rejection-form-container,
+  #password-reset-modal > div,
+  #role-update-modal > div {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+}
+
+.hypro-logo-img {
+  object-fit: contain;
+}
+
+.theme-toggle-button {
+  position: relative;
+  isolation: isolate;
+}
+
+.theme-transition-circle {
+  --x: 50vw;
+  --y: 50vh;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: clip-path;
+}
+
+.theme-transition-circle.to-dark {
+  background: #020617;
+  clip-path: circle(0 at var(--x) var(--y));
+  animation: themeCircleOpen 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.theme-transition-circle.to-light {
+  background: #f8fafc;
+  clip-path: circle(150vmax at var(--x) var(--y));
+  animation: themeCircleClose 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes themeCircleOpen {
+  to {
+    clip-path: circle(150vmax at var(--x) var(--y));
+  }
+}
+
+@keyframes themeCircleClose {
+  to {
+    clip-path: circle(0 at var(--x) var(--y));
+  }
+}
