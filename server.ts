@@ -1074,6 +1074,20 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`HYPRO ERP Server running on port ${PORT}`);
+
+    // Keep-alive ping for Render free tier (spins down after 15 min inactivity)
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+    if (RENDER_URL) {
+      const pingUrl = `${RENDER_URL}/api/health`;
+      setInterval(async () => {
+        try {
+          await fetch(pingUrl);
+          console.log(`[Keep-Alive] Pinged ${pingUrl}`);
+        } catch (e) {
+          console.warn('[Keep-Alive] Ping failed:', e);
+        }
+      }, 14 * 60 * 1000); // Every 14 minutes
+    }
   });
 }
 
