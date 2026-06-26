@@ -443,8 +443,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   <tr key={e.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20" id={`expense-row-${e.id}`}>
                     {/* Project & Category */}
                     <td className="p-4">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">{e.project_name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono block">{e.project_code} • {e.category_name}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">{(e as any).projects?.name || projects.find(p => p.id === e.project_id)?.name || 'N/A'}</span>
+                      <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || '—'}</span>
                     </td>
                     {/* Submitter & Date */}
                     <td className="p-4">
@@ -720,17 +720,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     {localImageForScan ? 'Changer Photo' : 'Prendre Photo / Charger'}
                   </button>
 
-                  {localImageForScan && isOnline && (
-                    <button
-                      type="button"
-                      onClick={handleAutoScan}
-                      className="inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 rounded-lg py-2 px-4 font-semibold text-indigo-700 dark:text-indigo-400"
-                      disabled={isScanning}
-                    >
-                      {isScanning ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-                      Auto-scan avec IA
-                    </button>
-                  )}
+
                 </div>
 
                 {/* Scan Status banner */}

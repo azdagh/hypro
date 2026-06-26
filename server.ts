@@ -662,6 +662,17 @@ app.post('/api/purchase-orders', requireRole(['Super Admin', 'Financial Director
   }
 });
 
+app.put('/api/purchase-orders/:id/status', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    const { status } = req.body;
+    const data = await SupabaseDbService.updatePurchaseOrderStatus(req.params.id, status, userId);
+    res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Contracts
 app.get('/api/contracts', async (req, res) => {
   try {
@@ -677,6 +688,17 @@ app.post('/api/contracts', requireRole(['Super Admin', 'Financial Director']), a
   try {
     const data = await SupabaseDbService.createContract(req.body, userId);
     res.status(201).json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.put('/api/contracts/:id/status', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    const { status } = req.body;
+    const data = await SupabaseDbService.updateContractStatus(req.params.id, status, userId);
+    res.json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }

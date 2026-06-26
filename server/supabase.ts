@@ -612,6 +612,30 @@ export const SupabaseDbService = {
     return data;
   },
 
+  async updatePurchaseOrderStatus(id: string, status: string, userId: string) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('purchase_orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateContractStatus(id: string, status: string, userId: string) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('contracts')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
   // Stocks
   async getStocks() {
     const supabase = getSupabase();

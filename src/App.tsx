@@ -519,6 +519,22 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const handleUpdatePOStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+    const res = await secureFetch(`/api/purchase-orders/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    await fetchData(false);
+  };
+
+  const handleUpdateContractStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+    const res = await secureFetch(`/api/contracts/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    await fetchData(false);
+  };
+
   // 4. Warehouse & Stocks
   const handleAddStockItem = async (item: any) => {
     const res = await secureFetch('/api/stock-items', {
@@ -1052,6 +1068,8 @@ function MainLayout() {
                         onAddPurchaseOrder={handleAddPurchaseOrder}
                         onAddContract={handleAddContract}
                         onUpdatePRStatus={handleUpdatePRStatus}
+                        onUpdatePOStatus={handleUpdatePOStatus}
+                        onUpdateContractStatus={handleUpdateContractStatus}
                         userRole={activeRole}
                         userId={currentUser.id}
                       />

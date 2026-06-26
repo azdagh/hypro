@@ -21,6 +21,8 @@ interface ProcurementViewProps {
   onAddPurchaseOrder: (order: Omit<PurchaseOrder, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
   onAddContract: (contract: Omit<Contract, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
   onUpdatePRStatus: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
+  onUpdatePOStatus?: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
+  onUpdateContractStatus?: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
   userRole: string;
   userId: string;
 }
@@ -38,6 +40,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   onAddPurchaseOrder,
   onAddContract,
   onUpdatePRStatus,
+  onUpdatePOStatus,
+  onUpdateContractStatus,
   userRole,
   userId
 }) => {
@@ -454,6 +458,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <th className="p-4 font-semibold">Date d'Émission</th>
                   <th className="p-4 font-semibold">Livraison Prévue</th>
                   <th className="p-4 font-semibold">Statut</th>
+                  {canApprove && <th className="p-4 font-semibold text-center">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -481,16 +486,42 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                         {po.delivery_planned_date ? new Date(po.delivery_planned_date).toLocaleDateString() : 'Néant'}
                       </td>
                       <td className="p-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800">
-                          {po.status}
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          po.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20' :
+                          po.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
+                          'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
+                        }`}>
+                          {po.status === 'Approved' ? '✓ Confirmé' : po.status === 'Rejected' ? '✗ Rejeté' : '⏳ En Attente'}
                         </span>
                       </td>
+                      {canApprove && (
+                        <td className="p-4">
+                          {po.status === 'Pending' ? (
+                            <div className="flex gap-1.5">
+                              <button
+                                onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Approved')}
+                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                              >
+                                <Check className="w-3 h-3" /> Confirmer
+                              </button>
+                              <button
+                                onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Rejected')}
+                                className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                              >
+                                <X className="w-3 h-3" /> Rejeter
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-[10px]">Traité</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
                 {filteredPOs.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">Aucun bon de commande correspondant.</td>
+                    <td colSpan={canApprove ? 8 : 7} className="p-8 text-center text-slate-400">Aucun bon de commande correspondant.</td>
                   </tr>
                 )}
               </tbody>
@@ -515,6 +546,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <th className="p-4 font-semibold">Date de Début</th>
                   <th className="p-4 font-semibold">Échéance</th>
                   <th className="p-4 font-semibold">Statut</th>
+                  {canApprove && <th className="p-4 font-semibold text-center">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -542,10 +574,36 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                         {new Date(c.end_date).toLocaleDateString()}
                       </td>
                       <td className="p-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20">
-                          {c.status}
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          c.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20' :
+                          c.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
+                          'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
+                        }`}>
+                          {c.status === 'Approved' ? '✓ Actif' : c.status === 'Rejected' ? '✗ Annulé' : '⏳ En Attente'}
                         </span>
                       </td>
+                      {canApprove && (
+                        <td className="p-4">
+                          {c.status === 'Pending' ? (
+                            <div className="flex gap-1.5">
+                              <button
+                                onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Approved')}
+                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                              >
+                                <Check className="w-3 h-3" /> Activer
+                              </button>
+                              <button
+                                onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Rejected')}
+                                className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                              >
+                                <X className="w-3 h-3" /> Annuler
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-[10px]">Traité</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
