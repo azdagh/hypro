@@ -3,7 +3,7 @@ import {
   Building2, LayoutDashboard, Wallet, ShoppingBag, 
   Settings as SettingsIcon, FileSpreadsheet, Activity, 
   LogOut, Globe, Moon, Sun, ShieldCheck, CheckCircle2, 
-  AlertTriangle, RefreshCw, Layers 
+  AlertTriangle, RefreshCw, Layers, Menu
 } from 'lucide-react';
 import { LanguageProvider, useTranslation, formatCurrencyDZD } from './i18n';
 import { ThemeProvider, useTheme } from './theme';
