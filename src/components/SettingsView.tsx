@@ -222,7 +222,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* Expense Categories Management */}
-      {onAddCategory && (
+      {currentRole === 'Super Admin' && onAddCategory && (
         <CategoriesPanel
           categories={categories}
           onAddCategory={onAddCategory}

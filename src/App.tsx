@@ -96,7 +96,7 @@ function MainLayout() {
         secureFetch('/api/subcontractors').then(r => r.json()),
         secureFetch('/api/stock-items').then(r => r.json()),
         secureFetch('/api/equipment').then(r => r.json()),
-        secureFetch('/api/audit-logs').then(r => r.json()),
+        secureFetch('/api/audit-logs').then(r => r.ok ? r.json() : []).catch(() => []),
         secureFetch('/api/my-assignments').then(r => r.json()),
         secureFetch('/api/auth/profiles').then(r => r.json())
       ]);
