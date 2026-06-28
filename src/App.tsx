@@ -70,6 +70,8 @@ function MainLayout() {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [myAssignments, setMyAssignments] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -81,7 +83,7 @@ function MainLayout() {
       const [
         resProjects, resAllocations, resExpenses, resCategories,
         resPRs, resPOs, resContracts, resSuppliers, resSubs,
-        resStocks, resEquip, resLogs
+        resStocks, resEquip, resLogs, resAssignments, resProfiles
       ] = await Promise.all([
         secureFetch('/api/projects').then(r => r.json()),
         secureFetch('/api/allocations').then(r => r.json()),
@@ -94,7 +96,9 @@ function MainLayout() {
         secureFetch('/api/subcontractors').then(r => r.json()),
         secureFetch('/api/stock-items').then(r => r.json()),
         secureFetch('/api/equipment').then(r => r.json()),
-        secureFetch('/api/audit-logs').then(r => r.json())
+        secureFetch('/api/audit-logs').then(r => r.json()),
+        secureFetch('/api/my-assignments').then(r => r.json()),
+        secureFetch('/api/auth/profiles').then(r => r.json())
       ]);
 
       setProjects(Array.isArray(resProjects) ? resProjects : []);
@@ -109,8 +113,9 @@ function MainLayout() {
       setStockItems(Array.isArray(resStocks) ? resStocks : []);
       setEquipment(Array.isArray(resEquip) ? resEquip : []);
       setAuditLogs(Array.isArray(resLogs) ? resLogs : []);
-    } catch (err) {
-      console.error('Error loading HYPRO ERP data:', err);
+      setMyAssignments(Array.isArray(resAssignments) ? resAssignments : []);
+      setProfiles(Array.isArray(resProfiles) ? resProfiles : []);
+    } catch (err) {  console.error('Error loading HYPRO ERP data:', err);
     } finally {
       setLoading(false);
     }
@@ -968,7 +973,8 @@ function MainLayout() {
                   if (isFdOrAccountantOrAdmin) return true;
                   const hasAllocations = filteredAllocations.some(a => a.project_id === p.id);
                   const hasExpenses = filteredExpenses.some(e => e.project_id === p.id);
-                  return hasAllocations || hasExpenses;
+                  const isAssigned = myAssignments.some(a => a.project_id === p.id);
+                  return hasAllocations || hasExpenses || isAssigned;
                 });
 
                 // 4. Filtered Purchase Requests
@@ -1044,6 +1050,7 @@ function MainLayout() {
                         projects={filteredProjects}
                         categories={categories}
                         allocations={filteredAllocations}
+                        profiles={profiles}
                         onSubmitExpense={handleSubmitExpense}
                         onSubmitAllocation={handleSubmitAllocation}
                         onUpdateExpenseStatus={handleUpdateExpenseStatus}

@@ -193,6 +193,16 @@ export const SupabaseDbService = {
     if (error) throw error;
     return data;
   },
+  // Assignments
+  async getMyAssignments(userId: string) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('project_assignments')
+      .select('*')
+      .eq('user_id', userId);
+    if (error) throw error;
+    return data;
+  },
 
   // Projects
   async getProjects() {

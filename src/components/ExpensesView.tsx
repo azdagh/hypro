@@ -13,6 +13,7 @@ interface ExpensesViewProps {
   projects: Project[];
   categories: ExpenseCategory[];
   allocations: Allocation[];
+  profiles: any[];
   onSubmitExpense: (expense: Omit<Expense, 'id' | 'submitted_at' | 'updated_at'>) => Promise<any>;
   onSubmitAllocation: (allocation: Omit<Allocation, 'id' | 'created_at'>) => Promise<any>;
   onUpdateExpenseStatus: (id: string, status: 'Approved' | 'Rejected', reason?: string) => Promise<any>;
@@ -27,6 +28,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   projects,
   categories,
   allocations,
+  profiles,
   onSubmitExpense,
   onSubmitAllocation,
   onUpdateExpenseStatus,
@@ -42,6 +44,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [activeSubTab, setActiveSubTab] = useState<'expenses' | 'allocations'>('expenses');
   const [filterProject, setFilterProject] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [filterAcheteur, setFilterAcheteur] = useState<string>('ALL');
   
   // Modals / Dialog state
   const [isExpenseFormOpen, setIsExpenseFormOpen] = useState(false);
@@ -64,6 +67,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [localImageForScan, setLocalImageForScan] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // New Allocation form states
   const [allocProject, setAllocProject] = useState('');
@@ -122,53 +126,55 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       reader.onload = async () => {
         try {
           const originalBase64 = reader.result as string;
+          setUploadError(null);
 
           // 1. Compress Image
           const compressedBase64 = await compressPhoto(originalBase64);
           const uploadFilename = file.name.replace(/\.[^.]+$/, '') + '.jpg';
 
-          // 2. Upload photo to Supabase Storage
-          const base64Data = compressedBase64.split(',')[1];
-          const byteCharacters = atob(base64Data);
-          const byteArrays = [];
-          for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-              byteNumbers[i] = slice.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-          }
-          const blob = new Blob(byteArrays, { type: 'image/jpeg' });
-          
-          const uniqueFilename = `${Date.now()}-${uploadFilename}`;
-          const supabase = await getSupabaseClient();
-          const { data, error } = await supabase.storage.from('receipts').upload(uniqueFilename, blob, {
-             contentType: 'image/jpeg'
-          });
-          
-          if (error) {
-             throw new Error(error.message || "Echec de l'upload vers Supabase Storage");
-          }
-          
-          const { data: publicUrlData } = supabase.storage.from('receipts').getPublicUrl(uniqueFilename);
-          const receiptUrl = publicUrlData.publicUrl;
-          const uploadData = { drive_file_id: uniqueFilename };
-
-          // Save uploaded references
-          setExpReceiptUrl(receiptUrl);
-          setExpReceiptFileId(uploadData.drive_file_id);
+          // Show local preview immediately (before upload completes)
           setLocalImageForScan(compressedBase64);
 
-          // Save references for allocations as well if that form is open
+          // 2. Upload photo to Google Drive via Apps Script
+          const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+          const secret = import.meta.env.VITE_GOOGLE_SCRIPT_SECRET;
+          
+          if (!scriptUrl) {
+            throw new Error("Google Apps Script URL non configuré. Vérifiez .env.local");
+          }
+
+          const response = await fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8' // avoids CORS preflight
+            },
+            body: JSON.stringify({
+              file: compressedBase64,
+              fileName: uploadFilename,
+              mimeType: 'image/jpeg',
+              uploadType: isAllocFormOpen ? 'transfer' : 'expense',
+              secret: secret || ''
+            })
+          });
+
+          const uploadData = await response.json();
+          if (!uploadData.success) {
+             throw new Error(uploadData.error || "Echec de l'upload vers Google Drive");
+          }
+          
+          const receiptUrl = uploadData.webViewLink;
+
+          // Save uploaded references for both forms
+          setExpReceiptUrl(receiptUrl);
+          setExpReceiptFileId(uploadData.fileId);
           setAllocReceiptUrl(receiptUrl);
-          setAllocReceiptFileId(uploadData.drive_file_id);
+          setAllocReceiptFileId(uploadData.fileId);
 
         } catch (err: any) {
           console.error(err);
           setScanStatus('error');
-          alert(err.message || "Erreur de sauvegarde de l'image.");
+          // Show inline error instead of blocking alert
+          setUploadError(err.message || "Erreur lors de l'upload vers Google Drive.");
         } finally {
           setIsScanning(false);
           setSubmitting(false);
@@ -263,8 +269,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       setExpReceiptUrl('');
       setLocalImageForScan('');
       setScanStatus('idle');
+      setUploadError(null);
     } catch (err: any) {
-      alert(err.message || 'Erreur lors de la soumission');
+      setUploadError(err.message || 'Erreur lors de la soumission');
     } finally {
       setSubmitting(false);
     }
@@ -338,12 +345,27 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const filteredExpenses = expenses.filter(e => {
     const matchesProj = filterProject === 'ALL' || e.project_id === filterProject;
     const matchesStatus = filterStatus === 'ALL' || e.status === filterStatus;
-    return matchesProj && matchesStatus;
+    const matchesAcheteur = filterAcheteur === 'ALL' || e.submitted_by === filterAcheteur;
+    return matchesProj && matchesStatus && matchesAcheteur;
   }).sort((a,b) => b.submitted_at.localeCompare(a.submitted_at));
 
   const filteredAllocations = allocations.filter(a => {
-    return filterProject === 'ALL' || a.project_id === filterProject;
+    const matchesProj = filterProject === 'ALL' || a.project_id === filterProject;
+    const matchesAcheteur = filterAcheteur === 'ALL' || a.allocated_to === filterAcheteur;
+    return matchesProj && matchesAcheteur;
   }).sort((a,b) => b.created_at.localeCompare(a.created_at));
+
+  // Compute Solde
+  let soldeAcheteur = null;
+  if (filterAcheteur !== 'ALL') {
+    const totalAlloc = allocations
+      .filter(a => a.allocated_to === filterAcheteur && (filterProject === 'ALL' || a.project_id === filterProject))
+      .reduce((sum, a) => sum + Number(a.amount_dzd), 0);
+    const totalExp = expenses
+      .filter(e => e.submitted_by === filterAcheteur && e.status !== 'Rejected' && (filterProject === 'ALL' || e.project_id === filterProject))
+      .reduce((sum, e) => sum + Number(e.amount_dzd), 0);
+    soldeAcheteur = totalAlloc - totalExp;
+  }
 
   return (
     <div className="space-y-6" id="expenses-and-pettycash-panel">
@@ -418,7 +440,29 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               <option value="Rejected">Rejeté (Rejected)</option>
             </select>
           )}
+          
+          {/* Acheteur / Beneficiaire select */}
+          {(isApprover) && (
+            <select 
+              value={filterAcheteur} 
+              onChange={e => setFilterAcheteur(e.target.value)}
+              className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2 min-w-[150px]"
+            >
+              <option value="ALL">Tous les Acheteurs</option>
+              {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
+                <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
+              ))}
+            </select>
+          )}
         </div>
+        
+        {/* Solde Display */}
+        {filterAcheteur !== 'ALL' && soldeAcheteur !== null && (
+          <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
+            <DollarSign className="w-4 h-4" />
+            <span className="font-bold text-sm">Solde : {formatCurrencyDZD(soldeAcheteur)}</span>
+          </div>
+        )}
       </div>
 
       {/* Tables display */}
@@ -559,7 +603,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                       </td>
                       <td className="p-4">
                         <span className="font-medium text-slate-700 dark:text-slate-300 block">De: {a.allocated_by_name}</span>
-                        <span className="text-[10px] text-slate-400 block">Pour: {a.allocated_to}</span>
+                        <span className="text-[10px] text-slate-400 block">Pour: {profiles?.find(p => p.id === a.allocated_to)?.full_name || a.allocated_to}</span>
                       </td>
                       <td className="p-4 max-w-[250px] truncate" title={a.notes}>
                         {a.notes || <span className="text-slate-400 italic">Sans notes</span>}
@@ -736,8 +780,14 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     <span>IA: Reçu scanné avec succès ! Montant & détails renseignés.</span>
                   </div>
                 )}
+                {uploadError && (
+                  <div className="text-rose-600 inline-flex items-center gap-1 text-[10px] bg-rose-50 dark:bg-rose-950/20 px-2.5 py-1 rounded">
+                    <X className="w-3.5 h-3.5 shrink-0" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
                 {expReceiptUrl && !isScanning && (
-                  <p className="text-[10px] text-slate-500 font-mono truncate">Image G-Drive liée: {expReceiptFileId}</p>
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Lié à Drive: {expReceiptFileId}</p>
                 )}
               </div>
 
@@ -827,15 +877,18 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Bénéficiaire Principal (Caisse/Chef de Chantier) *</label>
-                  <input 
-                    type="text" 
+                  <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
+                  <select 
                     value={allocTo} 
                     onChange={e => setAllocTo(e.target.value)} 
-                    placeholder="e.g. Sofiane Boumediene" 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                     required 
-                  />
+                  >
+                    <option value="">-- Sélectionner un compte --</option>
+                    {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
+                      <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-500">Justificatif Transfert / Bordereau</label>

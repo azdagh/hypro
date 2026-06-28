@@ -410,6 +410,17 @@ app.delete('/api/admin/project-assignments/:id', verifySuperAdmin, async (req, r
   }
 });
 
+// My Assignments
+app.get('/api/my-assignments', async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    const data = await SupabaseDbService.getMyAssignments(userId);
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // User Preferences
 app.get('/api/preferences/:userId', requireOwnershipOrPrivileged, async (req, res) => {
   try {
