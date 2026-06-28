@@ -936,19 +936,35 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       {previewImageUrl && (
         <div 
           onClick={() => setPreviewImageUrl(null)}
-          className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in"
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4 z-[999] animate-fade-in"
           id="receipt-preview-overlay"
         >
-          <div className="w-full max-w-5xl h-[85vh] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden relative shadow-2xl" id="receipt-preview-container">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setPreviewImageUrl(null); }}
-              className="absolute top-4 right-4 bg-slate-900/50 hover:bg-slate-900 text-white p-2 rounded-full z-10 transition-colors"
-            >
-              ✕
-            </button>
+          {/* Top Actions Bar */}
+          <div className="w-full max-w-5xl flex justify-between items-center mb-3 px-1">
+            <span className="text-white/70 text-xs sm:text-sm font-medium">Aperçu du Document</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <a 
+                href={previewImageUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-white hover:text-emerald-400 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <ArrowUpRight className="w-4 h-4" /> <span className="hidden sm:inline">Ouvrir</span>
+              </a>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setPreviewImageUrl(null); }}
+                className="bg-white/10 hover:bg-rose-500 text-white p-1.5 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="w-full max-w-5xl h-[85vh] bg-slate-100 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 flex-shrink-0" onClick={(e) => e.stopPropagation()} id="receipt-preview-container">
             <iframe 
               src={previewImageUrl.replace(/\/view.*$/, '/preview')} 
-              className="w-full h-full rounded border-0"
+              className="w-full h-full border-0"
               allow="autoplay"
               title="Receipt Preview"
             />
