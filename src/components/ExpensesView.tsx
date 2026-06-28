@@ -922,201 +922,6 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 <button 
                   type="submit" 
                   className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
-              {/* Justification Upload Card with Camera capture="environment" */}
-              <div className="border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-slate-50 dark:bg-slate-950/20 text-center space-y-3">
-                <div className="flex flex-col items-center">
-                  {localImageForScan ? (
-                    <div className="relative w-full max-w-[200px] mb-2 mx-auto">
-                      <img src={localImageForScan} alt="Preview" className="w-full h-auto rounded-lg receipt-preview-thumb" />
-                    </div>
-                  ) : (
-                    <>
-                      <Camera className="w-8 h-8 text-slate-400 mb-2" />
-                      <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu de Chantier</p>
-                      <p className="text-[10px] text-slate-400 mt-1 max-w-[320px]">
-                        Capturez directement via la caméra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-center gap-2">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    capture="environment" 
-                    onChange={handleFileChange} 
-                    ref={fileInputRef}
-                    className="hidden" 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 rounded-lg py-2 px-4 font-semibold text-slate-700 dark:text-slate-200"
-                    disabled={submitting}
-                  >
-                    {submitting ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5" />}
-                    {localImageForScan ? 'Changer Photo' : 'Prendre Photo / Charger'}
-                  </button>
-
-
-                </div>
-
-                {/* Scan Status banner */}
-                {isScanning && (
-                  <div className="text-slate-500 inline-flex items-center gap-1.5 text-[10px]">
-                    <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-500" />
-                    <span>Lancement de l'Analyse d'Image par IA (Gemini)...</span>
-                  </div>
-                )}
-                {scanStatus === 'success' && (
-                  <div className="text-emerald-600 inline-flex items-center gap-1 text-[10px] bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-1 rounded">
-                    <Check className="w-3.5 h-3.5" />
-                    <span>IA: Reçu scanné avec succès ! Montant & détails renseignés.</span>
-                  </div>
-                )}
-                {uploadError && (
-                  <div className="text-rose-600 inline-flex items-center gap-1 text-[10px] bg-rose-50 dark:bg-rose-950/20 px-2.5 py-1 rounded">
-                    <X className="w-3.5 h-3.5 shrink-0" />
-                    <span>{uploadError}</span>
-                  </div>
-                )}
-                {expReceiptUrl && !isScanning && (
-                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Lié à Drive: {expReceiptFileId}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Montant (DZD) *</label>
-                  <input 
-                    type="number" 
-                    value={expAmount} 
-                    onChange={e => setExpAmount(e.target.value)} 
-                    placeholder="Montant du reçu" 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Description / Preuve d'achat *</label>
-                  <input 
-                    type="text" 
-                    value={expDescription} 
-                    onChange={e => setExpDescription(e.target.value)} 
-                    placeholder="e.g. Achat gasoil pour grue n°2" 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required 
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button 
-                  type="button" 
-                  onClick={() => setIsExpenseFormOpen(false)}
-                  className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-colors"
-                >
-                  {t('cancel')}
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
-                  disabled={submitting}
-                >
-                  {t('submit')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Allocation form Modal */}
-      {isAllocFormOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="alloc-form-overlay">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-xl shadow-xl p-6 space-y-6" id="alloc-form-container">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">Effectuer Versement / Allocation de Caisse</h3>
-              <button onClick={() => setIsAllocFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
-            </div>
-
-            <form onSubmit={handleAllocSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Projet Destinataire *</label>
-                  <select 
-                    value={allocProject} 
-                    onChange={e => setAllocProject(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required
-                  >
-                    <option value="">-- Choisir --</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Montant Alloué (DZD) *</label>
-                  <input 
-                    type="number" 
-                    value={allocAmount} 
-                    onChange={e => setAllocAmount(e.target.value)} 
-                    placeholder="Montant du transfert" 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" 
-                    required 
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
-                  <select 
-                    value={allocTo} 
-                    onChange={e => setAllocTo(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required 
-                  >
-                    <option value="">-- Sélectionner un compte --</option>
-                    {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
-                      <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Justificatif Transfert / Bordereau</label>
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange}
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2" 
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Notes d'accompagnement / Motif</label>
-                <textarea 
-                  value={allocNotes} 
-                  onChange={e => setAllocNotes(e.target.value)}
-                  rows={2} 
-                  placeholder="Notes importantes sur cette injection de fonds de roulement..." 
-                  className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button 
-                  type="button" 
-                  onClick={() => setIsAllocFormOpen(false)}
-                  className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-colors"
-                >
-                  {t('cancel')}
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
                   disabled={submitting}
                 >
                   Confirmer Versement
@@ -1131,35 +936,19 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       {previewImageUrl && (
         <div 
           onClick={() => setPreviewImageUrl(null)}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4 z-[999] animate-fade-in"
+          className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in"
           id="receipt-preview-overlay"
         >
-          {/* Top Actions Bar */}
-          <div className="w-full max-w-5xl flex justify-between items-center mb-3 px-1">
-            <span className="text-white/70 text-xs sm:text-sm font-medium">Aperçu du Document</span>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <a 
-                href={previewImageUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-white hover:text-emerald-400 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-              >
-                <ArrowUpRight className="w-4 h-4" /> <span className="hidden sm:inline">Ouvrir</span>
-              </a>
-              <button 
-                onClick={(e) => { e.stopPropagation(); setPreviewImageUrl(null); }}
-                className="bg-white/10 hover:bg-rose-500 text-white p-1.5 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          
-          <div className="w-full max-w-5xl h-[85vh] bg-slate-100 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10" onClick={(e) => e.stopPropagation()} id="receipt-preview-container">
+          <div className="w-full max-w-5xl h-[85vh] bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden relative shadow-2xl" id="receipt-preview-container">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setPreviewImageUrl(null); }}
+              className="absolute top-4 right-4 bg-slate-900/50 hover:bg-slate-900 text-white p-2 rounded-full z-10 transition-colors"
+            >
+              ✕
+            </button>
             <iframe 
               src={previewImageUrl.replace(/\/view.*$/, '/preview')} 
-              className="w-full h-full border-0"
+              className="w-full h-full rounded border-0"
               allow="autoplay"
               title="Receipt Preview"
             />
