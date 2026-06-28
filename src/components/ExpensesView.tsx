@@ -54,8 +54,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(false);
 
-  // Selected receipt preview modal
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  // Selected receipt preview modal (Removed since Drive links don't embed)
 
   // New Expense form states
   const [expProject, setExpProject] = useState('');
@@ -509,12 +508,14 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     {/* Receipt link */}
                     <td className="p-4">
                       {e.receipt_url ? (
-                        <button 
-                          onClick={() => setPreviewImageUrl(e.receipt_url || null)}
+                        <a 
+                          href={e.receipt_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
                         >
-                          <Eye className="w-3.5 h-3.5" /> Voir Reçu
-                        </button>
+                          <ArrowUpRight className="w-3.5 h-3.5" /> Voir Reçu
+                        </a>
                       ) : (
                         <span className="text-slate-400 italic">Aucun</span>
                       )}
@@ -613,12 +614,14 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                       </td>
                       <td className="p-4">
                         {a.receipt_url ? (
-                          <button 
-                            onClick={() => setPreviewImageUrl(a.receipt_url || null)}
+                          <a 
+                            href={a.receipt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
                           >
-                            <Eye className="w-3.5 h-3.5" /> Reçu
-                          </button>
+                            <ArrowUpRight className="w-3.5 h-3.5" /> Reçu
+                          </a>
                         ) : (
                           <span className="text-slate-400 italic">Aucun</span>
                         )}
@@ -932,24 +935,6 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         </div>
       )}
 
-      {/* Full-screen Receipt Preview Modal overlay */}
-      {previewImageUrl && (
-        <div 
-          onClick={() => setPreviewImageUrl(null)}
-          className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in cursor-zoom-out"
-          id="receipt-preview-overlay"
-        >
-          <div className="max-w-3xl max-h-[90vh] bg-white p-2 rounded-xl border border-slate-300 overflow-hidden" id="receipt-preview-container">
-            <img 
-              src={previewImageUrl} 
-              alt="Receipt Preview" 
-              className="max-w-full max-h-[85vh] object-contain rounded"
-              referrerPolicy="no-referrer"
-            />
-            <p className="text-center text-[10px] text-slate-500 mt-2 font-mono">Fichier Hébergé sur le Service G-Drive HYPRO</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
