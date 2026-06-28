@@ -96,7 +96,7 @@ function MainLayout() {
         secureFetch('/api/subcontractors').then(r => r.json()),
         secureFetch('/api/stock-items').then(r => r.json()),
         secureFetch('/api/equipment').then(r => r.json()),
-        secureFetch('/api/audit-logs').then(r => r.ok ? r.json() : []).catch(() => []),
+        activeRole === 'Super Admin' ? secureFetch('/api/audit-logs').then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
         secureFetch('/api/my-assignments').then(r => r.json()),
         secureFetch('/api/auth/profiles').then(r => r.json())
       ]);
@@ -842,12 +842,14 @@ function MainLayout() {
               <FileSpreadsheet className="w-4 h-4" /> {t('reports')}
             </button>
 
-            <button 
-              onClick={() => { setActiveTab('audit'); setIsMobileMenuOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'audit' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
-            >
-              <Activity className="w-4 h-4" /> {t('auditLogs')}
-            </button>
+            {activeRole === 'Super Admin' && (
+              <button 
+                onClick={() => { setActiveTab('audit'); setIsMobileMenuOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'audit' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+              >
+                <Activity className="w-4 h-4" /> {t('auditLogs')}
+              </button>
+            )}
 
             {activeRole === 'Super Admin' && (
               <button 
