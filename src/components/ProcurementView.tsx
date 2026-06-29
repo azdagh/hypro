@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Plus, Users, FileCheck, ShoppingCart, Landmark, ArrowRight, 
-  Check, X, FileText, AlertTriangle, Briefcase 
+  Check, X, FileText, AlertTriangle, Briefcase, Trash2
 } from 'lucide-react';
 import { 
   Supplier, Subcontractor, PurchaseRequest, PurchaseOrder, Contract, Project 
@@ -23,6 +23,11 @@ interface ProcurementViewProps {
   onUpdatePRStatus: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
   onUpdatePOStatus?: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
   onUpdateContractStatus?: (id: string, status: 'Approved' | 'Rejected') => Promise<any>;
+  onDeletePurchaseRequest?: (id: string) => Promise<any>;
+  onDeletePurchaseOrder?: (id: string) => Promise<any>;
+  onDeleteContract?: (id: string) => Promise<any>;
+  onDeleteSupplier?: (id: string) => Promise<any>;
+  onDeleteSubcontractor?: (id: string) => Promise<any>;
   userRole: string;
   userId: string;
 }
@@ -42,6 +47,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   onUpdatePRStatus,
   onUpdatePOStatus,
   onUpdateContractStatus,
+  onDeletePurchaseRequest,
+  onDeletePurchaseOrder,
+  onDeleteContract,
+  onDeleteSupplier,
+  onDeleteSubcontractor,
   userRole,
   userId
 }) => {
@@ -632,7 +642,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <div key={s.id} className="py-3 flex flex-col gap-1 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-slate-900 dark:text-slate-100">{s.name}</span>
-                    <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.activity_area}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.activity_area}</span>
+                      {onDeleteSupplier && userRole === 'Super Admin' && (
+                        <button onClick={() => onDeleteSupplier(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-slate-500 space-y-0.5">
                     <p>Contact: {s.contact_name} • Tél: {s.phone}</p>
@@ -654,7 +671,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <div key={s.id} className="py-3 flex flex-col gap-1 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-slate-900 dark:text-slate-100">{s.name}</span>
-                    <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.specialty}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.specialty}</span>
+                      {onDeleteSubcontractor && userRole === 'Super Admin' && (
+                        <button onClick={() => onDeleteSubcontractor(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-slate-500 space-y-0.5">
                     <p>Contact: {s.contact_name} • Tél: {s.phone}</p>

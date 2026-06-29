@@ -495,12 +495,76 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const handleDeletePurchaseRequest = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette demande d'achat ?")) return;
+    const res = await secureFetch(`/api/purchase-requests/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeletePurchaseOrder = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce bon de commande ?")) return;
+    const res = await secureFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteContract = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce contrat ?")) return;
+    const res = await secureFetch(`/api/contracts/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteStock = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet élément de stock ?")) return;
+    const res = await secureFetch(`/api/stocks/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteEquipment = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet équipement ?")) return;
+    const res = await secureFetch(`/api/equipment/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
   // 3. Procurement Supply Chain
   const handleAddSupplier = async (supp: any) => {
     const res = await secureFetch('/api/suppliers', {
       method: 'POST',
       body: JSON.stringify(supp)
     });
+    await fetchData(false);
+  };
+
+  const handleDeleteSupplier = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce fournisseur ?")) return;
+    const res = await secureFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
+    await fetchData(false);
+  };
+
+  const handleDeleteSubcontractor = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce sous-traitant ?")) return;
+    const res = await secureFetch(`/api/subcontractors/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
     await fetchData(false);
   };
 
@@ -1098,12 +1162,17 @@ function MainLayout() {
                         projects={filteredProjects}
                         onAddSupplier={handleAddSupplier}
                         onAddSubcontractor={handleAddSubcontractor}
+                        onDeleteSupplier={handleDeleteSupplier}
+                        onDeleteSubcontractor={handleDeleteSubcontractor}
                         onAddPurchaseRequest={handleAddPurchaseRequest}
                         onAddPurchaseOrder={handleAddPurchaseOrder}
                         onAddContract={handleAddContract}
                         onUpdatePRStatus={handleUpdatePRStatus}
                         onUpdatePOStatus={handleUpdatePOStatus}
                         onUpdateContractStatus={handleUpdateContractStatus}
+                        onDeletePurchaseRequest={handleDeletePurchaseRequest}
+                        onDeletePurchaseOrder={handleDeletePurchaseOrder}
+                        onDeleteContract={handleDeleteContract}
                         userRole={activeRole}
                         userId={currentUser.id}
                       />
@@ -1117,6 +1186,8 @@ function MainLayout() {
                         onAddStockItem={handleAddStockItem}
                         onAddEquipment={handleAddEquipment}
                         onUpdateEquipmentStatus={handleUpdateEquipmentStatus}
+                        onDeleteStock={handleDeleteStock}
+                        onDeleteEquipment={handleDeleteEquipment}
                         userRole={activeRole}
                       />
                     )}

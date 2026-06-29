@@ -608,6 +608,16 @@ app.post('/api/suppliers', requireRole(['Super Admin', 'Financial Director', 'Ac
   }
 });
 
+app.delete('/api/suppliers/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteSupplier(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 app.get('/api/subcontractors', async (req, res) => {
   try {
     const data = await SupabaseDbService.getSubcontractors();
@@ -622,6 +632,16 @@ app.post('/api/subcontractors', requireRole(['Super Admin', 'Financial Director'
   try {
     const data = await SupabaseDbService.createSubcontractor(req.body, userId);
     res.status(201).json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/subcontractors/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteSubcontractor(req.params.id, userId);
+    res.json({ success: true });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
@@ -669,6 +689,16 @@ app.put('/api/purchase-requests/:id/status', requireRole(['Super Admin', 'Financ
   }
 });
 
+app.delete('/api/purchase-requests/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deletePurchaseRequest(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Purchase Orders
 app.get('/api/purchase-orders', async (req, res) => {
   try {
@@ -700,6 +730,16 @@ app.put('/api/purchase-orders/:id/status', requireRole(['Super Admin', 'Financia
   }
 });
 
+app.delete('/api/purchase-orders/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deletePurchaseOrder(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Contracts
 app.get('/api/contracts', async (req, res) => {
   try {
@@ -726,6 +766,16 @@ app.put('/api/contracts/:id/status', requireRole(['Super Admin', 'Financial Dire
     const { status } = req.body;
     const data = await SupabaseDbService.updateContractStatus(req.params.id, status, userId);
     res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/contracts/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteContract(req.params.id, userId);
+    res.json({ success: true });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }
@@ -792,6 +842,26 @@ app.put('/api/stock-items/:id/quantity', requireRole(['Super Admin', 'Financial 
   }
 });
 
+app.delete('/api/stocks/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteStock(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/stock-items/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteStock(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Equipment
 app.get('/api/equipment', async (req, res) => {
   try {
@@ -818,6 +888,16 @@ app.put('/api/equipment/:id/status', requireRole(['Super Admin', 'Financial Dire
   try {
     const data = await SupabaseDbService.updateEquipmentStatus(req.params.id, status, userId);
     res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/equipment/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteEquipment(req.params.id, userId);
+    res.json({ success: true });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }

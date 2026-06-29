@@ -496,6 +496,12 @@ export const SupabaseDbService = {
     return data;
   },
 
+  async deleteSupplier(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('suppliers').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   async getSubcontractors() {
     const supabase = getSupabase();
     const { data, error } = await supabase
@@ -520,6 +526,12 @@ export const SupabaseDbService = {
       .single();
     if (error) throw error;
     return data;
+  },
+
+  async deleteSubcontractor(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('subcontractors').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Purchase Requests

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Plus, Box, Settings, AlertCircle, CheckCircle, 
-  Wrench, FileText, Search, PackageOpen 
+  Wrench, FileText, Search, PackageOpen, Trash2 
 } from 'lucide-react';
 import { StockItem, Equipment, Project } from '../types';
 import { formatLocalDate, useTranslation } from '../i18n';
@@ -13,6 +13,8 @@ interface InventoryViewProps {
   onAddStockItem: (item: Omit<StockItem, 'id'>) => Promise<any>;
   onAddEquipment: (eq: Omit<Equipment, 'id'>) => Promise<any>;
   onUpdateEquipmentStatus: (id: string, status: Equipment['status']) => Promise<any>;
+  onDeleteStock?: (id: string) => Promise<any>;
+  onDeleteEquipment?: (id: string) => Promise<any>;
   userRole: string;
 }
 
@@ -23,6 +25,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onAddStockItem,
   onAddEquipment,
   onUpdateEquipmentStatus,
+  onDeleteStock,
+  onDeleteEquipment,
   userRole
 }) => {
   const { t, lang } = useTranslation();
@@ -175,11 +179,22 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-slate-500">
                       <Box className="w-5 h-5" />
                     </div>
-                    {isLowStock && (
-                      <span className="bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 px-2.5 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" /> Alerte Seuil Bas
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isLowStock && (
+                        <span className="bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 px-2.5 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> Alerte Seuil Bas
+                        </span>
+                      )}
+                      {onDeleteStock && userRole === 'Super Admin' && (
+                        <button 
+                          onClick={() => onDeleteStock(s.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-0.5">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{s.item_name}</h3>
@@ -252,6 +267,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           >
                             <Wrench className="w-3 h-3" /> Alterner Statut
                           </button>
+                          {onDeleteEquipment && userRole === 'Super Admin' && (
+                            <button 
+                              onClick={() => onDeleteEquipment(e.id)}
+                              className="p-1.5 ml-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </td>
                       )}
                     </tr>

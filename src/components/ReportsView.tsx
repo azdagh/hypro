@@ -24,8 +24,22 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const [selectedYear, setSelectedYear] = useState<string>('2026');
   const [selectedMonth, setSelectedMonth] = useState<string>('06'); // June
 
+  const [enterpriseName, setEnterpriseName] = useState('HYPRO PROMOTION IMMOBILIERE');
+  const [enterpriseLogo, setEnterpriseLogo] = useState<string | null>(null);
+
   const [generating, setGenerating] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<any>(null);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEnterpriseLogo(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleGenerateReport = () => {
     setGenerating(true);
@@ -87,7 +101,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           project: selectedProject === 'ALL' ? 'Tous les chantiers' : projects.find(p => p.id === selectedProject)?.name,
           year: selectedYear,
           month: selectedMonth
-        }
+        },
+        enterpriseName: enterpriseName || 'ERP REPORT',
+        enterpriseLogo: enterpriseLogo
       });
       setGenerating(false);
     }, 800);
@@ -98,7 +114,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     if (!generatedReport) return;
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "HYPRO Promotion Immobiliere ERP - RAPPORT FINANCIER\n";
+    csvContent += `${generatedReport.enterpriseName} ERP - RAPPORT FINANCIER\n`;
     csvContent += `Titre: ${generatedReport.title}\n`;
     csvContent += `Genere le: ${generatedReport.timestamp}\n\n`;
 
@@ -107,12 +123,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       generatedReport.projectSummaries.forEach((s: any) => {
         csvContent += `"${s.code}","${s.name}",${s.budget},${s.allocated},${s.spent},${s.balance}\n`;
       });
-    } else {
       csvContent += "Date,Projet,Categorie,Description,Montant (DZD),Soumis par\n";
       generatedReport.expensesList.forEach((e: any) => {
-        const projName = projects.find(p => p.id === e.project_id)?.code || e.project_code || '';
-        const catName = categories.find(c => c.id === e.category_id)?.name || e.category_name || '';
-        const subName = profiles.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || '';
+        const projMatch = projects.find(p => p.id === e.project_id);
+        const projName = projMatch ? `${projMatch.code} - ${projMatch.name}` : (e.project_name || 'Général');
+        
+        const catMatch = categories.find(c => c.id === e.category_id);
+        const catName = catMatch ? catMatch.name : (e.category_name || 'Non-catégorisé');
+        
+        const subMatch = profiles.find(p => p.id === e.submitted_by);
+        const subName = subMatch ? subMatch.full_name : (e.submitted_by_name || 'Inconnu');
+        
         csvContent += `"${new Date(e.submitted_at).toLocaleDateString()}","${projName}","${catName}","${e.description}",${e.amount_dzd},"${subName}"\n`;
       });
     }
@@ -148,11 +169,18 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       });
     } else {
       generatedReport.expensesList.forEach((e: any) => {
-        const projName = projects.find(p => p.id === e.project_id)?.code || e.project_code || '';
-        const catName = categories.find(c => c.id === e.category_id)?.name || e.category_name || '';
+        const projMatch = projects.find(p => p.id === e.project_id);
+        const projName = projMatch ? `${projMatch.code} - ${projMatch.name}` : (e.project_name || 'Général');
+        
+        const catMatch = categories.find(c => c.id === e.category_id);
+        const catName = catMatch ? catMatch.name : (e.category_name || 'Non-catégorisé');
+
+        const subMatch = profiles.find(p => p.id === e.submitted_by);
+        const subName = subMatch ? subMatch.full_name : (e.submitted_by_name || 'Inconnu');
+        
         tableRowsHtml += `
           <tr>
-            <td>${new Date(e.submitted_at).toLocaleDateString()}</td>
+            <td>${new Date(e.submitted_at).toLocaleDateString()}<br/><span style="font-size: 10px; color: #64748b;">Par: ${subName}</span></td>
             <td>${projName}</td>
             <td>${catName}</td>
             <td>${e.description}</td>
@@ -182,9 +210,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </head>
         <body>
           <div class="header">
-            <div class="logo">HYPRO PROMOTION IMMOBILIERE</div>
+            <div class="logo">
+              ${generatedReport.enterpriseLogo ? `<img src="${generatedReport.enterpriseLogo}" alt="Logo" style="max-height: 40px; display: inline-block; vertical-align: middle; margin-right: 12px;" />` : ''}
+              <span style="display: inline-block; vertical-align: middle;">${generatedReport.enterpriseName}</span>
+            </div>
             <div class="title">${generatedReport.title}</div>
-            <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
+            <div class="meta">Généré le : ${generatedReport.timestamp} &nbsp;|&nbsp; Filtre : ${generatedReport.parameters.project} &nbsp;|&nbsp; Exercice : ${generatedReport.parameters.year}</div>
           </div>
 
           <div className="overflow-x-auto w-full">
@@ -228,16 +259,37 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   return (
     <div className="space-y-6" id="report-center-container">
-      {/* Configuration Box */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="report-center-config">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-slate-500" /> {t('reportCenter')}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs" id="report-controls-form">
-          {/* Report Type Selector */}
+      {/* Configuration Header */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-4" id="report-configuration-panel">
+        
+        {/* Enterprise Info Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="space-y-1">
-            <label className="font-semibold text-slate-500">Nature du Rapport</label>
+            <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Nom de l'Entreprise</label>
+            <input 
+              type="text" 
+              value={enterpriseName}
+              onChange={e => setEnterpriseName(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-medium"
+              placeholder="Ex: HYPRO PROMOTION IMMOBILIERE"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Logo (Pour Impression)</label>
+            <input 
+              type="file" 
+              accept=".jpg,.jpeg,.png"
+              onChange={handleLogoUpload}
+              className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200"
+            />
+          </div>
+        </div>
+
+        {/* Report Params Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4" id="report-params-grid">
+          {/* Type of Report */}
+          <div className="space-y-1">
+            <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Nature du Rapport</label>
             <select 
               value={reportType} 
               onChange={e => setReportType(e.target.value as any)}
@@ -252,7 +304,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
           {/* Project filter */}
           <div className="space-y-1">
-            <label className="font-semibold text-slate-500">Chantier Concerné</label>
+            <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Chantier Concerné</label>
             <select 
               value={selectedProject} 
               onChange={e => setSelectedProject(e.target.value)}
@@ -268,7 +320,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {/* Month / Year selectors */}
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-500">Mois</label>
+              <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Mois</label>
               <select 
                 value={selectedMonth} 
                 onChange={e => setSelectedMonth(e.target.value)}
@@ -281,7 +333,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               </select>
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-slate-500">Exercice</label>
+              <label className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Exercice</label>
               <select 
                 value={selectedYear} 
                 onChange={e => setSelectedYear(e.target.value)}

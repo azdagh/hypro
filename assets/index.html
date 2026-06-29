@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فاتورة مشروع ERP - السيد أسامة</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+            color: #000;
+        }
+
+        .invoice {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 35px 40px;
+            border: 2px solid #000;
+        }
+
+        .no-print {
+            max-width: 850px;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border: 1px solid #d4d4d8;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .no-print button {
+            border: 2px solid #000;
+            background: #fff;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .no-print button:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header .invoice-sub {
+            font-size: 18px;
+            color: #444;
+            letter-spacing: 4px;
+        }
+
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 30px;
+        }
+
+        .info-block {
+            flex: 1;
+        }
+
+        .info-block h3 {
+            font-size: 16px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .info-block p {
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 4px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 12px 10px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        thead th {
+            background: #000;
+            color: #fff;
+            text-align: center;
+        }
+
+        tbody td.center {
+            text-align: center;
+        }
+
+        .item-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+            direction: ltr;
+            unicode-bidi: isolate;
+            text-align: left;
+        }
+
+        .item-desc {
+            display: block;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.7;
+            direction: ltr;
+            unicode-bidi: isolate;
+            text-align: left;
+        }
+
+        .item-desc em {
+            color: #444;
+        }
+
+        .total-row td {
+            background: #e5e5e5;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .total-row td.label {
+            text-align: left;
+        }
+
+        .optional-banner td {
+            background: #fff7d6;
+            font-style: italic;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .payment-section {
+            background: #e9e9e9;
+            border: 2px solid #000;
+            padding: 18px 22px;
+            margin-top: 25px;
+        }
+
+        .payment-section h3 {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+            font-size: 14px;
+        }
+
+        .payment-grid p {
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #000;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .footer .thanks {
+            font-weight: bold;
+            color: #000;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .invoice {
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <span>الفاتورة جاهزة للطباعة أو الحفظ PDF. الاسم مكتوب وجاهز للاستعمال.</span>
+        <button onclick="window.print()">طباعة / PDF</button>
+    </div>
+
+    <div class="invoice">
+        <div class="header">
+            <h1>فاتورة &nbsp;|&nbsp; FACTURE</h1>
+            <div class="invoice-sub">INVOICE</div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-block">
+                <h3>من / De :</h3>
+                <p><strong>M. BOULAKHRAS SEIF EL ISLAM</strong></p>
+                <p>سيف الإسلام بولخراص</p>
+                <p>CITE DES MUREIRS OUED ZENATI - 24001</p>
+            </div>
+            <div class="info-block">
+                <h3>معلومات الفاتورة / Info Facture :</h3>
+                <p>العميل / Client : <strong id="client-name"></strong></p>
+                <p>رقم الفاتورة: <span id="invoice-number"></span></p>
+                <p>التاريخ: <span id="date-ar"></span></p>
+                <p><strong>Date : <span id="date-fr"></span></strong></p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60%;">الوصف &nbsp;/&nbsp; Description</th>
+                    <th style="width: 10%;">الكمية<br>Qté</th>
+                    <th style="width: 15%;">السعر الوحدوي<br>Prix Unit.</th>
+                    <th style="width: 15%;">المجموع<br>Total</th>
+                </tr>
+            </thead>
+            <tbody id="invoice-rows"></tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3" class="label">المجموع الكلي / <strong>TOTAL GÉNÉRAL</strong></td>
+                    <td class="center" id="main-total"></td>
+                </tr>
+
+            </tfoot>
+        </table>
+
+        <div class="payment-section">
+            <h3>معلومات الدفع &nbsp;/&nbsp; Informations de Paiement</h3>
+            <div class="payment-grid">
+                <p><strong>Clé :</strong> 46</p>
+                <p><strong>CCP :</strong> 41454729</p>
+                <p><strong>Nom :</strong> BOULAKHRAS SEIF EL ISLAM / بولخراص سيف الإسلام</p>
+                <p><strong>RIP :</strong> 00799999004145472910</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="thanks">شكراً لثقتكم / Merci pour votre confiance</p>
+            <p>Thank you for your business</p>
+        </div>
+    </div>
+
+    <script>
+        const clientName = "السيد أسامة";
+        const projectNote = "مشروع تطوير وصيانة نظام ERP";
+
+        const items = [
+            {
+                title: "ERP System Integration & Backend Configuration",
+                desc: "Supabase integration, Google Apps Script API development, Google Drive file storage integration, backend configuration, and deployment setup.",
+                quantity: 1,
+                price: 7000
+            },
+            {
+                title: "ERP Feature Development & Workflow Enhancements",
+                desc: "Implementation of document preview functionality, role-based access control improvements, financial workflow enhancements, user interface improvements, and theme animation.",
+                quantity: 1,
+                price: 6200
+            },
+            {
+                title: "ERP Debugging, Mobile Optimization & Deployment",
+                desc: "Application debugging, responsive mobile optimization, file upload issue resolution, production deployment, testing, and final system optimization.",
+                quantity: 1,
+                price: 8000
+            }
+        ];
+
+        const rowsContainer = document.getElementById("invoice-rows");
+        const totalCell = document.getElementById("main-total");
+        document.getElementById("client-name").textContent = clientName;
+
+        let total = 0;
+
+        items.forEach((item) => {
+            const rowTotal = item.quantity * item.price;
+            total += rowTotal;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>
+                    <span class="item-title" dir="ltr">${item.title}</span>
+                    <span class="item-desc" dir="ltr">${item.desc}</span>
+                </td>
+                <td class="center">${item.quantity}</td>
+                <td class="center">DA ${item.price.toLocaleString("en-US")}</td>
+                <td class="center">DA ${rowTotal.toLocaleString("en-US")}</td>
+            `;
+            rowsContainer.appendChild(row);
+        });
+
+        totalCell.textContent = "DA " + total.toLocaleString("en-US");
+
+        const today = new Date();
+        const refSerial = String(today.getMonth() + 1).padStart(2, "0") + String(today.getDate()).padStart(2, "0");
+        document.getElementById("invoice-number").textContent = `INV-${today.getFullYear()}-${refSerial}`;
+
+        document.getElementById("date-ar").textContent = today.toLocaleDateString("ar-DZ", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+        document.getElementById("date-fr").textContent = today.toLocaleDateString("fr-DZ", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    </script>
+</body>
+</html>
