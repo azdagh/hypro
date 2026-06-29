@@ -511,7 +511,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     </td>
                     {/* Submitter & Date */}
                     <td className="p-4">
-                      <span className="font-medium text-slate-700 dark:text-slate-300 block">{e.submitted_by_name}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300 block">
+                        {profiles?.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || 'N/A'}
+                      </span>
                       <span className="text-[10px] text-slate-400 font-mono block">{new Date(e.submitted_at).toLocaleDateString()}</span>
                     </td>
                     {/* Description */}

@@ -7,12 +7,16 @@ interface ReportsViewProps {
   projects: Project[];
   allocations: Allocation[];
   expenses: Expense[];
+  categories: any[];
+  profiles: any[];
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({
   projects,
   allocations,
-  expenses
+  expenses,
+  categories,
+  profiles
 }) => {
   const { t } = useTranslation();
   const [reportType, setReportType] = useState<'monthly' | 'annual' | 'cashflow' | 'budget'>('monthly');
@@ -106,7 +110,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     } else {
       csvContent += "Date,Projet,Categorie,Description,Montant (DZD),Soumis par\n";
       generatedReport.expensesList.forEach((e: any) => {
-        csvContent += `"${new Date(e.submitted_at).toLocaleDateString()}","${e.project_code}","${e.category_name}","${e.description}",${e.amount_dzd},"${e.submitted_by_name}"\n`;
+        const projName = projects.find(p => p.id === e.project_id)?.code || e.project_code || '';
+        const catName = categories.find(c => c.id === e.category_id)?.name || e.category_name || '';
+        const subName = profiles.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || '';
+        csvContent += `"${new Date(e.submitted_at).toLocaleDateString()}","${projName}","${catName}","${e.description}",${e.amount_dzd},"${subName}"\n`;
       });
     }
 
@@ -141,11 +148,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       });
     } else {
       generatedReport.expensesList.forEach((e: any) => {
+        const projName = projects.find(p => p.id === e.project_id)?.code || e.project_code || '';
+        const catName = categories.find(c => c.id === e.category_id)?.name || e.category_name || '';
         tableRowsHtml += `
           <tr>
             <td>${new Date(e.submitted_at).toLocaleDateString()}</td>
-            <td>${e.project_code}</td>
-            <td>${e.category_name}</td>
+            <td>${projName}</td>
+            <td>${catName}</td>
             <td>${e.description}</td>
             <td align="right"><b>${e.amount_dzd.toLocaleString()} DZD</b></td>
           </tr>
@@ -393,16 +402,21 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {generatedReport.expensesList.map((e: any) => (
+                  {generatedReport.expensesList.map((e: any) => {
+                    const projCode = projects.find(p => p.id === e.project_id)?.code || e.project_code || '';
+                    const catName = categories.find(c => c.id === e.category_id)?.name || e.category_name || '';
+                    const subName = profiles.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || '';
+                    return (
                     <tr key={e.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/10">
                       <td className="p-3 text-slate-500 font-mono">{new Date(e.submitted_at).toLocaleDateString()}</td>
-                      <td className="p-3 font-semibold">{e.project_code}</td>
-                      <td className="p-3 text-slate-500">{e.category_name}</td>
+                      <td className="p-3 font-semibold">{projCode}</td>
+                      <td className="p-3 text-slate-500">{catName}</td>
                       <td className="p-3 text-slate-700 dark:text-slate-300 font-medium max-w-[200px] truncate" title={e.description}>{e.description}</td>
                       <td className="p-3 text-right font-mono font-bold text-slate-900 dark:text-slate-50">{formatCurrencyDZD(e.amount_dzd)}</td>
-                      <td className="p-3 font-medium text-slate-600 dark:text-slate-400">{e.submitted_by_name}</td>
+                      <td className="p-3 font-medium text-slate-600 dark:text-slate-400">{subName}</td>
                     </tr>
-                  ))}
+                    );
+                  })}
                   {generatedReport.expensesList.length === 0 && (
                     <tr>
                       <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Aucun décaissement justifié trouvé sur cette période.</td>

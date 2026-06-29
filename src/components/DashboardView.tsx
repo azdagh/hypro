@@ -89,22 +89,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     };
   });
 
-  // Allocation distribution for PieChart
+  // Expenses distribution for PieChart
   const COLORS = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'];
-  const projectAllocationsShare = projects.map(p => {
-    const amt = allocations.filter(a => a.project_id === p.id).reduce((sum, a) => sum + a.amount_dzd, 0);
+  const projectExpensesShare = projects.map(p => {
+    const amt = expenses.filter(e => e.project_id === p.id && e.status === 'Approved').reduce((sum, e) => sum + e.amount_dzd, 0);
     return {
       name: p.code || p.name,
       value: amt
     };
   }).filter(v => v.value > 0);
 
-  // Fallback demo data when no allocations exist yet
-  const pieData = projectAllocationsShare.length > 0
-    ? projectAllocationsShare
-    : [{ name: 'Aucune allocation', value: 1 }];
+  // Fallback demo data when no expenses exist yet
+  const pieData = projectExpensesShare.length > 0
+    ? projectExpensesShare
+    : [{ name: 'Aucune dépense', value: 1 }];
 
-  const hasData = projectAllocationsShare.length > 0;
+  const hasData = projectExpensesShare.length > 0;
 
   return (
     <div className="space-y-6" id="dashboard-view-container">
@@ -247,35 +247,49 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        {/* Share of Allocations per project (Pie Chart) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col" style={{height: '420px'}} id="chart-project-allocations-share">
+        {/* Share of Expenses per project (Pie Chart) */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col" style={{height: '420px'}} id="chart-project-expenses-share">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-2">
-            <PieChartIcon className="w-4 h-4 text-slate-500" /> Répartition des Allocations
+            <PieChartIcon className="w-4 h-4 text-slate-500" /> Répartition des Dépenses
           </h3>
-          <div className="flex-1 min-h-0" id="allocations-share-pie-container">
+          <div className="flex-1 min-h-0 relative" id="expenses-share-pie-container">
+            <svg style={{ height: 0, width: 0, position: 'absolute' }}>
+              <defs>
+                <filter id="pieShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000000" floodOpacity="0.15" />
+                </filter>
+              </defs>
+            </svg>
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+              <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <Pie
                   data={pieData}
                   cx="50%"
-                  cy="42%"
-                  innerRadius={50}
-                  outerRadius={85}
-                  paddingAngle={3}
+                  cy="45%"
+                  innerRadius={65}
+                  outerRadius={95}
+                  paddingAngle={5}
                   dataKey="value"
                   label={false}
                   labelLine={false}
+                  stroke="none"
+                  cornerRadius={6}
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={COLORS[index % COLORS.length]} 
+                      style={{ filter: `drop-shadow(0px 4px 8px ${COLORS[index % COLORS.length]}40)` }}
+                    />
                   ))}
                 </Pie>
                 <Tooltip 
                   formatter={(value: any, name: string) => [
-                    hasData ? formatCurrencyDZD(value) : 'Aucune allocation',
+                    hasData ? formatCurrencyDZD(value) : 'Aucune dépense',
                     name
                   ]} 
-                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc', fontSize: '11px' }} 
+                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: 'none', color: '#f8fafc', fontSize: '11px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }} 
+                  itemStyle={{ color: '#e2e8f0', fontWeight: 600 }}
                 />
                 <Legend 
                   verticalAlign="bottom" 

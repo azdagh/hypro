@@ -1126,6 +1126,8 @@ function MainLayout() {
                         projects={filteredProjects}
                         allocations={filteredAllocations}
                         expenses={filteredExpenses}
+                        categories={categories}
+                        profiles={profiles}
                       />
                     )}
                   </>
