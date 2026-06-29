@@ -608,7 +608,7 @@ app.post('/api/suppliers', requireRole(['Super Admin', 'Financial Director', 'Ac
   }
 });
 
-app.delete('/api/suppliers/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+app.delete('/api/suppliers/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
     await SupabaseDbService.deleteSupplier(req.params.id, userId);
@@ -637,7 +637,7 @@ app.post('/api/subcontractors', requireRole(['Super Admin', 'Financial Director'
   }
 });
 
-app.delete('/api/subcontractors/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+app.delete('/api/subcontractors/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
     await SupabaseDbService.deleteSubcontractor(req.params.id, userId);
@@ -689,7 +689,7 @@ app.put('/api/purchase-requests/:id/status', requireRole(['Super Admin', 'Financ
   }
 });
 
-app.delete('/api/purchase-requests/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+app.delete('/api/purchase-requests/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
     await SupabaseDbService.deletePurchaseRequest(req.params.id, userId);
@@ -730,7 +730,7 @@ app.put('/api/purchase-orders/:id/status', requireRole(['Super Admin', 'Financia
   }
 });
 
-app.delete('/api/purchase-orders/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+app.delete('/api/purchase-orders/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
     await SupabaseDbService.deletePurchaseOrder(req.params.id, userId);
@@ -771,7 +771,7 @@ app.put('/api/contracts/:id/status', requireRole(['Super Admin', 'Financial Dire
   }
 });
 
-app.delete('/api/contracts/:id', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
+app.delete('/api/contracts/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
     await SupabaseDbService.deleteContract(req.params.id, userId);

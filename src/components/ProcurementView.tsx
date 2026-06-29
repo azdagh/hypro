@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   Plus, Users, FileCheck, ShoppingCart, Landmark, ArrowRight, 
   Check, X, FileText, AlertTriangle, Briefcase, Trash2
@@ -246,7 +246,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
     try {
       await onUpdatePRStatus(id, status);
     } catch (err: any) {
-      alert(err.message || 'Erreur lors du traitement de la DA');
+      alert(err.message || 'Erreur lors du Traitéement de la DA');
     }
   };
 
@@ -271,7 +271,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             onClick={() => setProcTab('contracts')}
             className={`pb-2 text-sm font-semibold border-b-2 transition-colors ${procTab === 'contracts' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
           >
-            Contrats Sous-traitants
+            Contrats Sous-traitéants
           </button>
           <button 
             onClick={() => setProcTab('partners')}
@@ -287,7 +287,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               onClick={() => setIsPrFormOpen(true)}
               className="bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs hover:bg-slate-800"
             >
-              Créer Demande (DA)
+              CrÃ©er Demande (DA)
             </button>
           )}
           {procTab === 'orders' && canApprove && (
@@ -373,11 +373,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Projet</th>
-                  <th className="p-4 font-semibold">Équipements / Matériaux demandés</th>
-                  <th className="p-4 font-semibold text-center">Quantité</th>
-                  <th className="p-4 font-semibold text-right">Budget Estimé</th>
-                  <th className="p-4 font-semibold">Fournisseur Suggéré</th>
-                  <th className="p-4 font-semibold">Émetteur & Date</th>
+                  <th className="p-4 font-semibold">Ã‰quipements / MatÃ©riaux demandÃ©s</th>
+                  <th className="p-4 font-semibold text-center">QuantitÃ©</th>
+                  <th className="p-4 font-semibold text-right">Budget EstimÃ©</th>
+                  <th className="p-4 font-semibold">Fournisseur SuggÃ©rÃ©</th>
+                  <th className="p-4 font-semibold">Ã‰metteur & Date</th>
                   <th className="p-4 font-semibold">Statut</th>
                   {canApprove && <th className="p-4 font-semibold text-center">Actions</th>}
                 </tr>
@@ -400,7 +400,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       <td className="p-4 text-right font-mono font-bold text-slate-900 dark:text-slate-100">
                         {formatCurrencyDZD(pr.estimated_amount_dzd)}
                       </td>
-                      <td className="p-4 text-slate-500">{pr.suggested_supplier_name || 'Néant'}</td>
+                      <td className="p-4 text-slate-500">{pr.suggested_supplier_name || 'NÃ©ant'}</td>
                       <td className="p-4">
                         <span className="text-slate-700 block font-medium">{pr.requested_by_name}</span>
                         <span className="text-[10px] text-slate-400 block font-mono">{new Date(pr.created_at).toLocaleDateString()}</span>
@@ -416,26 +416,37 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </td>
                       {canApprove && (
                         <td className="p-4 text-center">
-                          {pr.status === 'Pending' ? (
-                            <div className="flex gap-1 justify-center">
-                              <button 
-                                onClick={() => handleApprovePR(pr.id, 'Approved')}
-                                className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded"
-                                title="Approuver la demande d'achat"
+                          <div className="flex gap-1 justify-center items-center">
+                            {pr.status === 'Pending' ? (
+                              <>
+                                <button 
+                                  onClick={() => handleApprovePR(pr.id, 'Approved')}
+                                  className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded"
+                                  title="Approuver la demande d'achat"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => handleApprovePR(pr.id, 'Rejected')}
+                                  className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
+                                  title="Rejeter la demande"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-slate-400 font-mono text-[10px]">TraitéÃ©</span>
+                            )}
+                            {onDeletePurchaseRequest && (
+                              <button
+                                onClick={() => onDeletePurchaseRequest(pr.id)}
+                                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Supprimer"
                               >
-                                <Check className="w-3.5 h-3.5" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
-                              <button 
-                                onClick={() => handleApprovePR(pr.id, 'Rejected')}
-                                className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
-                                title="Rejeter la demande"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 font-mono text-[10px]">Traité</span>
-                          )}
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -461,12 +472,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
-                  <th className="p-4 font-semibold">Réf BC</th>
+                  <th className="p-4 font-semibold">RÃ©f BC</th>
                   <th className="p-4 font-semibold">Projet</th>
-                  <th className="p-4 font-semibold">Fournisseur Laitier / Matériaux</th>
+                  <th className="p-4 font-semibold">Fournisseur Laitier / MatÃ©riaux</th>
                   <th className="p-4 font-semibold text-right">Montant Global (DZD)</th>
-                  <th className="p-4 font-semibold">Date d'Émission</th>
-                  <th className="p-4 font-semibold">Livraison Prévue</th>
+                  <th className="p-4 font-semibold">Date d'Ã‰mission</th>
+                  <th className="p-4 font-semibold">Livraison PrÃ©vue</th>
                   <th className="p-4 font-semibold">Statut</th>
                   {canApprove && <th className="p-4 font-semibold text-center">Actions</th>}
                 </tr>
@@ -493,7 +504,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </td>
                       <td className="p-4 text-slate-500">{new Date(po.created_at).toLocaleDateString()}</td>
                       <td className="p-4 text-amber-700 dark:text-amber-400 font-medium">
-                        {po.delivery_planned_date ? new Date(po.delivery_planned_date).toLocaleDateString() : 'Néant'}
+                        {po.delivery_planned_date ? new Date(po.delivery_planned_date).toLocaleDateString() : 'NÃ©ant'}
                       </td>
                       <td className="p-4">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -501,29 +512,40 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           po.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
                           'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
                         }`}>
-                          {po.status === 'Approved' ? '✓ Confirmé' : po.status === 'Rejected' ? '✗ Rejeté' : '⏳ En Attente'}
+                          {po.status === 'Approved' ? 'âœ“ ConfirmÃ©' : po.status === 'Rejected' ? 'âœ— RejetÃ©' : 'â³ En Attente'}
                         </span>
                       </td>
                       {canApprove && (
                         <td className="p-4">
-                          {po.status === 'Pending' ? (
-                            <div className="flex gap-1.5">
+                          <div className="flex gap-1.5 items-center">
+                            {po.status === 'Pending' ? (
+                              <>
+                                <button
+                                  onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Approved')}
+                                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                >
+                                  <Check className="w-3 h-3" /> Confirmer
+                                </button>
+                                <button
+                                  onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Rejected')}
+                                  className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                >
+                                  <X className="w-3 h-3" /> Rejeter
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-slate-400 text-[10px]">TraitéÃ©</span>
+                            )}
+                            {onDeletePurchaseOrder && (
                               <button
-                                onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Approved')}
-                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                onClick={() => onDeletePurchaseOrder(po.id)}
+                                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Supprimer"
                               >
-                                <Check className="w-3 h-3" /> Confirmer
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
-                              <button
-                                onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Rejected')}
-                                className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                              >
-                                <X className="w-3 h-3" /> Rejeter
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-[10px]">Traité</span>
-                          )}
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -541,7 +563,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         </div>
       )}
 
-      {/* 3. Contrats Sous-traitants */}
+      {/* 3. Contrats Sous-traitéants */}
       {procTab === 'contracts' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs" id="contracts-table-panel">
           <div className="overflow-x-auto">
@@ -549,12 +571,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
-                  <th className="p-4 font-semibold">Réf / Projet</th>
-                  <th className="p-4 font-semibold">Sous-traitant Partenaire</th>
+                  <th className="p-4 font-semibold">RÃ©f / Projet</th>
+                  <th className="p-4 font-semibold">Sous-traitéant Partenaire</th>
                   <th className="p-4 font-semibold">Champs d'Action (Scope)</th>
                   <th className="p-4 font-semibold text-right">Montant Contractuel</th>
-                  <th className="p-4 font-semibold">Date de Début</th>
-                  <th className="p-4 font-semibold">Échéance</th>
+                  <th className="p-4 font-semibold">Date de DÃ©but</th>
+                  <th className="p-4 font-semibold">Ã‰chÃ©ance</th>
                   <th className="p-4 font-semibold">Statut</th>
                   {canApprove && <th className="p-4 font-semibold text-center">Actions</th>}
                 </tr>
@@ -589,29 +611,40 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           c.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
                           'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
                         }`}>
-                          {c.status === 'Approved' ? '✓ Actif' : c.status === 'Rejected' ? '✗ Annulé' : '⏳ En Attente'}
+                          {c.status === 'Approved' ? 'âœ“ Actif' : c.status === 'Rejected' ? 'âœ— AnnulÃ©' : 'â³ En Attente'}
                         </span>
                       </td>
                       {canApprove && (
                         <td className="p-4">
-                          {(!c.status || c.status === 'Pending') ? (
-                            <div className="flex gap-1.5">
+                          <div className="flex gap-1.5 items-center">
+                            {(!c.status || c.status === 'Pending') ? (
+                              <>
+                                <button
+                                  onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Approved')}
+                                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                >
+                                  <Check className="w-3 h-3" /> Activer
+                                </button>
+                                <button
+                                  onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Rejected')}
+                                  className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                >
+                                  <X className="w-3 h-3" /> Annuler
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-slate-400 text-[10px]">TraitéÃ©</span>
+                            )}
+                            {onDeleteContract && (
                               <button
-                                onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Approved')}
-                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                onClick={() => onDeleteContract(c.id)}
+                                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Supprimer"
                               >
-                                <Check className="w-3 h-3" /> Activer
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
-                              <button
-                                onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Rejected')}
-                                className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                              >
-                                <X className="w-3 h-3" /> Annuler
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-[10px]">Traité</span>
-                          )}
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -619,7 +652,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 })}
                 {filteredContractsList.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">Aucun contrat de sous-traitance correspondant.</td>
+                    <td colSpan={7} className="p-8 text-center text-slate-400">Aucun contrat de Sous-traitéance correspondant.</td>
                   </tr>
                 )}
               </tbody>
@@ -629,13 +662,13 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         </div>
       )}
 
-      {/* 4. Partenaires (Fournisseurs / Sous-traitants) Lists */}
+      {/* 4. Partenaires (Fournisseurs / Sous-traitéants) Lists */}
       {procTab === 'partners' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="partners-lists-panel">
           {/* Suppliers Card List */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Landmark className="w-4 h-4 text-slate-500" /> Fournisseurs Matériaux ({suppliers.length})
+              <Landmark className="w-4 h-4 text-slate-500" /> Fournisseurs MatÃ©riaux ({suppliers.length})
             </h3>
             <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[450px] overflow-y-auto pr-1">
               {suppliers.map(s => (
@@ -644,7 +677,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <span className="font-bold text-slate-900 dark:text-slate-100">{s.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.activity_area}</span>
-                      {onDeleteSupplier && userRole === 'Super Admin' && (
+                      {onDeleteSupplier && (
                         <button onClick={() => onDeleteSupplier(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -652,7 +685,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     </div>
                   </div>
                   <div className="text-slate-500 space-y-0.5">
-                    <p>Contact: {s.contact_name} • Tél: {s.phone}</p>
+                    <p>Contact: {s.contact_name} â€¢ TÃ©l: {s.phone}</p>
                     <p className="font-mono">Email: {s.email || 'N/A'}</p>
                     <p className="text-[10px] truncate">Adresse: {s.address}</p>
                   </div>
@@ -664,7 +697,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           {/* Subcontractors Card List */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Users className="w-4 h-4 text-slate-500" /> Sous-traitants (Entreprises) ({subcontractors.length})
+              <Users className="w-4 h-4 text-slate-500" /> Sous-traitéants (Entreprises) ({subcontractors.length})
             </h3>
             <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[450px] overflow-y-auto pr-1">
               {subcontractors.map(s => (
@@ -673,7 +706,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <span className="font-bold text-slate-900 dark:text-slate-100">{s.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.specialty}</span>
-                      {onDeleteSubcontractor && userRole === 'Super Admin' && (
+                      {onDeleteSubcontractor && (
                         <button onClick={() => onDeleteSubcontractor(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -681,7 +714,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     </div>
                   </div>
                   <div className="text-slate-500 space-y-0.5">
-                    <p>Contact: {s.contact_name} • Tél: {s.phone}</p>
+                    <p>Contact: {s.contact_name} â€¢ TÃ©l: {s.phone}</p>
                     <p className="font-mono">Email: {s.email || 'N/A'}</p>
                     <p className="text-[10px] truncate">Adresse: {s.address}</p>
                   </div>
@@ -699,8 +732,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="pr-form-overlay">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="pr-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Émettre Demande d'Achat (DA)</h3>
-              <button onClick={() => setIsPrFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Ã‰mettre Demande d'Achat (DA)</h3>
+              <button onClick={() => setIsPrFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
             </div>
 
             <form onSubmit={handlePrSubmit} className="space-y-4 text-xs">
@@ -715,28 +748,28 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Matériaux / Équipement Demandé *</label>
+                <label className="font-semibold text-slate-500">MatÃ©riaux / Ã‰quipement DemandÃ© *</label>
                 <input type="text" value={prItemDescription} onChange={e => setPrItemDescription(e.target.value)} placeholder="e.g. Ciment Portland CPJ 42.5" className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Quantité *</label>
+                  <label className="font-semibold text-slate-500">QuantitÃ© *</label>
                   <input type="number" value={prQty} onChange={e => setPrQty(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Unité *</label>
+                  <label className="font-semibold text-slate-500">UnitÃ© *</label>
                   <input type="text" value={prUnit} onChange={e => setPrUnit(e.target.value)} placeholder="Sacs, Tonnes, etc." className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Budget Estimé (DZD) *</label>
+                  <label className="font-semibold text-slate-500">Budget EstimÃ© (DZD) *</label>
                   <input type="number" value={prEstimatedAmount} onChange={e => setPrEstimatedAmount(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" required />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Fournisseur Suggéré</label>
+                  <label className="font-semibold text-slate-500">Fournisseur SuggÃ©rÃ©</label>
                   <input type="text" value={prSuggestedSupplier} onChange={e => setPrSuggestedSupplier(e.target.value)} placeholder="Optionnel" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" />
                 </div>
               </div>
@@ -756,7 +789,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="po-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Nouveau Bon de Commande (BC)</h3>
-              <button onClick={() => setIsPoFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
+              <button onClick={() => setIsPoFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
             </div>
 
             <form onSubmit={handlePoSubmit} className="space-y-4 text-xs">
@@ -786,14 +819,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <input type="number" value={poTotalAmount} onChange={e => setPoTotalAmount(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" required />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Date de Livraison Souhaitée *</label>
+                  <label className="font-semibold text-slate-500">Date de Livraison SouhaitÃ©e *</label>
                   <input type="date" value={poDeliveryDate} onChange={e => setPoDeliveryDate(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsPoFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-              <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Émettre BC</button>
+              <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Ã‰mettre BC</button>
               </div>
             </form>
           </div>
@@ -805,13 +838,13 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="contract-form-overlay">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="contract-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Créer un Contrat de Sous-traitance</h3>
-              <button onClick={() => setIsContractFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">CrÃ©er un Contrat de Sous-traitéance</h3>
+              <button onClick={() => setIsContractFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
             </div>
 
             <form onSubmit={handleContractSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Chantier Concerné *</label>
+                <label className="font-semibold text-slate-500">Chantier ConcernÃ© *</label>
                 <select value={ctrProject} onChange={e => setCtrProject(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
                   {projects.map(p => (
@@ -821,7 +854,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Sous-traitant Adjudicataire *</label>
+                <label className="font-semibold text-slate-500">Sous-traitéant Adjudicataire *</label>
                 <select value={ctrSubcontractor} onChange={e => setCtrSubcontractor(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
                   {subcontractors.map(s => (
@@ -832,7 +865,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="space-y-1">
                 <label className="font-semibold text-slate-500">Champs d'intervention (Scope of work) *</label>
-                <textarea value={ctrScope} onChange={e => setCtrScope(e.target.value)} rows={2} placeholder="e.g. Travaux de maçonnerie, électricité lot B" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                <textarea value={ctrScope} onChange={e => setCtrScope(e.target.value)} rows={2} placeholder="e.g. Travaux de maÃ§onnerie, Ã©lectricitÃ© lot B" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
               </div>
 
               <div className="space-y-1">
@@ -842,11 +875,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Date de Début *</label>
+                  <label className="font-semibold text-slate-500">Date de DÃ©but *</label>
                   <input type="date" value={ctrStartDate} onChange={e => setCtrStartDate(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Échéance de Fin *</label>
+                  <label className="font-semibold text-slate-500">Ã‰chÃ©ance de Fin *</label>
                   <input type="date" value={ctrEndDate} onChange={e => setCtrEndDate(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
               </div>
@@ -866,7 +899,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="partner-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Ajouter un Partenaire Commercial</h3>
-              <button onClick={() => setIsPartnerFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
+              <button onClick={() => setIsPartnerFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
             </div>
 
             <form onSubmit={handlePartnerSubmit} className="space-y-4 text-xs">
@@ -874,17 +907,17 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <label className="font-semibold text-slate-500 block">Type de Partenaire *</label>
                 <div className="flex gap-4 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
                   <label className="flex items-center gap-1.5 font-medium cursor-pointer">
-                    <input type="radio" checked={partnerType === 'supplier'} onChange={() => setPartnerType('supplier')} /> Fournisseur Matériaux
+                    <input type="radio" checked={partnerType === 'supplier'} onChange={() => setPartnerType('supplier')} /> Fournisseur MatÃ©riaux
                   </label>
                   <label className="flex items-center gap-1.5 font-medium cursor-pointer">
-                    <input type="radio" checked={partnerType === 'subcontractor'} onChange={() => setPartnerType('subcontractor')} /> Sous-traitant Gros Œuvres
+                    <input type="radio" checked={partnerType === 'subcontractor'} onChange={() => setPartnerType('subcontractor')} /> Sous-traitéant Gros Å’uvres
                   </label>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Dénomination Sociale / Nom *</label>
-                <input type="text" value={partName} onChange={e => setPartName(e.target.value)} placeholder="e.g. SARL Lafarge Algérie" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                <label className="font-semibold text-slate-500">DÃ©nomination Sociale / Nom *</label>
+                <input type="text" value={partName} onChange={e => setPartName(e.target.value)} placeholder="e.g. SARL Lafarge AlgÃ©rie" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -893,7 +926,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <input type="text" value={partContact} onChange={e => setPartContact(e.target.value)} placeholder="Nom du contact" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Téléphone Mobile *</label>
+                  <label className="font-semibold text-slate-500">TÃ©lÃ©phone Mobile *</label>
                   <input type="text" value={partPhone} onChange={e => setPartPhone(e.target.value)} placeholder="0550 00 00 00" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
               </div>
@@ -904,14 +937,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <input type="email" value={partEmail} onChange={e => setPartEmail(e.target.value)} placeholder="contact@entreprise.dz" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Spécialité / Secteur d'activité *</label>
-                  <input type="text" value={partActivity} onChange={e => setPartActivity(e.target.value)} placeholder="e.g. Béton, Peinture, Ascenseurs" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  <label className="font-semibold text-slate-500">SpÃ©cialitÃ© / Secteur d'activitÃ© *</label>
+                  <input type="text" value={partActivity} onChange={e => setPartActivity(e.target.value)} placeholder="e.g. BÃ©ton, Peinture, Ascenseurs" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="font-semibold text-slate-500">Adresse Commerciale *</label>
-                <input type="text" value={partAddress} onChange={e => setPartAddress(e.target.value)} placeholder="Siège social, Ville" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                <input type="text" value={partAddress} onChange={e => setPartAddress(e.target.value)} placeholder="SiÃ¨ge social, Ville" className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
@@ -925,3 +958,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
     </div>
   );
 };
+
+
+

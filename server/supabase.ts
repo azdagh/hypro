@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+﻿import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AsyncLocalStorage } from 'async_hooks';
 
 export const supabaseClientLS = new AsyncLocalStorage<SupabaseClient>();
@@ -378,13 +378,13 @@ export const SupabaseDbService = {
     // Auto-seed if empty
     if (data.length === 0) {
       const defaultCategories = [
-        { name: 'Gros Œuvre & Fondations' },
-        { name: 'Second Œuvre & Plâtre' },
-        { name: 'Matériaux & Ciment' },
-        { name: 'Main d\'Œuvre & Journaliers' },
+        { name: 'Gros Å’uvre & Fondations' },
+        { name: 'Second Å’uvre & PlÃ¢tre' },
+        { name: 'MatÃ©riaux & Ciment' },
+        { name: 'Main d\'Å’uvre & Journaliers' },
         { name: 'Location Engins & Camions' },
         { name: 'Carburant & Logistique' },
-        { name: 'Sécurité & Équipements (EPI)' },
+        { name: 'SÃ©curitÃ© & Ã‰quipements (EPI)' },
         { name: 'Frais Administratifs & Bureau' }
       ];
       await supabase.from('expense_categories').insert(defaultCategories);
@@ -558,7 +558,7 @@ export const SupabaseDbService = {
       .insert([{
         project_id: prData.project_id,
         requester_id: userId,
-        description: prData.item_description + (prData.quantity ? '\nQuantité: ' + prData.quantity + ' ' + prData.unit : '') + (prData.suggested_supplier_name ? '\nFournisseur Suggéré: ' + prData.suggested_supplier_name : ''),
+        description: prData.item_description + (prData.quantity ? '\nQuantitÃ©: ' + prData.quantity + ' ' + prData.unit : '') + (prData.suggested_supplier_name ? '\nFournisseur SuggÃ©rÃ©: ' + prData.suggested_supplier_name : ''),
         amount_dzd: Number(prData.estimated_amount_dzd || 0),
         receipt_file_id: prData.receipt_file_id || null,
         receipt_url: prData.receipt_url || null,
@@ -759,6 +759,36 @@ export const SupabaseDbService = {
       .single();
     if (error) throw error;
     return data;
+  },
+
+  async deletePurchaseRequest(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('purchase_requests').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async deletePurchaseOrder(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('purchase_orders').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteContract(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('contracts').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteStock(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('stocks').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteEquipment(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('equipment').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Notifications
@@ -1157,3 +1187,4 @@ export async function bootstrapSuperAdmin() {
     console.error('[Bootstrap] Unexpected error in bootstrap process:', e.message);
   }
 }
+

@@ -13,7 +13,7 @@ interface InventoryViewProps {
   onAddStockItem: (item: Omit<StockItem, 'id'>) => Promise<any>;
   onAddEquipment: (eq: Omit<Equipment, 'id'>) => Promise<any>;
   onUpdateEquipmentStatus: (id: string, status: Equipment['status']) => Promise<any>;
-  onDeleteStock?: (id: string) => Promise<any>;
+  onDeleteStockItem?: (id: string) => Promise<any>;
   onDeleteEquipment?: (id: string) => Promise<any>;
   userRole: string;
 }
@@ -25,7 +25,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onAddStockItem,
   onAddEquipment,
   onUpdateEquipmentStatus,
-  onDeleteStock,
+  onDeleteStockItem,
   onDeleteEquipment,
   userRole
 }) => {
@@ -53,6 +53,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [loading, setLoading] = useState(false);
 
   const canManage = ['Super Admin', 'Site Manager', 'Purchasing Agent'].includes(userRole);
+  const canDelete = ['Super Admin', 'Financial Director', 'Accountant', 'Site Manager'].includes(userRole);
 
   const handleStockSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +101,16 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       await onUpdateEquipmentStatus(id, next);
     } catch (err: any) {
       alert('Erreur changement de statut');
+    }
+  };
+
+  const handleDelete = async (action: (() => Promise<any>) | undefined, label: string) => {
+    if (!action) return;
+    if (!window.confirm(`Supprimer ${label} ?`)) return;
+    try {
+      await action();
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de la suppression');
     }
   };
 
@@ -179,19 +190,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-slate-500">
                       <Box className="w-5 h-5" />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       {isLowStock && (
                         <span className="bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 px-2.5 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
                           <AlertCircle className="w-3 h-3" /> Alerte Seuil Bas
                         </span>
                       )}
-                      {onDeleteStock && userRole === 'Super Admin' && (
-                        <button 
-                          onClick={() => onDeleteStock(s.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors"
-                          title="Supprimer"
+                      {canDelete && (
+                        <button
+                          onClick={() => handleDelete(() => onDeleteStockItem?.(s.id), 'ce matériau')}
+                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
+                          title="Supprimer le matériau"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -234,7 +245,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <th className="p-4 font-semibold">N° de Série (Plaque)</th>
                   <th className="p-4 font-semibold">Dernière Maintenance</th>
                   <th className="p-4 font-semibold">Statut</th>
-                  {canManage && <th className="p-4 font-semibold text-center">Action</th>}
+                  {(canManage || canDelete) && <th className="p-4 font-semibold text-center">Action</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -259,23 +270,27 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           {e.status}
                         </span>
                       </td>
-                      {canManage && (
+                      {(canManage || canDelete) && (
                         <td className="p-4 text-center">
-                          <button 
-                            onClick={() => handleToggleMaintenance(e.id, e.status)}
-                            className="inline-flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded hover:bg-slate-50 font-semibold"
-                          >
-                            <Wrench className="w-3 h-3" /> Alterner Statut
-                          </button>
-                          {onDeleteEquipment && userRole === 'Super Admin' && (
-                            <button 
-                              onClick={() => onDeleteEquipment(e.id)}
-                              className="p-1.5 ml-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
+                          <div className="flex items-center justify-center gap-1.5">
+                            {canManage && (
+                              <button 
+                                onClick={() => handleToggleMaintenance(e.id, e.status)}
+                                className="inline-flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded hover:bg-slate-50 font-semibold"
+                              >
+                                <Wrench className="w-3 h-3" /> Alterner Statut
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button
+                                onClick={() => handleDelete(() => onDeleteEquipment?.(e.id), 'cet équipement')}
+                                className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
+                                title="Supprimer l'équipement"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>

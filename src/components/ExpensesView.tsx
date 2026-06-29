@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { 
   Plus, Camera, Sparkles, Check, X, Filter, FileText, 
   AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign, Trash2
@@ -85,6 +85,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [allocReceiptUrl, setAllocReceiptUrl] = useState('');
 
   const isApprover = ['Super Admin', 'Financial Director', 'Accountant'].includes(userRole);
+  const canDelete = ['Super Admin', 'Financial Director', 'Accountant', 'Site Manager'].includes(userRole);
   const isManagerOrEmployee = ['Site Manager', 'Employee', 'Super Admin'].includes(userRole);
 
   // Canvas photo compression (JPEG, 70% Quality, Max Width 1600px)
@@ -157,7 +158,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           const secret = import.meta.env.VITE_GOOGLE_SCRIPT_SECRET;
           
           if (!scriptUrl) {
-            throw new Error("Google Apps Script URL non configuré. Vérifiez .env.local");
+            throw new Error("Google Apps Script URL non configurÃ©. VÃ©rifiez .env.local");
           }
 
           const response = await fetch(scriptUrl, {
@@ -268,7 +269,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     if (!isOnline) {
       // Save in queue offline
       enqueueOffline('CREATE_EXPENSE', payload);
-      alert(' ERP en Mode Hors Ligne : Votre dépense a été mise en attente et sera transmise dès le rétablissement de la connexion.');
+      alert(' ERP en Mode Hors Ligne : Votre dÃ©pense a Ã©tÃ© mise en attente et sera transmise dÃ¨s le rÃ©tablissement de la connexion.');
       setIsExpenseFormOpen(false);
       return;
     }
@@ -310,7 +311,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
     if (!isOnline) {
       enqueueOffline('CREATE_ALLOCATION', payload);
-      alert(' ERP en Mode Hors Ligne : Versement sauvegardé localement.');
+      alert(' ERP en Mode Hors Ligne : Versement sauvegardÃ© localement.');
       setIsAllocFormOpen(false);
       return;
     }
@@ -395,7 +396,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             onClick={() => setActiveSubTab('expenses')}
             className={`pb-2 text-sm font-semibold border-b-2 transition-colors ${activeSubTab === 'expenses' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
           >
-            Dépenses & Petty Cash ({expenses.length})
+            DÃ©penses & Petty Cash ({expenses.length})
           </button>
           <button 
             onClick={() => setActiveSubTab('allocations')}
@@ -412,7 +413,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               className="inline-flex items-center justify-center bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-xs"
               id="btn-trigger-expense-form"
             >
-              <Plus className="w-4 h-4 mr-1.5" /> Déclarer Dépense
+              <Plus className="w-4 h-4 mr-1.5" /> DÃ©clarer DÃ©pense
             </button>
           )}
           {activeSubTab === 'allocations' && isApprover && (
@@ -455,8 +456,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             >
               <option value="ALL">Tous les Statuts</option>
               <option value="Pending">En attente (Pending)</option>
-              <option value="Approved">Approuvé (Approved)</option>
-              <option value="Rejected">Rejeté (Rejected)</option>
+              <option value="Approved">ApprouvÃ© (Approved)</option>
+              <option value="Rejected">RejetÃ© (Rejected)</option>
             </select>
           )}
           
@@ -492,7 +493,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
-                  <th className="p-4 font-semibold">Projet & Catégorie</th>
+                  <th className="p-4 font-semibold">Projet & CatÃ©gorie</th>
                   <th className="p-4 font-semibold">Soumis par & Date</th>
                   <th className="p-4 font-semibold">Description</th>
                   <th className="p-4 font-semibold text-right">Montant</th>
@@ -507,12 +508,12 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     {/* Project & Category */}
                     <td className="p-4">
                       <span className="font-semibold text-slate-900 dark:text-slate-100 block">{(e as any).projects?.name || projects.find(p => p.id === e.project_id)?.name || 'N/A'}</span>
-                      <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || '—'}</span>
+                      <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || 'â€”'}</span>
                     </td>
                     {/* Submitter & Date */}
                     <td className="p-4">
                       <span className="font-medium text-slate-700 dark:text-slate-300 block">
-                        {profiles?.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || 'N/A'}
+                        {(e as any).profiles?.full_name || profiles?.find(p => p.id === e.submitted_by)?.full_name || e.submitted_by_name || 'N/A'}
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono block">{new Date(e.submitted_at).toLocaleDateString()}</span>
                     </td>
@@ -534,7 +535,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                           onClick={() => setPreviewImageUrl(e.receipt_url || null)}
                           className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
                         >
-                          <Eye className="w-3.5 h-3.5" /> Voir Reçu
+                          <Eye className="w-3.5 h-3.5" /> Voir ReÃ§u
                         </button>
                       ) : (
                         <span className="text-slate-400 italic">Aucun</span>
@@ -561,7 +562,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                             <button 
                               onClick={() => handleApproval(e.id, 'Approved')}
                               className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded transition-colors"
-                              title="Approuver la dépense"
+                              title="Approuver la dÃ©pense"
                               id={`btn-approve-exp-${e.id}`}
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -569,7 +570,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                             <button 
                               onClick={() => handleApproval(e.id, 'Rejected')}
                               className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded transition-colors"
-                              title="Rejeter la dépense"
+                              title="Rejeter la dÃ©pense"
                               id={`btn-reject-exp-${e.id}`}
                             >
                               <X className="w-3.5 h-3.5" />
@@ -577,11 +578,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                           </div>
                         ) : (
                           <div className="flex items-center justify-center gap-2">
-                            <span className="text-slate-400 font-mono text-[10px]">Verrouillé</span>
+                            <span className="text-slate-400 font-mono text-[10px]">VerrouillÃ©</span>
                             <button 
                               onClick={() => onDeleteExpense(e.id)}
                               className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
-                              title="Supprimer la dépense"
+                              title="Supprimer la dÃ©pense"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -594,7 +595,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 {filteredExpenses.length === 0 && (
                   <tr>
                     <td colSpan={isApprover ? 7 : 6} className="p-8 text-center text-slate-400">
-                      Aucune dépense ne correspond aux filtres actifs.
+                      Aucune dÃ©pense ne correspond aux filtres actifs.
                     </td>
                   </tr>
                 )}
@@ -613,7 +614,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
                   <th className="p-4 font-semibold">Projet Destinataire</th>
                   <th className="p-4 font-semibold">Date & Heure</th>
-                  <th className="p-4 font-semibold">Alloué par & Bénéficiaire</th>
+                  <th className="p-4 font-semibold">AllouÃ© par & BÃ©nÃ©ficiaire</th>
                   <th className="p-4 font-semibold">Notes / Objet</th>
                   <th className="p-4 font-semibold text-right">Montant</th>
                   <th className="p-4 font-semibold">Justificatif</th>
@@ -625,7 +626,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   return (
                     <tr key={a.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20" id={`alloc-row-${a.id}`}>
                       <td className="p-4 font-semibold">
-                        {proj ? proj.name : 'Projet Supprimé'}
+                        {proj ? proj.name : 'Projet SupprimÃ©'}
                         <span className="text-[10px] text-slate-400 font-mono block">{proj ? proj.code : ''}</span>
                       </td>
                       <td className="p-4 text-slate-500 font-mono">
@@ -648,19 +649,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                               onClick={() => setPreviewImageUrl(a.receipt_url || null)}
                               className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
                             >
-                              <Eye className="w-3.5 h-3.5" /> Reçu
+                              <Eye className="w-3.5 h-3.5" /> ReÃ§u
                             </button>
                           ) : (
                             <span className="text-slate-400 italic">Aucun</span>
-                          )}
-                          {isApprover && (
-                            <button 
-                              onClick={() => onDeleteAllocation(a.id)}
-                              className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
-                              title="Supprimer l'allocation"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
                           )}
                         </div>
                       </td>
@@ -670,7 +662,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 {filteredAllocations.length === 0 && (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-400">
-                      Aucune allocation enregistrée.
+                      Aucune allocation enregistrÃ©e.
                     </td>
                   </tr>
                 )}
@@ -686,11 +678,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="rejection-form-overlay">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md p-6 space-y-4 shadow-xl" id="rejection-form-container">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-500" /> Motiver le Rejet du Reçu
+              <AlertTriangle className="w-4 h-4 text-rose-500" /> Motiver le Rejet du ReÃ§u
             </h3>
             <form onSubmit={handleRejectionConfirm} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-500">Raison de rejet (sera notifié au chef de chantier) *</label>
+                <label className="font-semibold text-slate-500">Raison de rejet (sera notifiÃ© au chef de chantier) *</label>
                 <textarea 
                   value={rejectionReason} 
                   onChange={e => setRejectionReason(e.target.value)}
@@ -725,8 +717,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="expense-form-overlay">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6" id="expense-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">Déclarer Dépense de Chantier (Petty Cash)</h3>
-              <button onClick={() => setIsExpenseFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">DÃ©clarer DÃ©pense de Chantier (Petty Cash)</h3>
+              <button onClick={() => setIsExpenseFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">âœ•</button>
             </div>
 
             {duplicateAlert && (
@@ -739,7 +731,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             <form onSubmit={handleExpenseSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Sélectionner Projet *</label>
+                  <label className="font-semibold text-slate-500">SÃ©lectionner Projet *</label>
                   <select 
                     value={expProject} 
                     onChange={e => setExpProject(e.target.value)} 
@@ -753,7 +745,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Catégorie de Dépense *</label>
+                  <label className="font-semibold text-slate-500">CatÃ©gorie de DÃ©pense *</label>
                   <select 
                     value={expCategory} 
                     onChange={e => setExpCategory(e.target.value)} 
@@ -778,9 +770,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   ) : (
                     <>
                       <Camera className="w-8 h-8 text-slate-400 mb-2" />
-                      <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu de Chantier</p>
+                      <p className="font-medium text-slate-700 dark:text-slate-300">NumÃ©riser ReÃ§u de Chantier</p>
                       <p className="text-[10px] text-slate-400 mt-1 max-w-[320px]">
-                        Capturez directement via la caméra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
+                        Capturez directement via la camÃ©ra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
                       </p>
                     </>
                   )}
@@ -824,7 +816,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 {scanStatus === 'success' && (
                   <div className="text-emerald-600 inline-flex items-center gap-1 text-[10px] bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-1 rounded">
                     <Check className="w-3.5 h-3.5" />
-                    <span>IA: Reçu scanné avec succès ! Montant & détails renseignés.</span>
+                    <span>IA: ReÃ§u scannÃ© avec succÃ¨s ! Montant & dÃ©tails renseignÃ©s.</span>
                   </div>
                 )}
                 {uploadError && (
@@ -834,10 +826,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   </div>
                 )}
                 {uploadedFileName && !isUploading && (
-                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Fichier uploadé: {uploadedFileName}</p>
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">âœ” Fichier uploadÃ©: {uploadedFileName}</p>
                 )}
                 {expReceiptUrl && !isScanning && !uploadedFileName && (
-                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Lié à Drive: {expReceiptFileId}</p>
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">âœ” LiÃ© Ã  Drive: {expReceiptFileId}</p>
                 )}
               </div>
 
@@ -848,7 +840,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     type="number" 
                     value={expAmount} 
                     onChange={e => setExpAmount(e.target.value)} 
-                    placeholder="Montant du reçu" 
+                    placeholder="Montant du reÃ§u" 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" 
                     required 
                   />
@@ -859,7 +851,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     type="text" 
                     value={expDescription} 
                     onChange={e => setExpDescription(e.target.value)} 
-                    placeholder="e.g. Achat gasoil pour grue n°2" 
+                    placeholder="e.g. Achat gasoil pour grue nÂ°2" 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                     required 
                   />
@@ -895,20 +887,20 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-xl shadow-xl p-6 space-y-6" id="alloc-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">Effectuer Versement / Allocation de Caisse</h3>
-              <button onClick={() => setIsAllocFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
+              <button onClick={() => setIsAllocFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">âœ•</button>
             </div>
 
             <form onSubmit={handleAllocSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
+                  <label className="font-semibold text-slate-500">BÃ©nÃ©ficiaire Principal (Compte Utilisateur) *</label>
                   <select 
                     value={allocTo} 
                     onChange={e => setAllocTo(e.target.value)} 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                     required 
                   >
-                    <option value="">-- Sélectionner un compte --</option>
+                    <option value="">-- SÃ©lectionner un compte --</option>
                     {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
                       <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
                     ))}
@@ -931,7 +923,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Montant Alloué (DZD) *</label>
+                  <label className="font-semibold text-slate-500">Montant AllouÃ© (DZD) *</label>
                   <input 
                     type="number" 
                     value={allocAmount} 
@@ -956,10 +948,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     </div>
                   )}
                   {uploadedFileName && !isUploading && (
-                    <p className="text-[10px] text-emerald-600 mt-1">✔ {uploadedFileName}</p>
+                    <p className="text-[10px] text-emerald-600 mt-1">âœ” {uploadedFileName}</p>
                   )}
                   {allocReceiptUrl && !isUploading && !uploadedFileName && (
-                    <p className="text-[10px] text-emerald-600 mt-1">✔ Photo liée à Drive</p>
+                    <p className="text-[10px] text-emerald-600 mt-1">âœ” Photo liÃ©e Ã  Drive</p>
                   )}
                 </div>
               </div>
@@ -1007,7 +999,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         >
           {/* Top Actions Bar */}
           <div className="w-full max-w-5xl flex justify-between items-center mb-3 px-1">
-            <span className="text-white/70 text-xs sm:text-sm font-medium">Aperçu du Document</span>
+            <span className="text-white/70 text-xs sm:text-sm font-medium">AperÃ§u du Document</span>
             <div className="flex items-center gap-2 sm:gap-3">
               <a 
                 href={previewImageUrl} 
@@ -1062,3 +1054,6 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     </div>
   );
 };
+
+
+

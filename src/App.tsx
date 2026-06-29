@@ -495,76 +495,12 @@ function MainLayout() {
     await fetchData(false);
   };
 
-  const handleDeletePurchaseRequest = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette demande d'achat ?")) return;
-    const res = await secureFetch(`/api/purchase-requests/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error);
-    }
-    await fetchData(false);
-  };
-
-  const handleDeletePurchaseOrder = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce bon de commande ?")) return;
-    const res = await secureFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error);
-    }
-    await fetchData(false);
-  };
-
-  const handleDeleteContract = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce contrat ?")) return;
-    const res = await secureFetch(`/api/contracts/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error);
-    }
-    await fetchData(false);
-  };
-
-  const handleDeleteStock = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet élément de stock ?")) return;
-    const res = await secureFetch(`/api/stocks/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error);
-    }
-    await fetchData(false);
-  };
-
-  const handleDeleteEquipment = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet équipement ?")) return;
-    const res = await secureFetch(`/api/equipment/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error);
-    }
-    await fetchData(false);
-  };
-
   // 3. Procurement Supply Chain
   const handleAddSupplier = async (supp: any) => {
     const res = await secureFetch('/api/suppliers', {
       method: 'POST',
       body: JSON.stringify(supp)
     });
-    await fetchData(false);
-  };
-
-  const handleDeleteSupplier = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce fournisseur ?")) return;
-    const res = await secureFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
-    if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
-    await fetchData(false);
-  };
-
-  const handleDeleteSubcontractor = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce sous-traitant ?")) return;
-    const res = await secureFetch(`/api/subcontractors/${id}`, { method: 'DELETE' });
-    if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
     await fetchData(false);
   };
 
@@ -624,6 +560,35 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const deleteAndRefresh = async (endpoint: string, fallbackMessage: string) => {
+    const res = await secureFetch(endpoint, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || fallbackMessage);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteSupplier = async (id: string) => {
+    await deleteAndRefresh(`/api/suppliers/${id}`, 'Erreur suppression fournisseur');
+  };
+
+  const handleDeleteSubcontractor = async (id: string) => {
+    await deleteAndRefresh(`/api/subcontractors/${id}`, 'Erreur suppression sous-traitant');
+  };
+
+  const handleDeletePurchaseRequest = async (id: string) => {
+    await deleteAndRefresh(`/api/purchase-requests/${id}`, 'Erreur suppression DA');
+  };
+
+  const handleDeletePurchaseOrder = async (id: string) => {
+    await deleteAndRefresh(`/api/purchase-orders/${id}`, 'Erreur suppression BC');
+  };
+
+  const handleDeleteContract = async (id: string) => {
+    await deleteAndRefresh(`/api/contracts/${id}`, 'Erreur suppression contrat');
+  };
+
   // 4. Warehouse & Stocks
   const handleAddStockItem = async (item: any) => {
     const res = await secureFetch('/api/stock-items', {
@@ -647,6 +612,14 @@ function MainLayout() {
       body: JSON.stringify({ status })
     });
     await fetchData(false);
+  };
+
+  const handleDeleteStockItem = async (id: string) => {
+    await deleteAndRefresh(`/api/stock-items/${id}`, 'Erreur suppression stock');
+  };
+
+  const handleDeleteEquipment = async (id: string) => {
+    await deleteAndRefresh(`/api/equipment/${id}`, 'Erreur suppression équipement');
   };
 
   const handleAddCategory = async (name: string) => {
@@ -1050,8 +1023,11 @@ function MainLayout() {
                 const filteredAllocations = allocations.filter(a => {
                   if (isFdOrAccountantOrAdmin) return true;
                   if (myAssignments.some(pa => pa.project_id === a.project_id)) return true;
-                  const matchesName = currentUser?.full_name && a.allocated_to?.toLowerCase().includes(currentUser.full_name.toLowerCase());
-                  const matchesId = a.allocated_to === currentUser?.id;
+                  const matchesName = currentUser?.full_name && (
+                    a.allocated_to?.toLowerCase().includes(currentUser.full_name.toLowerCase()) ||
+                    a.allocated_to_name?.toLowerCase().includes(currentUser.full_name.toLowerCase())
+                  );
+                  const matchesId = a.allocated_to === currentUser?.id || a.allocated_to_id === currentUser?.id;
                   const matchesAllocatedBy = a.allocated_by === currentUser?.id;
                   return matchesName || matchesId || matchesAllocatedBy;
                 });
@@ -1162,14 +1138,14 @@ function MainLayout() {
                         projects={filteredProjects}
                         onAddSupplier={handleAddSupplier}
                         onAddSubcontractor={handleAddSubcontractor}
-                        onDeleteSupplier={handleDeleteSupplier}
-                        onDeleteSubcontractor={handleDeleteSubcontractor}
                         onAddPurchaseRequest={handleAddPurchaseRequest}
                         onAddPurchaseOrder={handleAddPurchaseOrder}
                         onAddContract={handleAddContract}
                         onUpdatePRStatus={handleUpdatePRStatus}
                         onUpdatePOStatus={handleUpdatePOStatus}
                         onUpdateContractStatus={handleUpdateContractStatus}
+                        onDeleteSupplier={handleDeleteSupplier}
+                        onDeleteSubcontractor={handleDeleteSubcontractor}
                         onDeletePurchaseRequest={handleDeletePurchaseRequest}
                         onDeletePurchaseOrder={handleDeletePurchaseOrder}
                         onDeleteContract={handleDeleteContract}
@@ -1186,7 +1162,7 @@ function MainLayout() {
                         onAddStockItem={handleAddStockItem}
                         onAddEquipment={handleAddEquipment}
                         onUpdateEquipmentStatus={handleUpdateEquipmentStatus}
-                        onDeleteStock={handleDeleteStock}
+                        onDeleteStockItem={handleDeleteStockItem}
                         onDeleteEquipment={handleDeleteEquipment}
                         userRole={activeRole}
                       />

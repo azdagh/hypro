@@ -73,6 +73,8 @@ export interface Allocation {
   allocated_by: string; // profile_id (or expanded full_name in query)
   allocated_by_name?: string;
   allocated_to: string;
+  allocated_to_id?: string;
+  allocated_to_name?: string;
   notes?: string;
   receipt_file_id?: string;
   receipt_url?: string;
