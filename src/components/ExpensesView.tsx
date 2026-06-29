@@ -55,6 +55,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [isAllocFormOpen, setIsAllocFormOpen] = useState(false);
   const [rejectionExpenseId, setRejectionExpenseId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(false);
 
@@ -111,14 +114,15 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     });
   };
 
-  // Image Upload handler (Vite environment supports standard camera uploads)
+  // Image/File Upload handler
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setSubmitting(true);
+    setIsUploading(true);
     setIsScanning(true);
     setScanStatus('idle');
+    setUploadedFileName(null);
 
     try {
       const reader = new FileReader();
@@ -126,7 +130,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       reader.onerror = () => {
         setScanStatus('error');
         setIsScanning(false);
-        setSubmitting(false);
+        setIsUploading(false);
       };
       reader.onload = async () => {
         try {
@@ -182,22 +186,22 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           setExpReceiptFileId(uploadData.fileId);
           setAllocReceiptUrl(receiptUrl);
           setAllocReceiptFileId(uploadData.fileId);
+          if (!isImage) setUploadedFileName(file.name);
 
         } catch (err: any) {
           console.error(err);
           setScanStatus('error');
-          // Show inline error instead of blocking alert
           setUploadError(err.message || "Erreur lors de l'upload vers Google Drive.");
         } finally {
           setIsScanning(false);
-          setSubmitting(false);
+          setIsUploading(false);
         }
       };
     } catch (err) {
       console.error(err);
       setScanStatus('error');
       setIsScanning(false);
-      setSubmitting(false);
+      setIsUploading(false);
     }
   };
 
@@ -269,7 +273,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       return;
     }
 
-    setSubmitting(true);
+    setIsSubmittingForm(true);
     try {
       await onSubmitExpense(payload);
       setIsExpenseFormOpen(false);
@@ -283,10 +287,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       setLocalImageForScan('');
       setScanStatus('idle');
       setUploadError(null);
+      setUploadedFileName(null);
     } catch (err: any) {
       setUploadError(err.message || 'Erreur lors de la soumission');
     } finally {
-      setSubmitting(false);
+      setIsSubmittingForm(false);
     }
   };
 
@@ -310,7 +315,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       return;
     }
 
-    setSubmitting(true);
+    setIsSubmittingForm(true);
     try {
       await onSubmitAllocation(payload);
       setIsAllocFormOpen(false);
@@ -320,10 +325,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       setAllocNotes('');
       setAllocReceiptFileId('');
       setAllocReceiptUrl('');
+      setUploadedFileName(null);
     } catch (err: any) {
       alert(err.message || 'Erreur d\'allocation');
     } finally {
-      setSubmitting(false);
+      setIsSubmittingForm(false);
     }
   };
 
@@ -791,20 +797,26 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
                     className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 rounded-lg py-2 px-4 font-semibold text-slate-700 dark:text-slate-200"
-                    disabled={submitting}
+                    disabled={isUploading}
                   >
-                    {submitting ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5" />}
-                    {localImageForScan ? 'Changer Photo' : 'Prendre Photo / Charger'}
+                    {isUploading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5" />}
+                    {localImageForScan ? 'Changer Photo' : uploadedFileName ? 'Changer Fichier' : 'Prendre Photo / Charger'}
                   </button>
 
 
                 </div>
 
                 {/* Scan Status banner */}
-                {isScanning && (
+                {isScanning && !isUploading && (
                   <div className="text-slate-500 inline-flex items-center gap-1.5 text-[10px]">
                     <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-500" />
                     <span>Lancement de l'Analyse d'Image par IA (Gemini)...</span>
+                  </div>
+                )}
+                {isUploading && (
+                  <div className="text-slate-500 inline-flex items-center gap-1.5 text-[10px]">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-500" />
+                    <span>Upload en cours vers Google Drive...</span>
                   </div>
                 )}
                 {scanStatus === 'success' && (
@@ -819,7 +831,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     <span>{uploadError}</span>
                   </div>
                 )}
-                {expReceiptUrl && !isScanning && (
+                {uploadedFileName && !isUploading && (
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Fichier uploadé: {uploadedFileName}</p>
+                )}
+                {expReceiptUrl && !isScanning && !uploadedFileName && (
                   <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Lié à Drive: {expReceiptFileId}</p>
                 )}
               </div>
@@ -854,14 +869,16 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   type="button" 
                   onClick={() => setIsExpenseFormOpen(false)}
                   className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-colors"
+                  disabled={isSubmittingForm}
                 >
                   {t('cancel')}
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
-                  disabled={submitting}
+                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold inline-flex items-center gap-2"
+                  disabled={isSubmittingForm || isUploading}
                 >
+                  {isSubmittingForm && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   {t('submit')}
                 </button>
               </div>
@@ -927,8 +944,21 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   <input 
                     type="file" 
                     onChange={handleFileChange}
+                    disabled={isUploading}
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2" 
                   />
+                  {isUploading && (
+                    <div className="text-slate-500 inline-flex items-center gap-1.5 text-[10px] mt-1">
+                      <RefreshCw className="w-3 h-3 animate-spin text-indigo-500" />
+                      <span>Upload en cours...</span>
+                    </div>
+                  )}
+                  {uploadedFileName && !isUploading && (
+                    <p className="text-[10px] text-emerald-600 mt-1">✔ {uploadedFileName}</p>
+                  )}
+                  {allocReceiptUrl && !isUploading && !uploadedFileName && (
+                    <p className="text-[10px] text-emerald-600 mt-1">✔ Photo liée à Drive</p>
+                  )}
                 </div>
               </div>
 
@@ -948,14 +978,16 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   type="button" 
                   onClick={() => setIsAllocFormOpen(false)}
                   className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-colors"
+                  disabled={isSubmittingForm}
                 >
                   {t('cancel')}
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
-                  disabled={submitting}
+                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold inline-flex items-center gap-2"
+                  disabled={isSubmittingForm || isUploading}
                 >
+                  {isSubmittingForm && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   Confirmer Versement
                 </button>
               </div>
@@ -995,11 +1027,33 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           
           <div className="w-full max-w-5xl h-[85vh] bg-slate-100 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 flex-shrink-0" onClick={(e) => e.stopPropagation()} id="receipt-preview-container">
             <iframe 
-              src={previewImageUrl.replace(/\/view.*$/, '/preview')} 
+              src={(() => {
+                // Convert Google Drive view link to embeddable preview link
+                const url = previewImageUrl || '';
+                // Handle /file/d/ID/view pattern
+                const fileIdMatch = url.match(/\/file\/d\/([^/]+)/);
+                if (fileIdMatch) return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+                // Handle open?id=ID pattern
+                const openIdMatch = url.match(/[?&]id=([^&]+)/);
+                if (openIdMatch) return `https://drive.google.com/file/d/${openIdMatch[1]}/preview`;
+                // Fallback: try replacing /view with /preview
+                return url.replace(/\/view(\?.*)?$/, '/preview');
+              })()}
               className="w-full h-full border-0"
               allow="autoplay"
               title="Receipt Preview"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Global Loading Overlay - shown when saving/submitting data */}
+      {isSubmittingForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4">
+            <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin" />
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Enregistrement en cours...</p>
+            <p className="text-xs text-slate-400">Veuillez patienter</p>
           </div>
         </div>
       )}

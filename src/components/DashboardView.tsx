@@ -197,57 +197,93 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Visualizations Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="dashboard-charts-grid">
         {/* Project Budgets vs Allocations vs Expenses */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs lg:col-span-2 flex flex-col h-[380px]" id="chart-project-budget-utilization">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs lg:col-span-2 flex flex-col" style={{height: '420px'}} id="chart-project-budget-utilization">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-slate-500" /> {t('budgetUtilization')} per Project
             </h3>
             <span className="text-xs font-mono text-slate-400">Values in DZD</span>
           </div>
-          <div className="flex-1 min-h-0" id="project-utilization-bar-container">
+          <div className="flex-1 min-h-0 overflow-hidden" id="project-utilization-bar-container">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={projectUtilizationData} margin={{ top: 10, right: 10, left: 20, bottom: 5 }}>
+              <BarChart 
+                data={projectUtilizationData} 
+                margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
+                barCategoryGap="30%"
+                barGap={4}
+              >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="code" fontSize={11} stroke="#94a3b8" />
-                <YAxis fontSize={11} stroke="#94a3b8" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v.toString()} />
-                <Tooltip 
-                  cursor={{fill: "transparent"}}
-                  formatter={(value: any) => [formatCurrencyDZD(value), '']}
-                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }}
+                <XAxis 
+                  dataKey="code" 
+                  fontSize={11} 
+                  stroke="#94a3b8" 
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                  height={50}
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
                 />
-                <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="budget" name="Budget Initial" fill="#cbd5e1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="allocations" name="Allocations Injectées" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <YAxis 
+                  fontSize={11} 
+                  stroke="#94a3b8" 
+                  width={70}
+                  tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v.toString()} 
+                />
+                <Tooltip 
+                  cursor={{fill: 'rgba(148,163,184,0.1)'}}
+                  formatter={(value: any, name: string) => [formatCurrencyDZD(value), name]}
+                  labelFormatter={(label) => {
+                    const proj = projectUtilizationData.find(p => p.code === label);
+                    return proj ? proj.name : label;
+                  }}
+                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc', fontSize: '11px' }}
+                />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                <Bar dataKey="budget" name="Budget Initial" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                <Bar dataKey="allocations" name="Allocations Injectées" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                <Bar dataKey="expenses" name="Dépenses Approuvées" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={60} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Share of Allocations per project (Pie Chart) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col h-[380px]" id="chart-project-allocations-share">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col" style={{height: '420px'}} id="chart-project-allocations-share">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-2">
             <PieChartIcon className="w-4 h-4 text-slate-500" /> Répartition des Allocations
           </h3>
-          <div className="flex-1 min-h-0 relative flex items-center justify-center" id="allocations-share-pie-container">
+          <div className="flex-1 min-h-0" id="allocations-share-pie-container">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <PieChart margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
                 <Pie
                   data={pieData}
                   cx="50%"
-                  cy="45%"
-                  innerRadius={55}
-                  outerRadius={80}
-                  paddingAngle={4}
+                  cy="42%"
+                  innerRadius={50}
+                  outerRadius={85}
+                  paddingAngle={3}
                   dataKey="value"
-                  label={hasData ? ({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : '' : false}
+                  label={false}
                   labelLine={false}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip cursor={{fill: "transparent"}} formatter={(value: any) => hasData ? formatCurrencyDZD(value) : 'Aucune allocation'} contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc' }} />
-                <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+                <Tooltip 
+                  formatter={(value: any, name: string) => [
+                    hasData ? formatCurrencyDZD(value) : 'Aucune allocation',
+                    name
+                  ]} 
+                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc', fontSize: '11px' }} 
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={60} 
+                  iconSize={10} 
+                  wrapperStyle={{ fontSize: '11px', lineHeight: '20px' }}
+                  formatter={(value: string) => <span style={{color: '#94a3b8'}}>{value}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
