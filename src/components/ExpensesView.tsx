@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   Plus, Camera, Sparkles, Check, X, Filter, FileText, 
-  AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign 
+  AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign, Trash2
 } from 'lucide-react';
 import { Expense, Project, ExpenseCategory, Allocation } from '../types';
 import { formatCurrencyDZD, useTranslation } from '../i18n';
@@ -17,6 +17,8 @@ interface ExpensesViewProps {
   onSubmitExpense: (expense: Omit<Expense, 'id' | 'submitted_at' | 'updated_at'>) => Promise<any>;
   onSubmitAllocation: (allocation: Omit<Allocation, 'id' | 'created_at'>) => Promise<any>;
   onUpdateExpenseStatus: (id: string, status: 'Approved' | 'Rejected', reason?: string) => Promise<any>;
+  onDeleteExpense: (id: string) => Promise<any>;
+  onDeleteAllocation: (id: string) => Promise<any>;
   userRole: string;
   userId: string;
   isOnline: boolean;
@@ -32,6 +34,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   onSubmitExpense,
   onSubmitAllocation,
   onUpdateExpenseStatus,
+  onDeleteExpense,
+  onDeleteAllocation,
   userRole,
   userId,
   isOnline,
@@ -82,7 +86,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
   // Canvas photo compression (JPEG, 70% Quality, Max Width 1600px)
   const compressPhoto = (base64Str: string): Promise<string> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = base64Str;
       img.onload = () => {
@@ -103,6 +107,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         // Output at 70% quality JPEG as requested
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
+      img.onerror = () => reject(new Error("Erreur de traitement d'image"));
     });
   };
 
@@ -128,14 +133,22 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           const originalBase64 = reader.result as string;
           setUploadError(null);
 
-          // 1. Compress Image
-          const compressedBase64 = await compressPhoto(originalBase64);
-          const uploadFilename = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+          // 1. Prepare file for upload
+          const isImage = file.type.startsWith('image/');
+          let base64ForUpload = originalBase64;
+          let uploadFilename = file.name;
+          let finalMimeType = file.type || 'application/octet-stream';
 
-          // Show local preview immediately (before upload completes)
-          setLocalImageForScan(compressedBase64);
+          if (isImage) {
+            base64ForUpload = await compressPhoto(originalBase64);
+            uploadFilename = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+            finalMimeType = 'image/jpeg';
+            setLocalImageForScan(base64ForUpload);
+          } else {
+            setLocalImageForScan('');
+          }
 
-          // 2. Upload photo to Google Drive via Apps Script
+          // 2. Upload photo/file to Google Drive via Apps Script
           const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
           const secret = import.meta.env.VITE_GOOGLE_SCRIPT_SECRET;
           
@@ -149,9 +162,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               'Content-Type': 'text/plain;charset=utf-8' // avoids CORS preflight
             },
             body: JSON.stringify({
-              file: compressedBase64,
+              file: base64ForUpload,
               fileName: uploadFilename,
-              mimeType: 'image/jpeg',
+              mimeType: finalMimeType,
               uploadType: isAllocFormOpen ? 'transfer' : 'expense',
               secret: secret || ''
             })
@@ -555,7 +568,16 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                             </button>
                           </div>
                         ) : (
-                          <span className="text-slate-400 font-mono text-[10px]">Verrouillé</span>
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-slate-400 font-mono text-[10px]">Verrouillé</span>
+                            <button 
+                              onClick={() => onDeleteExpense(e.id)}
+                              className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                              title="Supprimer la dépense"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     )}
@@ -612,16 +634,27 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                         {formatCurrencyDZD(a.amount_dzd)}
                       </td>
                       <td className="p-4">
-                        {a.receipt_url ? (
-                          <button 
-                            onClick={() => setPreviewImageUrl(a.receipt_url || null)}
-                            className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
-                          >
-                            <Eye className="w-3.5 h-3.5" /> Reçu
-                          </button>
-                        ) : (
-                          <span className="text-slate-400 italic">Aucun</span>
-                        )}
+                        <div className="flex items-center justify-between">
+                          {a.receipt_url ? (
+                            <button 
+                              onClick={() => setPreviewImageUrl(a.receipt_url || null)}
+                              className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 font-semibold"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> Reçu
+                            </button>
+                          ) : (
+                            <span className="text-slate-400 italic">Aucun</span>
+                          )}
+                          {isApprover && (
+                            <button 
+                              onClick={() => onDeleteAllocation(a.id)}
+                              className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                              title="Supprimer l'allocation"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -849,34 +882,6 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             <form onSubmit={handleAllocSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Projet Destinataire *</label>
-                  <select 
-                    value={allocProject} 
-                    onChange={e => setAllocProject(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required
-                  >
-                    <option value="">-- Choisir --</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Montant Alloué (DZD) *</label>
-                  <input 
-                    type="number" 
-                    value={allocAmount} 
-                    onChange={e => setAllocAmount(e.target.value)} 
-                    placeholder="Montant du transfert" 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" 
-                    required 
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
                   <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
                   <select 
                     value={allocTo} 
@@ -889,6 +894,33 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                       <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
                     ))}
                   </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-500">Projet Destinataire (Optionnel)</label>
+                  <select 
+                    value={allocProject} 
+                    onChange={e => setAllocProject(e.target.value)} 
+                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
+                  >
+                    <option value="">-- Choisir --</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-500">Montant Alloué (DZD) *</label>
+                  <input 
+                    type="number" 
+                    value={allocAmount} 
+                    onChange={e => setAllocAmount(e.target.value)} 
+                    placeholder="Montant du transfert" 
+                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-bold" 
+                    required 
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-500">Justificatif Transfert / Bordereau</label>

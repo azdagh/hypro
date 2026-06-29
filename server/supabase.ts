@@ -343,7 +343,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('allocations')
       .insert([{
-        project_id: allocData.project_id,
+        project_id: allocData.project_id || null,
         amount_dzd: Number(allocData.amount_dzd),
         allocated_by: userId,
         allocated_to: allocatedTo || userId,
@@ -355,6 +355,15 @@ export const SupabaseDbService = {
       .single();
     if (error) throw error;
     return data;
+  },
+
+  async deleteAllocation(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('allocations')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   },
 
   // Categories
@@ -448,6 +457,15 @@ export const SupabaseDbService = {
       .single();
     if (error) throw error;
     return data;
+  },
+
+  async deleteExpense(id: string, userId: string) {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   },
 
   // Suppliers & Subcontractors

@@ -509,6 +509,16 @@ app.post('/api/allocations', requireRole(['Super Admin', 'Financial Director']),
   }
 });
 
+app.delete('/api/allocations/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteAllocation(req.params.id, userId);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Categories
 app.get('/api/categories', async (req, res) => {
   try {
@@ -563,6 +573,16 @@ app.put('/api/expenses/:id/status', requireRole(['Super Admin', 'Financial Direc
   try {
     const data = await SupabaseDbService.updateExpenseStatus(req.params.id, status, rejection_reason, userId);
     res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/expenses/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
+  const userId = req.user!.id;
+  try {
+    await SupabaseDbService.deleteExpense(req.params.id, userId);
+    res.json({ success: true });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
   }

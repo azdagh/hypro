@@ -475,6 +475,26 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const handleDeleteExpense = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette dépense ?")) return;
+    const res = await secureFetch(`/api/expenses/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
+  const handleDeleteAllocation = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce versement ?")) return;
+    const res = await secureFetch(`/api/allocations/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+    await fetchData(false);
+  };
+
   // 3. Procurement Supply Chain
   const handleAddSupplier = async (supp: any) => {
     const res = await secureFetch('/api/suppliers', {
@@ -958,12 +978,14 @@ function MainLayout() {
                 // 1. Filtered Expenses
                 const filteredExpenses = expenses.filter(e => {
                   if (isFdOrAccountantOrAdmin) return true;
+                  if (myAssignments.some(a => a.project_id === e.project_id)) return true;
                   return e.submitted_by === currentUser?.id;
                 });
 
                 // 2. Filtered Allocations
                 const filteredAllocations = allocations.filter(a => {
                   if (isFdOrAccountantOrAdmin) return true;
+                  if (myAssignments.some(pa => pa.project_id === a.project_id)) return true;
                   const matchesName = currentUser?.full_name && a.allocated_to?.toLowerCase().includes(currentUser.full_name.toLowerCase());
                   const matchesId = a.allocated_to === currentUser?.id;
                   const matchesAllocatedBy = a.allocated_by === currentUser?.id;
@@ -982,13 +1004,14 @@ function MainLayout() {
                 // 4. Filtered Purchase Requests
                 const filteredPurchaseRequests = purchaseRequests.filter(pr => {
                   if (isFdOrAccountantOrAdmin) return true;
+                  if (myAssignments.some(pa => pa.project_id === pr.project_id)) return true;
                   return pr.requester_id === currentUser?.id;
                 });
 
                 // 5. Filtered Purchase Orders
                 const filteredPurchaseOrders = purchaseOrders.filter(po => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (isSiteManager) {
+                  if (isSiteManager || isEmployee) {
                     return filteredProjects.some(p => p.id === po.project_id);
                   }
                   return false;
@@ -997,7 +1020,7 @@ function MainLayout() {
                 // 6. Filtered Contracts
                 const filteredContracts = contracts.filter(c => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (isSiteManager) {
+                  if (isSiteManager || isEmployee) {
                     return filteredProjects.some(p => p.id === c.project_id);
                   }
                   return false;
@@ -1006,7 +1029,7 @@ function MainLayout() {
                 // 7. Filtered Stock Items
                 const filteredStockItems = stockItems.filter(s => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (isSiteManager) {
+                  if (isSiteManager || isEmployee) {
                     return filteredProjects.some(p => p.id === s.project_id);
                   }
                   return false;
@@ -1015,7 +1038,7 @@ function MainLayout() {
                 // 8. Filtered Equipment
                 const filteredEquipment = equipment.filter(eq => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (isSiteManager) {
+                  if (isSiteManager || isEmployee) {
                     return filteredProjects.some(p => p.id === eq.project_id);
                   }
                   return false;
@@ -1056,6 +1079,8 @@ function MainLayout() {
                         onSubmitExpense={handleSubmitExpense}
                         onSubmitAllocation={handleSubmitAllocation}
                         onUpdateExpenseStatus={handleUpdateExpenseStatus}
+                        onDeleteExpense={handleDeleteExpense}
+                        onDeleteAllocation={handleDeleteAllocation}
                         userRole={activeRole}
                         userId={currentUser.id}
                         isOnline={isOnline}
