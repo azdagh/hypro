@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, Edit, Eye, Trash2, Calendar, MapPin, Building, 
   Layers, ChevronLeft, Wallet, CheckSquare, Info, RefreshCw 
@@ -31,6 +31,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // Form states
@@ -488,12 +489,13 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button 
-                        onClick={() => onDeleteProject(p.id)}
+                        onClick={async () => { setDeletingId(p.id); try { await (onDeleteProject as any)(p.id); } finally { setDeletingId(null); } }}
                         className="p-1.5 border border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded text-rose-600 transition-colors"
                         title={t('delete')}
                         id={`btn-delete-${p.code}`}
+                        disabled={deletingId === p.id}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deletingId === p.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                       </button>
                     </>
                   )}

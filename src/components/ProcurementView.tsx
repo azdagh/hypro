@@ -446,11 +446,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             )}
                             {onDeletePurchaseRequest && (
                               <button
-                                onClick={() => onDeletePurchaseRequest(pr.id)}
+                                onClick={async () => { setDeletingId(pr.id); try { await onDeletePurchaseRequest(pr.id); } finally { setDeletingId(null); } }}
                                 className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 title="Supprimer"
+                                disabled={deletingId === pr.id}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                {deletingId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                               </button>
                             )}
                           </div>
@@ -547,11 +548,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             )}
                             {onDeletePurchaseOrder && (
                               <button
-                                onClick={() => onDeletePurchaseOrder(po.id)}
+                                onClick={async () => { setDeletingId(po.id); try { await onDeletePurchaseOrder(po.id); } finally { setDeletingId(null); } }}
                                 className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 title="Supprimer"
+                                disabled={deletingId === po.id}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                {deletingId === po.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                               </button>
                             )}
                           </div>
@@ -648,11 +650,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             )}
                             {onDeleteContract && (
                               <button
-                                onClick={() => onDeleteContract(c.id)}
+                                onClick={async () => { setDeletingId(c.id); try { await onDeleteContract(c.id); } finally { setDeletingId(null); } }}
                                 className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 title="Supprimer"
+                                disabled={deletingId === c.id}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                {deletingId === c.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                               </button>
                             )}
                           </div>
@@ -689,8 +692,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.activity_area}</span>
                       {onDeleteSupplier && (
-                        <button onClick={() => onDeleteSupplier(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={async () => { setDeletingId(s.id); try { await onDeleteSupplier(s.id); } finally { setDeletingId(null); } }} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer" disabled={deletingId === s.id}>
+                          {deletingId === s.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                       )}
                     </div>
@@ -718,8 +721,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] rounded font-semibold">{s.specialty}</span>
                       {onDeleteSubcontractor && (
-                        <button onClick={() => onDeleteSubcontractor(s.id)} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={async () => { setDeletingId(s.id); try { await onDeleteSubcontractor(s.id); } finally { setDeletingId(null); } }} className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Supprimer" disabled={deletingId === s.id}>
+                          {deletingId === s.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                       )}
                     </div>
