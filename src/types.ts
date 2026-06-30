@@ -62,6 +62,7 @@ export interface Project {
   planned_end_date: string;
   actual_end_date?: string;
   status: ProjectStatus;
+  technical_files?: { id: string, name: string, url: string }[];
   created_at: string;
   updated_at: string;
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Plus, Edit, Eye, Trash2, Calendar, MapPin, Building, 
-  Layers, ChevronLeft, Wallet, CheckSquare, Info, RefreshCw 
+  Layers, ChevronLeft, Wallet, CheckSquare, Info, RefreshCw, UploadCloud, FileText, X 
 } from 'lucide-react';
 import { Project, Allocation, Expense } from '../types';
 import { formatCurrencyDZD, formatLocalDate, useTranslation } from '../i18n';
@@ -49,6 +49,70 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [startDate, setStartDate] = useState('');
   const [plannedEndDate, setPlannedEndDate] = useState('');
   const [status, setStatus] = useState<Project['status']>('Planning');
+  const [technicalFiles, setTechnicalFiles] = useState<{ id: string, name: string, url: string }[]>([]);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setUploadError('Veuillez sélectionner un fichier PDF.');
+      return;
+    }
+
+    setIsUploadingFile(true);
+    setUploadError(null);
+
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            imageBase64: base64, 
+            filename: file.name
+          })
+        });
+
+        const uploadData = await response.json();
+        if (!uploadData.success) {
+           throw new Error(uploadData.error || "Echec de l'upload vers Google Drive");
+        }
+
+        setTechnicalFiles(prev => [...prev, {
+          id: uploadData.fileId,
+          name: file.name,
+          url: uploadData.webViewLink
+        }]);
+      };
+      reader.onerror = () => {
+        throw new Error('Erreur de lecture du fichier');
+      };
+    } catch (err: any) {
+      setUploadError(err.message || 'Erreur lors du téléchargement');
+    } finally {
+      setIsUploadingFile(false);
+      // clear the input
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteFile = (id: string) => {
+    setDeletingFileId(id);
+    // Simulate API delay for deletion from drive if we had one, but we'll just remove it from state for now.
+    // Since we don't have a direct drive delete API exposed in this project, we just remove it from the list.
+    setTimeout(() => {
+      setTechnicalFiles(prev => prev.filter(f => f.id !== id));
+      setDeletingFileId(null);
+    }, 500);
+  };
 
   const canManage = ['Super Admin', 'Financial Director'].includes(userRole);
 
@@ -68,6 +132,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setPlannedEndDate('');
     setStatus('Planning');
     setEditingProject(null);
+    setTechnicalFiles([]);
+    setUploadError(null);
   };
 
   const handleOpenAdd = () => {
@@ -91,6 +157,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setStartDate(p.start_date);
     setPlannedEndDate(p.planned_end_date);
     setStatus(p.status);
+    setTechnicalFiles(p.technical_files || []);
+    setUploadError(null);
     setIsFormOpen(true);
   };
 
@@ -111,7 +179,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       budget: Number(budget),
       start_date: startDate,
       planned_end_date: plannedEndDate,
-      status
+      status,
+      technical_files: technicalFiles
     };
 
     try {
@@ -246,15 +315,37 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   <span className="text-slate-400 text-[10px]">Bâtiments / Blocs</span>
                   <p className="font-bold font-mono">{p.number_of_buildings} / {p.number_of_blocks}</p>
                 </div>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-slate-400" />
-                <div>
-                  <span className="text-slate-400 text-[10px]">Étages / Appartements</span>
-                  <p className="font-bold font-mono">{p.number_of_floors} / {p.number_of_apartments}</p>
+              </div>                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-slate-400" />
+                  <div>
+                    <span className="text-slate-400 text-[10px]">Étages / Appartements</span>
+                    <p className="font-bold font-mono">{p.number_of_floors} / {p.number_of_apartments}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+              
+              {/* Display technical files if any */}
+              {p.technical_files && p.technical_files.length > 0 && (
+                <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                  <h4 className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Fichiers Techniques</h4>
+                  <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                    {p.technical_files.map(file => (
+                      <a 
+                        key={file.id}
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 p-2 border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono group-hover:text-emerald-600 transition-colors">
+                          {file.name}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
           </div>
 
           {/* Timeline & Status */}
@@ -647,6 +738,52 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     <option value="Delayed">Retardé</option>
                     <option value="Archived">Archivé</option>
                   </select>
+                </div>
+
+                {/* File Upload Field */}
+                <div className="space-y-2 col-span-2 md:col-span-4">
+                  <label className="font-semibold text-slate-500 text-[10px] block">Fichiers Techniques (PDF)</label>
+                  
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="relative cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 rounded-lg px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-all text-slate-600 dark:text-slate-300 w-full sm:w-auto">
+                        <input 
+                          type="file" 
+                          accept=".pdf"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          onChange={handleFileUpload}
+                          disabled={isUploadingFile}
+                        />
+                        {isUploadingFile ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                        {isUploadingFile ? 'Chargement...' : 'Ajouter un PDF'}
+                      </label>
+                      {uploadError && <span className="text-rose-500 text-[10px] font-semibold">{uploadError}</span>}
+                    </div>
+
+                    {technicalFiles.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
+                        {technicalFiles.map(file => (
+                          <div key={file.id} className="flex items-center justify-between p-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg group">
+                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 overflow-hidden hover:opacity-80 flex-1">
+                              <FileText className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                              <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono">
+                                {file.name}
+                              </span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteFile(file.id)}
+                              className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded ml-2 flex-shrink-0 disabled:opacity-50"
+                              title="Supprimer"
+                              disabled={deletingFileId === file.id}
+                            >
+                              {deletingFileId === file.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
