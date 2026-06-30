@@ -46,6 +46,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
   // View state
   const [activeSubTab, setActiveSubTab] = useState<'expenses' | 'allocations'>('expenses');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filterProject, setFilterProject] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [filterAcheteur, setFilterAcheteur] = useState<string>('ALL');
@@ -580,11 +581,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                           <div className="flex items-center justify-center gap-2">
                             <span className="text-slate-400 font-mono text-[10px]">Verrouillé</span>
                             <button 
-                              onClick={() => onDeleteExpense(e.id)}
+                              onClick={async () => { setDeletingId(e.id); try { await onDeleteExpense(e.id); } finally { setDeletingId(null); } }} disabled={deletingId === e.id}
                               className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
                               title="Supprimer la dépense"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {deletingId === e.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                             </button>
                           </div>
                         )}

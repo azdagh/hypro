@@ -59,6 +59,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
   // Active sub tab
   const [procTab, setProcTab] = useState<'requests' | 'orders' | 'contracts' | 'partners'>('requests');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Form states
   const [isPrFormOpen, setIsPrFormOpen] = useState(false);

@@ -31,6 +31,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 }) => {
   const { t, lang } = useTranslation();
   const [activeSubTab, setActiveSubTab] = useState<'stocks' | 'equipment'>('stocks');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filterProject, setFilterProject] = useState<string>('ALL');
 
   // Form toggles

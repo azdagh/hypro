@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { FileText, Download, Printer, RefreshCw, Calendar, TrendingUp } from 'lucide-react';
 import { Project, Allocation, Expense } from '../types';
 import { formatCurrencyDZD, useTranslation } from '../i18n';
@@ -208,9 +208,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       <html>
         <head>
           <title>${generatedReport.title}</title>
-          <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; padding: 40px; margin: 0; }
-            .header { border-bottom: 3px solid #0f172a; padding-bottom: 24px; margin-bottom: 32px; display: flex; align-items: flex-start; gap: 24px; }
+            <style>
+              @media print { @page { size: portrait; margin: 15mm; } body { padding: 0 !important; } }
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; padding: 40px; margin: 0; background: #fff; }
+              .page-container { max-width: 850px; margin: 0 auto; }
+              .header { border-bottom: 3px solid #0f172a; padding-bottom: 24px; margin-bottom: 32px; display: flex; align-items: flex-start; gap: 24px; }
             .brand-logo { width: 80px; height: 80px; object-fit: contain; flex: 0 0 auto; display: ${safeLogo ? 'block' : 'none'}; }
             .brand-copy { min-width: 0; }
             .logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; }
@@ -223,16 +225,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             .summary-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 8px; letter-spacing: 0.5px; }
             .summary-val { font-size: 24px; font-weight: 800; color: #0f172a; }
           </style>
-        </head>
-        <body>
-          <div class="header">
-            <img class="brand-logo" src="${safeLogo}" alt="Logo" />
-            <div class="brand-copy">
-              <div class="logo">${safeEnterpriseName || 'HYPRO PROMOTION IMMOBILIERE'}</div>
-              <div class="title">${generatedReport.title}</div>
-              <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
-            </div>
-          </div>
+          </head>
+          <body>
+            <div class="page-container">
+              <div class="header">
+                <img class="brand-logo" src="${safeLogo}" alt="Logo" />
+                <div class="brand-copy">
+                  <div class="logo">${safeEnterpriseName || 'HYPRO PROMOTION IMMOBILIERE'}</div>
+                  <div class="title">${generatedReport.title}</div>
+                  <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
+                </div>
+              </div>
 
           <div class="overflow-x-auto w-full">
             <table>
@@ -240,17 +243,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 ${generatedReport.type === 'budget' || generatedReport.type === 'annual' ? `
                   <tr>
                     <th>Projet de Construction</th>
-                    <th style="text-align: right">Budget Global</th>
-                    <th style="text-align: right">Allocations Injectéeses</th>
-                    <th style="text-align: right">Dépenses Justifiéeses</th>
-                    <th style="text-align: right">Solde Disponible</th>
+                      <th style="text-align: right">Budget Global</th>
+                      <th style="text-align: right">Allocations Injectées</th>
+                      <th style="text-align: right">Dépenses Justifiées</th>
+                      <th style="text-align: right">Solde Disponible</th>
                   </tr>
                 ` : `
-                  <tr>
-                    <th>Date</th>
-                    <th>Chantier</th>
-                    <th>Catégorie</th>
-                    <th>Description</th>
+                    <tr>
+                      <th>Date</th>
+                      <th>Chantier</th>
+                      <th>Catégorie</th>
+                      <th>Description</th>
                     <th style="text-align: right">Montant (DZD)</th>
                   </tr>
                 `}
@@ -262,14 +265,21 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           <div class="summary-box">
-            <div class="summary-title">TOTAL DES DÉCAISSEMENTS CONSOLIDÉS</div>
-            <div class="summary-val">${generatedReport.totalExpenses.toLocaleString()} DZD</div>
-          </div>
+              <div class="summary-title">TOTAL DES DÉCAISSEMENTS CONSOLIDÉS</div>
+              <div class="summary-val">${generatedReport.totalExpenses.toLocaleString()} DZD</div>
+            </div>
+            </div>
           
-          <script>window.print();</script>
-        </body>
-      </html>
-    `);
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
     printWindow.document.close();
   };
 
