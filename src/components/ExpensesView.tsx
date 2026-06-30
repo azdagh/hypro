@@ -619,7 +619,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   <th className="p-4 font-semibold">Notes / Objet</th>
                   <th className="p-4 font-semibold text-right">Montant</th>
                   <th className="p-4 font-semibold">Justificatif</th>
-                </tr>
+                    {isApprover && <th className="p-4 font-semibold text-center">Actions</th>}
+                  </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filteredAllocations.map(a => {
@@ -657,13 +658,24 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                           )}
                         </div>
                       </td>
+                        {isApprover && (
+                          <td className="p-4 text-center">
+                            <button 
+                              onClick={async () => { setDeletingId(a.id); try { await onDeleteAllocation(a.id); } finally { setDeletingId(null); } }} disabled={deletingId === a.id}
+                              className="p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                              title="Supprimer ce versement"
+                            >
+                              {deletingId === a.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                            </button>
+                          </td>
+                        )}
                     </tr>
                   );
                 })}
                 {filteredAllocations.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-slate-400">
-                      Aucune allocation enregistrée.
+                    <td colSpan={isApprover ? 7 : 6} className="p-8 text-center text-slate-400">
+                        Aucune allocation enregistrée.
                     </td>
                   </tr>
                 )}
