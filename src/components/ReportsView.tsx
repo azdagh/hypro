@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { FileText, Download, Printer, RefreshCw, Calendar, TrendingUp } from 'lucide-react';
 import { Project, Allocation, Expense } from '../types';
 import { formatCurrencyDZD, useTranslation } from '../i18n';
@@ -209,60 +209,60 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <head>
           <title>${generatedReport.title}</title>
           <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; padding: 40px; }
-            .header { border-bottom: 2px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 18px; }
-            .brand-logo { width: 62px; height: 62px; object-fit: contain; flex: 0 0 auto; }
+            body { font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; color: #1e293b; padding: 40px; margin: 0; }
+            .header { border-bottom: 3px solid #0f172a; padding-bottom: 24px; margin-bottom: 32px; display: flex; align-items: flex-start; gap: 24px; }
+            .brand-logo { width: 80px; height: 80px; object-fit: contain; flex: 0 0 auto; display: ${safeLogo ? \'block\' : \'none\'}; }
             .brand-copy { min-width: 0; }
-            .logo { font-size: 24px; font-weight: bold; letter-spacing: -1px; }
-            .title { font-size: 18px; margin-top: 10px; font-weight: 500; }
-            .meta { font-size: 11px; color: #64748b; margin-top: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { padding: 12px; font-size: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-            th { background-color: #f8fafc; font-weight: bold; color: #475569; }
-            .summary-box { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-top: 30px; display: inline-block; min-width: 250px; }
-            .summary-title { font-size: 11px; text-transform: uppercase; color: #64748b; }
-            .summary-val { font-size: 20px; font-weight: bold; font-family: monospace; margin-top: 5px; }
+            .logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; }
+            .title { font-size: 20px; color: #334155; margin-bottom: 8px; }
+            .meta { font-size: 12px; color: #64748b; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { padding: 16px 12px; font-size: 13px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+            th { font-weight: bold; color: #475569; border-bottom: 2px solid #e2e8f0; }
+            .summary-box { border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-top: 40px; display: inline-block; min-width: 300px; }
+            .summary-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 8px; letter-spacing: 0.5px; }
+            .summary-val { font-size: 24px; font-weight: 800; color: #0f172a; }
           </style>
         </head>
         <body>
           <div class="header">
-            <img class="brand-logo" src="${safeLogo}" alt="${safeEnterpriseName}" />
+            <img class="brand-logo" src="${safeLogo}" alt="Logo" />
             <div class="brand-copy">
-              <div class="logo">${safeEnterpriseName}</div>
-            <div class="title">${generatedReport.title}</div>
-            <div class="meta">GÃ©nÃ©rÃ© le : ${generatedReport.timestamp} â€¢ Filtre : ${generatedReport.parameters.project} â€¢ Exercice : ${generatedReport.parameters.year}</div>
+              <div class="logo">${safeEnterpriseName || \'HYPRO PROMOTION IMMOBILIERE\'}</div>
+              <div class="title">${generatedReport.title}</div>
+              <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
             </div>
           </div>
 
-          <div className="overflow-x-auto w-full">
-<table>
-            <thead>
-              ${generatedReport.type === 'budget' || generatedReport.type === 'annual' ? `
-                <tr>
-                  <th>Projet de Construction</th>
-                  <th style="text-align: right">Budget Global</th>
-                  <th style="text-align: right">Allocations InjectÃ©es</th>
-                  <th style="text-align: right">DÃ©penses JustifiÃ©es</th>
-                  <th style="text-align: right">Solde Disponible</th>
-                </tr>
-              ` : `
-                <tr>
-                  <th>Date</th>
-                  <th>Chantier</th>
-                  <th>CatÃ©gorie</th>
-                  <th>Description</th>
-                  <th style="text-align: right">Montant (DZD)</th>
-                </tr>
-              `}
-            </thead>
-            <tbody>
-              ${tableRowsHtml}
-            </tbody>
-          </table>
-</div>
+          <div class="overflow-x-auto w-full">
+            <table>
+              <thead>
+                ${generatedReport.type === \'budget\' || generatedReport.type === \'annual\' ? `
+                  <tr>
+                    <th>Projet de Construction</th>
+                    <th style="text-align: right">Budget Global</th>
+                    <th style="text-align: right">Allocations Injectéeses</th>
+                    <th style="text-align: right">Dépenses Justifiéeses</th>
+                    <th style="text-align: right">Solde Disponible</th>
+                  </tr>
+                ` : `
+                  <tr>
+                    <th>Date</th>
+                    <th>Chantier</th>
+                    <th>Catégorie</th>
+                    <th>Description</th>
+                    <th style="text-align: right">Montant (DZD)</th>
+                  </tr>
+                `}
+              </thead>
+              <tbody>
+                ${tableRowsHtml}
+              </tbody>
+            </table>
+          </div>
 
           <div class="summary-box">
-            <div class="summary-title">Total des dÃ©caissements consolidÃ©s</div>
+            <div class="summary-title">TOTAL DES DÉCAISSEMENTS CONSOLIDÉS</div>
             <div class="summary-val">${generatedReport.totalExpenses.toLocaleString()} DZD</div>
           </div>
           
@@ -440,8 +440,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Chantier de Construction</th>
                     <th className="p-3 text-right">Budget Global</th>
-                    <th className="p-3 text-right">Allocations InjectÃ©es</th>
-                    <th className="p-3 text-right">DÃ©penses JustifiÃ©es</th>
+                    <th className="p-3 text-right">Allocations Injectéeses</th>
+                    <th className="p-3 text-right">Dépenses Justifiéeses</th>
                     <th className="p-3 text-right">Solde Caisse</th>
                   </tr>
                 </thead>
@@ -468,7 +468,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Date</th>
                     <th className="p-3">Chantier</th>
-                    <th className="p-3">CatÃ©gorie</th>
+                    <th className="p-3">Catégorie</th>
                     <th className="p-3">Description / Objet</th>
                     <th className="p-3 text-right">Montant (DZD)</th>
                     <th className="p-3">Soumis Par</th>
@@ -510,4 +510,5 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     </div>
   );
 };
+
 

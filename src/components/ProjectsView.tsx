@@ -30,6 +30,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const { t, lang } = useTranslation();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // Form states
@@ -92,8 +93,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setIsFormOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const payload = {
       code,
       name,
@@ -111,13 +113,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       status
     };
 
-    if (editingProject) {
-      onEditProject(editingProject.id, payload);
-    } else {
-      onAddProject(payload);
+    try {
+      if (editingProject) {
+        await onEditProject(editingProject.id, payload);
+      } else {
+        await onAddProject(payload);
+      }
+      setIsFormOpen(false);
+      resetForm();
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsFormOpen(false);
-    resetForm();
   };
 
   // If a project is selected for Details Page
@@ -675,9 +681,11 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold disabled:opacity-50 inline-flex items-center gap-2"
                 >
-                  {t('save')}
+                  {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  {editingProject ? t('edit') : t('create')}
                 </button>
               </div>
             </form>
