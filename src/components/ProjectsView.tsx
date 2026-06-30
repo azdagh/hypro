@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Project, Allocation, Expense } from '../types';
 import { formatCurrencyDZD, formatLocalDate, useTranslation } from '../i18n';
+import { secureFetch } from '../lib/api';
 
 interface ProjectsViewProps {
   projects: Project[];
@@ -72,7 +73,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       reader.onload = async () => {
         const base64 = reader.result as string;
         
-        const response = await fetch('/api/upload', {
+        const response = await secureFetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
