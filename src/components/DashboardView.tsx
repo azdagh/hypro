@@ -224,6 +224,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   tick={{ fill: '#94a3b8', fontSize: 11 }}
                 />
                 <YAxis 
+                  scale="sqrt"
                   fontSize={11} 
                   stroke="#94a3b8" 
                   width={70}
@@ -239,9 +240,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', border: 'none', color: '#f8fafc', fontSize: '11px' }}
                 />
                 <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
-                <Bar dataKey="budget" name="Budget Initial" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={60} minPointSize={2} />
-                <Bar dataKey="allocations" name="Allocations Injectées" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={60} minPointSize={2} />
-                <Bar dataKey="expenses" name="Dépenses Approuvées" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={60} minPointSize={2} />
+                <Bar dataKey="budget" name="Budget Initial" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                <Bar dataKey="allocations" name="Allocations Injectées" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                <Bar dataKey="expenses" name="Dépenses Approuvées" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={60} />
               </BarChart>
             </ResponsiveContainer>
           </div>
