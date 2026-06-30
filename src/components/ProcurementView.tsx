@@ -1,7 +1,7 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, Users, FileCheck, ShoppingCart, Landmark, ArrowRight, 
-  Check, X, FileText, AlertTriangle, Briefcase, Trash2
+  Check, X, FileText, AlertTriangle, Briefcase, Trash2, RefreshCw
 } from 'lucide-react';
 import { 
   Supplier, Subcontractor, PurchaseRequest, PurchaseOrder, Contract, Project 
@@ -60,6 +60,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   // Active sub tab
   const [procTab, setProcTab] = useState<'requests' | 'orders' | 'contracts' | 'partners'>('requests');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actioningId, setActioningId] = useState<string | null>(null);
 
   // Form states
   const [isPrFormOpen, setIsPrFormOpen] = useState(false);
@@ -244,10 +245,13 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   };
 
   const handleApprovePR = async (id: string, status: 'Approved' | 'Rejected') => {
+    setActioningId(id);
     try {
       await onUpdatePRStatus(id, status);
     } catch (err: any) {
-      alert(err.message || 'Erreur lors du Traitéement de la DA');
+      alert(err.message || 'Erreur lors du Traitement de la DA');
+    } finally {
+      setActioningId(null);
     }
   };
 
@@ -424,15 +428,17 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                                   onClick={() => handleApprovePR(pr.id, 'Approved')}
                                   className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded"
                                   title="Approuver la demande d'achat"
+                                  disabled={actioningId === pr.id}
                                 >
-                                  <Check className="w-3.5 h-3.5" />
+                                  {actioningId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                                 </button>
                                 <button 
                                   onClick={() => handleApprovePR(pr.id, 'Rejected')}
                                   className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
                                   title="Rejeter la demande"
+                                  disabled={actioningId === pr.id}
                                 >
-                                  <X className="w-3.5 h-3.5" />
+                                  {actioningId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
                                 </button>
                               </>
                             ) : (
@@ -522,16 +528,18 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             {po.status === 'Pending' ? (
                               <>
                                 <button
-                                  onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Approved')}
+                                  onClick={async () => { if(onUpdatePOStatus) { setActioningId(po.id); try { await onUpdatePOStatus(po.id, 'Approved'); } finally { setActioningId(null); } } }}
                                   className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                  disabled={actioningId === po.id}
                                 >
-                                  <Check className="w-3 h-3" /> Confirmer
+                                  {actioningId === po.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Confirmer
                                 </button>
                                 <button
-                                  onClick={() => onUpdatePOStatus && onUpdatePOStatus(po.id, 'Rejected')}
+                                  onClick={async () => { if(onUpdatePOStatus) { setActioningId(po.id); try { await onUpdatePOStatus(po.id, 'Rejected'); } finally { setActioningId(null); } } }}
                                   className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                  disabled={actioningId === po.id}
                                 >
-                                  <X className="w-3 h-3" /> Rejeter
+                                  {actioningId === po.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />} Rejeter
                                 </button>
                               </>
                             ) : (
@@ -621,16 +629,18 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             {(!c.status || c.status === 'Pending') ? (
                               <>
                                 <button
-                                  onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Approved')}
+                                  onClick={async () => { if(onUpdateContractStatus) { setActioningId(c.id); try { await onUpdateContractStatus(c.id, 'Approved'); } finally { setActioningId(null); } } }}
                                   className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                  disabled={actioningId === c.id}
                                 >
-                                  <Check className="w-3 h-3" /> Activer
+                                  {actioningId === c.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Activer
                                 </button>
                                 <button
-                                  onClick={() => onUpdateContractStatus && onUpdateContractStatus(c.id, 'Rejected')}
+                                  onClick={async () => { if(onUpdateContractStatus) { setActioningId(c.id); try { await onUpdateContractStatus(c.id, 'Rejected'); } finally { setActioningId(null); } } }}
                                   className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                  disabled={actioningId === c.id}
                                 >
-                                  <X className="w-3 h-3" /> Annuler
+                                  {actioningId === c.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />} Annuler
                                 </button>
                               </>
                             ) : (
@@ -777,7 +787,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsPrFormOpen(false)} className="px-4 py-2 border rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300">Annuler</button>
-                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Soumettre DA</button>
+                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Soumettre DA
+                </button>
               </div>
             </form>
           </div>
@@ -827,7 +839,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsPoFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-              <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Émettre BC</button>
+              <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Émettre BC
+              </button>
               </div>
             </form>
           </div>
@@ -887,7 +901,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsContractFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Valider Contrat</button>
+                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Valider Contrat
+                </button>
               </div>
             </form>
           </div>
@@ -950,7 +966,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsPartnerFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Enregistrer Partenaire</button>
+                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Enregistrer Partenaire
+                </button>
               </div>
             </form>
           </div>

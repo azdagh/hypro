@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Plus, Box, Settings, AlertCircle, CheckCircle, 
-  Wrench, FileText, Search, PackageOpen, Trash2 
+  Wrench, FileText, Search, PackageOpen, Trash2, RefreshCw 
 } from 'lucide-react';
 import { StockItem, Equipment, Project } from '../types';
 import { formatLocalDate, useTranslation } from '../i18n';
@@ -105,13 +105,16 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     }
   };
 
-  const handleDelete = async (action: (() => Promise<any>) | undefined, label: string) => {
+  const handleDelete = async (action: (() => Promise<any>) | undefined, label: string, id: string) => {
     if (!action) return;
     if (!window.confirm(`Supprimer ${label} ?`)) return;
+    setDeletingId(id);
     try {
       await action();
     } catch (err: any) {
       alert(err.message || 'Erreur lors de la suppression');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -199,11 +202,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       )}
                       {canDelete && (
                         <button
-                          onClick={() => handleDelete(() => onDeleteStockItem?.(s.id), 'ce matériau')}
+                          onClick={() => handleDelete(() => onDeleteStockItem?.(s.id), 'ce matériau', s.id)}
                           className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
                           title="Supprimer le matériau"
+                          disabled={deletingId === s.id}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          {deletingId === s.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                       )}
                     </div>
@@ -284,11 +288,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                             )}
                             {canDelete && (
                               <button
-                                onClick={() => handleDelete(() => onDeleteEquipment?.(e.id), 'cet équipement')}
+                                onClick={() => handleDelete(() => onDeleteEquipment?.(e.id), 'cet équipement', e.id)}
                                 className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
                                 title="Supprimer l'équipement"
+                                disabled={deletingId === e.id}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                {deletingId === e.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                               </button>
                             )}
                           </div>
@@ -354,7 +359,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsStockFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Loguer Entrée Stock</button>
+                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Loguer Entrée Stock
+                </button>
               </div>
             </form>
           </div>
@@ -403,7 +410,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsEquipFormOpen(false)} className="px-4 py-2 border rounded-lg text-slate-600 dark:text-slate-300">Annuler</button>
-                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold" disabled={loading}>Ajouter Engin</button>
+                <button type="submit" className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 rounded-lg font-semibold flex items-center justify-center gap-2" disabled={loading}>
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null} Ajouter Engin
+                </button>
               </div>
             </form>
           </div>
