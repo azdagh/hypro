@@ -508,7 +508,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     {/* Project & Category */}
                     <td className="p-4">
                       <span className="font-semibold text-slate-900 dark:text-slate-100 block">{(e as any).projects?.name || projects.find(p => p.id === e.project_id)?.name || 'N/A'}</span>
-                      <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || 'â€”'}</span>
+                      <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || '—'}</span>
                     </td>
                     {/* Submitter & Date */}
                     <td className="p-4">
@@ -718,7 +718,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6" id="expense-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">Déclarer Dépense de Chantier (Petty Cash)</h3>
-              <button onClick={() => setIsExpenseFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">âœ•</button>
+              <button onClick={() => setIsExpenseFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
             </div>
 
             {duplicateAlert && (
@@ -826,10 +826,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   </div>
                 )}
                 {uploadedFileName && !isUploading && (
-                  <p className="text-[10px] text-emerald-600 font-mono truncate">âœ” Fichier uploadé: {uploadedFileName}</p>
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Fichier uploadé: {uploadedFileName}</p>
                 )}
                 {expReceiptUrl && !isScanning && !uploadedFileName && (
-                  <p className="text-[10px] text-emerald-600 font-mono truncate">âœ” Lié à Drive: {expReceiptFileId}</p>
+                  <p className="text-[10px] text-emerald-600 font-mono truncate">✔ Lié à Drive: {expReceiptFileId}</p>
                 )}
               </div>
 
@@ -887,7 +887,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-xl shadow-xl p-6 space-y-6" id="alloc-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">Effectuer Versement / Allocation de Caisse</h3>
-              <button onClick={() => setIsAllocFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">âœ•</button>
+              <button onClick={() => setIsAllocFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
             </div>
 
             <form onSubmit={handleAllocSubmit} className="space-y-4 text-xs">
@@ -948,10 +948,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     </div>
                   )}
                   {uploadedFileName && !isUploading && (
-                    <p className="text-[10px] text-emerald-600 mt-1">âœ” {uploadedFileName}</p>
+                    <p className="text-[10px] text-emerald-600 mt-1">✔ {uploadedFileName}</p>
                   )}
                   {allocReceiptUrl && !isUploading && !uploadedFileName && (
-                    <p className="text-[10px] text-emerald-600 mt-1">âœ” Photo liée à Drive</p>
+                    <p className="text-[10px] text-emerald-600 mt-1">✔ Photo liée à Drive</p>
                   )}
                 </div>
               </div>

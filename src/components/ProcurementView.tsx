@@ -512,7 +512,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           po.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
                           'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
                         }`}>
-                          {po.status === 'Approved' ? 'âœ“ Confirmé' : po.status === 'Rejected' ? 'âœ— Rejeté' : '⏳ En Attente'}
+                          {po.status === 'Approved' ? '✓ Confirmé' : po.status === 'Rejected' ? '✗ Rejeté' : '⏳ En Attente'}
                         </span>
                       </td>
                       {canApprove && (
@@ -611,7 +611,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           c.status === 'Rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' :
                           'bg-amber-50 text-amber-700 dark:bg-amber-950/20'
                         }`}>
-                          {c.status === 'Approved' ? 'âœ“ Actif' : c.status === 'Rejected' ? 'âœ— Annulé' : '⏳ En Attente'}
+                          {c.status === 'Approved' ? '✓ Actif' : c.status === 'Rejected' ? '✗ Annulé' : '⏳ En Attente'}
                         </span>
                       </td>
                       {canApprove && (
@@ -733,7 +733,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="pr-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Émettre Demande d'Achat (DA)</h3>
-              <button onClick={() => setIsPrFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
+              <button onClick={() => setIsPrFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
             </div>
 
             <form onSubmit={handlePrSubmit} className="space-y-4 text-xs">
@@ -789,7 +789,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="po-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Nouveau Bon de Commande (BC)</h3>
-              <button onClick={() => setIsPoFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
+              <button onClick={() => setIsPoFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
             </div>
 
             <form onSubmit={handlePoSubmit} className="space-y-4 text-xs">
@@ -839,7 +839,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="contract-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Créer un Contrat de Sous-traitéance</h3>
-              <button onClick={() => setIsContractFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
+              <button onClick={() => setIsContractFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
             </div>
 
             <form onSubmit={handleContractSubmit} className="space-y-4 text-xs">
@@ -899,7 +899,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-xl p-6 space-y-6" id="partner-form-container">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Ajouter un Partenaire Commercial</h3>
-              <button onClick={() => setIsPartnerFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">âœ•</button>
+              <button onClick={() => setIsPartnerFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold">✕</button>
             </div>
 
             <form onSubmit={handlePartnerSubmit} className="space-y-4 text-xs">

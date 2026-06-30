@@ -193,7 +193,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="project-details-metrics-grid">
           {/* Financial Progress */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="project-financial-progress-card">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ã‰tat BudgÃ©taire</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">État Budgétaire</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">Budget Global:</span>
@@ -204,7 +204,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <span className="font-mono text-amber-600 font-semibold">{formatCurrencyDZD(totalAllocated)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">DÃ©penses ApprouvÃ©es:</span>
+                <span className="text-slate-400">Dépenses Approuvées:</span>
                 <span className="font-mono text-emerald-600 font-semibold">{formatCurrencyDZD(totalExpApproved)}</span>
               </div>
               <div className="flex justify-between text-sm pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -215,7 +215,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
             
             <div className="space-y-1">
               <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                <span>Budget ConsommÃ©: {utilization.toFixed(1)}%</span>
+                <span>Budget Consommé: {utilization.toFixed(1)}%</span>
                 <span>Restant: {formatCurrencyDZD(remainingBudget)}</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -229,27 +229,27 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
           {/* Construction Specifications */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="project-specs-card">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">DonnÃ©es Techniques</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Données Techniques</h3>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1">
                 <span className="text-slate-400 text-[10px]">Superficie Terrain</span>
-                <p className="font-bold font-mono">{p.total_land_area} mÂ²</p>
+                <p className="font-bold font-mono">{p.total_land_area} m²</p>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1">
-                <span className="text-slate-400 text-[10px]">Superficie BÃ¢tie</span>
-                <p className="font-bold font-mono">{p.built_area} mÂ²</p>
+                <span className="text-slate-400 text-[10px]">Superficie Bâtie</span>
+                <p className="font-bold font-mono">{p.built_area} m²</p>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1 flex items-center gap-2">
                 <Building className="w-4 h-4 text-slate-400" />
                 <div>
-                  <span className="text-slate-400 text-[10px]">BÃ¢timents / Blocs</span>
+                  <span className="text-slate-400 text-[10px]">Bâtiments / Blocs</span>
                   <p className="font-bold font-mono">{p.number_of_buildings} / {p.number_of_blocks}</p>
                 </div>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg space-y-1 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-slate-400" />
                 <div>
-                  <span className="text-slate-400 text-[10px]">Ã‰tages / Appartements</span>
+                  <span className="text-slate-400 text-[10px]">Étages / Appartements</span>
                   <p className="font-bold font-mono">{p.number_of_floors} / {p.number_of_apartments}</p>
                 </div>
               </div>
@@ -258,7 +258,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
           {/* Timeline & Status */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="project-timeline-card">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut & Ã‰chÃ©ancier</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut & Échéancier</h3>
             <div className="space-y-3 text-xs">
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-4 h-4 text-slate-400" />
@@ -270,7 +270,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-4 h-4 text-slate-400" />
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Fin PrÃ©visionnelle</span>
+                  <span className="text-slate-400 text-[10px] block">Fin Prévisionnelle</span>
                   <span className="font-medium text-amber-700 dark:text-amber-500">{formatLocalDate(p.planned_end_date, lang)}</span>
                 </div>
               </div>
@@ -297,7 +297,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
           {/* Allocations made to this project */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="proj-allocations-table">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <Wallet className="w-4 h-4 text-slate-500" /> Versements de caisse rÃ©cents
+              <Wallet className="w-4 h-4 text-slate-500" /> Versements de caisse récents
             </h3>
             <div className="overflow-x-auto">
               <div className="overflow-x-auto w-full">
@@ -305,7 +305,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400">
                     <th className="py-2">Date</th>
-                    <th className="py-2">BÃ©nÃ©ficiaire</th>
+                    <th className="py-2">Bénéficiaire</th>
                     <th className="py-2 text-right">Montant</th>
                   </tr>
                 </thead>
@@ -319,7 +319,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   ))}
                   {projAllocations.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="py-6 text-center text-slate-400">Aucune allocation enregistrÃ©e.</td>
+                      <td colSpan={3} className="py-6 text-center text-slate-400">Aucune allocation enregistrée.</td>
                     </tr>
                   )}
                 </tbody>
@@ -331,7 +331,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
           {/* Expenses made to this project */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs" id="proj-expenses-table">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <CheckSquare className="w-4 h-4 text-slate-500" /> DÃ©penses de chantier payÃ©es
+              <CheckSquare className="w-4 h-4 text-slate-500" /> Dépenses de chantier payées
             </h3>
             <div className="overflow-x-auto">
               <div className="overflow-x-auto w-full">
@@ -353,7 +353,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   ))}
                   {projExpenses.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="py-6 text-center text-slate-400">Aucune dÃ©pense approuvÃ©e.</td>
+                      <td colSpan={3} className="py-6 text-center text-slate-400">Aucune dépense approuvée.</td>
                     </tr>
                   )}
                 </tbody>
@@ -425,11 +425,11 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 {/* Micro Tech description */}
                 <div className="grid grid-cols-3 gap-2 py-2 border-t border-b border-slate-50 dark:border-slate-800 text-[10px]">
                   <div>
-                    <span className="text-slate-400 block uppercase">BÃ¢timents</span>
+                    <span className="text-slate-400 block uppercase">Bâtiments</span>
                     <span className="font-semibold">{p.number_of_buildings}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block uppercase">Ã‰tages</span>
+                    <span className="text-slate-400 block uppercase">Étages</span>
                     <span className="font-semibold">R+{p.number_of_floors}</span>
                   </div>
                   <div>
@@ -445,7 +445,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     <span className="font-mono font-bold">{formatCurrencyDZD(p.budget)}</span>
                   </div>
                   <div className="flex justify-between text-slate-500">
-                    <span>DÃ©caissements:</span>
+                    <span>Décaissements:</span>
                     <span className="font-mono font-semibold">{formatCurrencyDZD(totalSpent)}</span>
                   </div>
                 </div>
@@ -512,7 +512,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
                 {editingProject ? t('editProject') : t('createProject')}
               </h3>
-              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">âœ•</button>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -547,7 +547,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   value={description} 
                   onChange={e => setDescription(e.target.value)} 
                   rows={2}
-                  placeholder="Notes et dÃ©tails du chantier..." 
+                  placeholder="Notes et détails du chantier..." 
                   className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
                 />
               </div>
@@ -559,7 +559,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     type="text" 
                     value={location} 
                     onChange={e => setLocation(e.target.value)} 
-                    placeholder="e.g. ChÃ©raga, Alger" 
+                    placeholder="e.g. Chéraga, Alger" 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                     required 
                   />
@@ -597,7 +597,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500 text-[10px] block">BÃ¢timents</label>
+                  <label className="font-semibold text-slate-500 text-[10px] block">Bâtiments</label>
                   <input 
                     type="number" 
                     value={numberofBuildings} 
@@ -615,7 +615,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-500 text-[10px] block">Ã‰tages (R+x)</label>
+                  <label className="font-semibold text-slate-500 text-[10px] block">Étages (R+x)</label>
                   <input 
                     type="number" 
                     value={numberofFloors} 
@@ -641,9 +641,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   >
                     <option value="Planning">En Planification</option>
                     <option value="Active">Actif / En cours</option>
-                    <option value="Completed">TerminÃ©</option>
-                    <option value="Delayed">RetardÃ©</option>
-                    <option value="Archived">ArchivÃ©</option>
+                    <option value="Completed">Terminé</option>
+                    <option value="Delayed">Retardé</option>
+                    <option value="Archived">Archivé</option>
                   </select>
                 </div>
               </div>

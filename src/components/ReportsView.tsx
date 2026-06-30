@@ -35,7 +35,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     setEnterpriseLogo('');
     if (!file) return;
     if (!['image/png', 'image/jpeg'].includes(file.type)) {
-      setReportError('Le logo doit ÃƒÂªtre un fichier PNG ou JPG.');
+      setReportError('Le logo doit être un fichier PNG ou JPG.');
       return;
     }
 
@@ -113,8 +113,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       setGeneratedReport({
         title: reportType === 'monthly' ? `Rapport Financier Mensuel - ${selectedMonth}/${selectedYear}` :
                reportType === 'annual' ? `Bilan Comptable Annuel - Exercice ${selectedYear}` :
-               reportType === 'cashflow' ? `Analyse de TrÃƒÂ©sorerie & Flux de Caisse` :
-               `Rapport d'Utilisation BudgÃƒÂ©taire des Projets`,
+               reportType === 'cashflow' ? `Analyse de Trésorerie & Flux de Caisse` :
+               `Rapport d'Utilisation Budgétaire des Projets`,
         timestamp: new Date().toLocaleString(),
         type: reportType,
         totalExpenses: totalSpent,
@@ -230,7 +230,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div class="brand-copy">
               <div class="logo">${safeEnterpriseName || 'HYPRO PROMOTION IMMOBILIERE'}</div>
               <div class="title">${generatedReport.title}</div>
-              <div class="meta">GÃ©nÃ©rÃ© le : ${generatedReport.timestamp} â€¢ Filtre : ${generatedReport.parameters.project} â€¢ Exercice : ${generatedReport.parameters.year}</div>
+              <div class="meta">Généré le : ${generatedReport.timestamp} • Filtre : ${generatedReport.parameters.project} • Exercice : ${generatedReport.parameters.year}</div>
             </div>
           </div>
 
@@ -241,15 +241,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <tr>
                     <th>Projet de Construction</th>
                     <th style="text-align: right">Budget Global</th>
-                    <th style="text-align: right">Allocations InjectÃ©eses</th>
-                    <th style="text-align: right">DÃ©penses JustifiÃ©eses</th>
+                    <th style="text-align: right">Allocations Injectéeses</th>
+                    <th style="text-align: right">Dépenses Justifiéeses</th>
                     <th style="text-align: right">Solde Disponible</th>
                   </tr>
                 ` : `
                   <tr>
                     <th>Date</th>
                     <th>Chantier</th>
-                    <th>CatÃ©gorie</th>
+                    <th>Catégorie</th>
                     <th>Description</th>
                     <th style="text-align: right">Montant (DZD)</th>
                   </tr>
@@ -262,7 +262,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           <div class="summary-box">
-            <div class="summary-title">TOTAL DES DÃ‰CAISSEMENTS CONSOLIDÃ‰S</div>
+            <div class="summary-title">TOTAL DES DÉCAISSEMENTS CONSOLIDÉS</div>
             <div class="summary-val">${generatedReport.totalExpenses.toLocaleString()} DZD</div>
           </div>
           
@@ -289,7 +289,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               value={enterpriseName}
               onChange={e => setEnterpriseName(e.target.value)}
               className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
-              placeholder="Nom affichÃƒÂ© sur le rapport"
+              placeholder="Nom affiché sur le rapport"
               required
             />
           </div>
@@ -322,13 +322,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
           {/* Project filter */}
           <div className="space-y-1 lg:col-span-2">
-            <label className="font-semibold text-slate-500">Chantier ConcernÃƒÂ©</label>
+            <label className="font-semibold text-slate-500">Chantier Concerné</label>
             <select 
               value={selectedProject} 
               onChange={e => setSelectedProject(e.target.value)}
               className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
             >
-              <option value="ALL">Tous les chantiers (ConsolidÃƒÂ©)</option>
+              <option value="ALL">Tous les chantiers (Consolidé)</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
               ))}
@@ -387,9 +387,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {/* Action header bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-4" id="report-results-header">
             <div>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-bold uppercase tracking-wider">AperÃƒÂ§u RÃƒÂ©el Avant TÃƒÂ©lÃƒÂ©chargement</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-bold uppercase tracking-wider">Aperçu Réel Avant Téléchargement</span>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{generatedReport.title}</h3>
-              <p className="text-xs text-slate-400 mt-1">ConsolidÃƒÂ© le {generatedReport.timestamp} Ã¢â‚¬Â¢ Filtres: {generatedReport.parameters.project}</p>
+              <p className="text-xs text-slate-400 mt-1">Consolidé le {generatedReport.timestamp} • Filtres: {generatedReport.parameters.project}</p>
             </div>
 
             <div className="flex gap-2 text-xs" id="report-export-buttons">
@@ -414,7 +414,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4" id="report-summary-metrics">
             <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">DÃƒÂ©caissements ValidÃƒÂ©s PÃƒÂ©riode</span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Décaissements Validés Période</span>
                 <span className="text-xl font-bold font-mono text-amber-700 dark:text-amber-400">{formatCurrencyDZD(generatedReport.totalExpenses)}</span>
               </div>
               <TrendingUp className="w-8 h-8 text-amber-600/20" />
@@ -440,8 +440,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Chantier de Construction</th>
                     <th className="p-3 text-right">Budget Global</th>
-                    <th className="p-3 text-right">Allocations InjectÃ©eses</th>
-                    <th className="p-3 text-right">DÃ©penses JustifiÃ©eses</th>
+                    <th className="p-3 text-right">Allocations Injectéeses</th>
+                    <th className="p-3 text-right">Dépenses Justifiéeses</th>
                     <th className="p-3 text-right">Solde Caisse</th>
                   </tr>
                 </thead>
@@ -468,7 +468,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
                     <th className="p-3">Date</th>
                     <th className="p-3">Chantier</th>
-                    <th className="p-3">CatÃ©gorie</th>
+                    <th className="p-3">Catégorie</th>
                     <th className="p-3">Description / Objet</th>
                     <th className="p-3 text-right">Montant (DZD)</th>
                     <th className="p-3">Soumis Par</th>
@@ -492,7 +492,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   })}
                   {generatedReport.expensesList.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Aucun dÃƒÂ©caissement justifiÃƒÂ© trouvÃƒÂ© sur cette pÃƒÂ©riode.</td>
+                      <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Aucun décaissement justifié trouvé sur cette période.</td>
                     </tr>
                   )}
                 </tbody>
@@ -504,7 +504,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       ) : (
         <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-12 text-center text-slate-400 text-xs" id="report-empty-placeholder">
           <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-          SÃƒÂ©lectionnez les paramÃƒÂ¨tres et cliquez sur "GÃƒÂ©nÃƒÂ©rer le Rapport" pour visualiser le grand livre des dÃƒÂ©caissements et des budgets.
+          Sélectionnez les paramètres et cliquez sur "Générer le Rapport" pour visualiser le grand livre des décaissements et des budgets.
         </div>
       )}
     </div>
