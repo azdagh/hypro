@@ -1032,14 +1032,10 @@ function MainLayout() {
                   return matchesName || matchesId || matchesAllocatedBy;
                 });
 
-                // 3. Filtered Projects
-                const filteredProjects = projects.filter(p => {
-                  if (isFdOrAccountantOrAdmin) return true;
-                  const hasAllocations = filteredAllocations.some(a => a.project_id === p.id);
-                  const hasExpenses = filteredExpenses.some(e => e.project_id === p.id);
-                  const isAssigned = myAssignments.some(a => a.project_id === p.id);
-                  return hasAllocations || hasExpenses || isAssigned;
-                });
+                  // 3. Filtered Projects
+                  const filteredProjects = projects.filter(p => {
+                    return true;
+                  });
 
                 // 4. Filtered Purchase Requests
                 const filteredPurchaseRequests = purchaseRequests.filter(pr => {
