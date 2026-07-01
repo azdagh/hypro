@@ -300,15 +300,26 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   // Submit Allocation
   const handleAllocSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      project_id: allocProject,
-      amount_dzd: Number(allocAmount),
-      allocated_by: userId,
-      allocated_to: allocTo,
-      notes: allocNotes,
-      receipt_file_id: allocReceiptFileId,
-      receipt_url: allocReceiptUrl
-    };
+    let projectIdToUse = allocProject;
+      if (!projectIdToUse) {
+        const defaultProject = projects.find(p => p.code === 'GEN-00' || p.name === 'Non spécifié');
+        if (defaultProject) {
+          projectIdToUse = defaultProject.id;
+        } else {
+          alert("Erreur: Le projet par défaut 'Non spécifié' est introuvable. Veuillez sélectionner un projet.");
+          return;
+        }
+      }
+
+      const payload = {
+        project_id: projectIdToUse,
+        amount_dzd: Number(allocAmount),
+        allocated_by: userId,
+        allocated_to: allocTo,
+        notes: allocNotes,
+        receipt_file_id: allocReceiptFileId,
+        receipt_url: allocReceiptUrl
+      };
 
     if (!isOnline) {
       enqueueOffline('CREATE_ALLOCATION', payload);
@@ -926,7 +937,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     onChange={e => setAllocProject(e.target.value)} 
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                   >
-                    <option value="">-- Choisir --</option>
+                    <option value="">-- Non spécifié --</option>
                     {projects.map(p => (
                       <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                     ))}
