@@ -73,12 +73,24 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       reader.onload = async () => {
         const base64 = reader.result as string;
         
-        const response = await secureFetch('/api/upload', {
+        const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+        const secret = import.meta.env.VITE_GOOGLE_SCRIPT_SECRET;
+        
+        if (!scriptUrl) {
+          throw new Error("Google Apps Script URL non configuré. Vérifiez .env.local");
+        }
+
+        const response = await fetch(scriptUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            imageBase64: base64, 
-            filename: file.name
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8' // avoids CORS preflight
+          },
+          body: JSON.stringify({
+            file: base64,
+            fileName: file.name,
+            mimeType: file.type || 'application/pdf',
+            uploadType: 'project_technical_file',
+            secret: secret || ''
           })
         });
 
