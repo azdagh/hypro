@@ -818,7 +818,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold disabled:opacity-50 inline-flex items-center gap-2"
+                  className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold disabled:opacity-50 inline-flex items-center gap-2"
                 >
                   {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   {editingProject ? t('edit') : t('create')}
