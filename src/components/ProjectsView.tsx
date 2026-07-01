@@ -832,7 +832,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       {previewUrl && (
         <div
           onClick={() => setPreviewUrl(null)}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4 z-[999]"
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4 z-[9999]"
           id="tech-file-preview-overlay"
         >
           <div className="w-full max-w-5xl flex justify-between items-center mb-3 px-1">
