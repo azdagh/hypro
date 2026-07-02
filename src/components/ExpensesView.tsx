@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Plus, Camera, Sparkles, Check, X, Filter, FileText, 
   AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign, Trash2
@@ -912,34 +912,19 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             </div>
 
             <form onSubmit={handleAllocSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
-                  <select 
-                    value={allocTo} 
-                    onChange={e => setAllocTo(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required 
-                  >
-                    <option value="">-- Sélectionner un compte --</option>
-                    {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
-                      <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Projet Destinataire (Optionnel)</label>
-                  <select 
-                    value={allocProject} 
-                    onChange={e => setAllocProject(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                  >
-                    <option value="">-- Non spécifié --</option>
-                    {projects.filter(p => p.code !== 'GEN-00').map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-500">Bénéficiaire Principal (Compte Utilisateur) *</label>
+                <select 
+                  value={allocTo} 
+                  onChange={e => setAllocTo(e.target.value)} 
+                  className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
+                  required 
+                >
+                  <option value="">-- Sélectionner un compte --</option>
+                  {profiles?.filter(p => p.role !== 'Super Admin').map(p => (
+                    <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
