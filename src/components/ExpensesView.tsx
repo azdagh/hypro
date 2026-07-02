@@ -454,7 +454,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2 min-w-[150px]"
           >
             <option value="ALL">Tous les Projets</option>
-            {projects.map(p => (
+            {projects.filter(p => p.code !== 'GEN-00').map(p => (
               <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
             ))}
           </select>
@@ -763,7 +763,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     required
                   >
                     <option value="">-- Choisir --</option>
-                    {projects.map(p => (
+                    {projects.filter(p => p.code !== 'GEN-00').map(p => (
                       <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                     ))}
                   </select>
@@ -938,7 +938,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
                   >
                     <option value="">-- Non spécifié --</option>
-                    {projects.map(p => (
+                    {projects.filter(p => p.code !== 'GEN-00').map(p => (
                       <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                     ))}
                   </select>

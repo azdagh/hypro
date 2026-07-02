@@ -76,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   });
 
   // Project utilization data for BarChart
-  const projectUtilizationData = projects.map(p => {
+  const projectUtilizationData = projects.filter(p => p.code !== 'GEN-00').map(p => {
     const projAllocations = allocations.filter(a => a.project_id === p.id).reduce((sum, a) => sum + a.amount_dzd, 0);
     const projExpenses = expenses.filter(e => e.project_id === p.id && e.status === 'Approved').reduce((sum, e) => sum + e.amount_dzd, 0);
     return {
@@ -91,7 +91,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Expenses distribution for PieChart
   const COLORS = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'];
-  const projectExpensesShare = projects.map(p => {
+  const projectExpensesShare = projects.filter(p => p.code !== 'GEN-00').map(p => {
     const amt = expenses.filter(e => e.project_id === p.id && e.status === 'Approved').reduce((sum, e) => sum + e.amount_dzd, 0);
     return {
       name: p.code || p.name,

@@ -631,7 +631,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                   className="w-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg font-medium"
                 >
                   <option value="">-- Sélectionner un Projet --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
                   ))}
                 </select>

@@ -91,7 +91,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       }
 
       // Project totals summary
-      const summaryByProject = projects.map(p => {
+      const summaryByProject = projects.filter(p => p.code !== 'GEN-00').map(p => {
         const projExp = approvedExpenses.filter(e => e.project_id === p.id);
         const projAlloc = allocations.filter(a => a.project_id === p.id);
         const totalAlloc = projAlloc.reduce((sum, a) => sum + a.amount_dzd, 0);
@@ -339,7 +339,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
             >
               <option value="ALL">Tous les chantiers (Consolidé)</option>
-              {projects.map(p => (
+              {projects.filter(p => p.code !== 'GEN-00').map(p => (
                 <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
               ))}
             </select>

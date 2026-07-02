@@ -172,7 +172,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs rounded-lg p-2 min-w-[200px]"
         >
           <option value="ALL">Tous les Chantiers</option>
-          {projects.map(p => (
+          {projects.filter(p => p.code !== 'GEN-00').map(p => (
             <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
           ))}
         </select>
@@ -330,7 +330,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 <label className="font-semibold text-slate-500">Chantier Concerné *</label>
                 <select value={stProject} onChange={e => setStProject(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                   ))}
                 </select>
@@ -382,7 +382,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 <label className="font-semibold text-slate-500">Chantier d'affectation *</label>
                 <select value={eqProject} onChange={e => setEqProject(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                   ))}
                 </select>

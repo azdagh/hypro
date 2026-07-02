@@ -333,7 +333,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
               <option value="">Tous les projets</option>
-              {projects.map(p => (
+              {projects.filter(p => p.code !== 'GEN-00').map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
               ))}
             </select>
@@ -755,7 +755,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <label className="font-semibold text-slate-500">Chantier d'affectation *</label>
                 <select value={prProject} onChange={e => setPrProject(e.target.value)} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                   ))}
                 </select>
@@ -813,7 +813,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <label className="font-semibold text-slate-500">Projet Destinataire *</label>
                 <select value={poProject} onChange={e => setPoProject(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                   ))}
                 </select>
@@ -865,7 +865,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <label className="font-semibold text-slate-500">Chantier Concerné *</label>
                 <select value={ctrProject} onChange={e => setCtrProject(e.target.value)} className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-lg p-2.5" required>
                   <option value="">-- Choisir --</option>
-                  {projects.map(p => (
+                  {projects.filter(p => p.code !== 'GEN-00').map(p => (
                     <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                   ))}
                 </select>
