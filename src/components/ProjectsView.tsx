@@ -459,7 +459,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     <div className="space-y-6" id="projects-list-page">
       {/* Upper header controls */}
       <div className="flex items-center justify-between" id="projects-list-controls">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{t('projects')} ({projects.length})</h2>
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{t('projects')} ({projects.filter(p => p.code !== 'GEN-00').length})</h2>
         {canManage && (
           <button 
             onClick={handleOpenAdd}
@@ -473,7 +473,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
       {/* Grid of Projects */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projects-grid">
-        {projects.map(p => {
+        {projects.filter(p => p.code !== 'GEN-00').map(p => {
           const projExpenses = expenses.filter(e => e.project_id === p.id && e.status === 'Approved');
           const totalSpent = projExpenses.reduce((sum, e) => sum + e.amount_dzd, 0);
           const ratio = p.budget > 0 ? (totalSpent / p.budget) * 100 : 0;
