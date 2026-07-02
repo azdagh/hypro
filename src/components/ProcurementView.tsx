@@ -60,7 +60,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   // Active sub tab
   const [procTab, setProcTab] = useState<'requests' | 'orders' | 'contracts' | 'partners'>('requests');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [actioningId, setActioningId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   // Form states
   const [isPrFormOpen, setIsPrFormOpen] = useState(false);
@@ -424,22 +425,8 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           <div className="flex gap-1 justify-center items-center">
                             {pr.status === 'Pending' ? (
                               <>
-                                <button 
-                                  onClick={() => handleApprovePR(pr.id, 'Approved')}
-                                  className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded"
-                                  title="Approuver la demande d'achat"
-                                  disabled={actioningId === pr.id}
-                                >
-                                  {actioningId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                                </button>
-                                <button 
-                                  onClick={() => handleApprovePR(pr.id, 'Rejected')}
-                                  className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"
-                                  title="Rejeter la demande"
-                                  disabled={actioningId === pr.id}
-                                >
-                                  {actioningId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
-                                </button>
+                                <button onClick={() => handleApprovePR(pr.id, 'Approved')} className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded" title="Approuver la demande d'achat" disabled={approvingId === pr.id || rejectingId === pr.id}> {approvingId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} </button>
+                                <button onClick={() => handleApprovePR(pr.id, 'Rejected')} className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded" title="Rejeter la demande" disabled={approvingId === pr.id || rejectingId === pr.id}> {rejectingId === pr.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />} </button>
                               </>
                             ) : (
                               <span className="text-slate-400 font-mono text-[10px]">Traitéé</span>
@@ -529,18 +516,18 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             {po.status === 'Pending' ? (
                               <>
                                 <button
-                                  onClick={async () => { if(onUpdatePOStatus) { setActioningId(po.id); try { await onUpdatePOStatus(po.id, 'Approved'); } finally { setActioningId(null); } } }}
+                                  onClick={async () => { if(onUpdatePOStatus) { setApprovingId(po.id); try { await onUpdatePOStatus(po.id, 'Approved'); } finally { setApprovingId(null); } } }}
                                   className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                                  disabled={actioningId === po.id}
+                                  disabled={approvingId === po.id || rejectingId === po.id}
                                 >
-                                  {actioningId === po.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Confirmer
+                                  {approvingId === po.id ? <RefreshCw className='w-3 h-3 animate-spin' /> : <Check className="w-3 h-3" />} Confirmer
                                 </button>
                                 <button
-                                  onClick={async () => { if(onUpdatePOStatus) { setActioningId(po.id); try { await onUpdatePOStatus(po.id, 'Rejected'); } finally { setActioningId(null); } } }}
+                                  onClick={async () => { if(onUpdatePOStatus) { setRejectingId(po.id); try { await onUpdatePOStatus(po.id, 'Rejected'); } finally { setRejectingId(null); } } }}
                                   className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                                  disabled={actioningId === po.id}
+                                  disabled={approvingId === po.id || rejectingId === po.id}
                                 >
-                                  {actioningId === po.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />} Rejeter
+                                  {rejectingId === po.id ? <RefreshCw className='w-3 h-3 animate-spin' /> : <X className="w-3 h-3" />} Rejeter
                                 </button>
                               </>
                             ) : (
@@ -631,18 +618,18 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             {(!c.status || c.status === 'Pending') ? (
                               <>
                                 <button
-                                  onClick={async () => { if(onUpdateContractStatus) { setActioningId(c.id); try { await onUpdateContractStatus(c.id, 'Approved'); } finally { setActioningId(null); } } }}
+                                  onClick={async () => { if(onUpdateContractStatus) { setApprovingId(c.id); try { await onUpdateContractStatus(c.id, 'Approved'); } finally { setApprovingId(null); } } }}
                                   className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                                  disabled={actioningId === c.id}
+                                  disabled={approvingId === c.id || rejectingId === c.id}
                                 >
-                                  {actioningId === c.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Activer
+                                  {approvingId === c.id ? <RefreshCw className='w-3 h-3 animate-spin' /> : <Check className="w-3 h-3" />} Activer
                                 </button>
                                 <button
-                                  onClick={async () => { if(onUpdateContractStatus) { setActioningId(c.id); try { await onUpdateContractStatus(c.id, 'Rejected'); } finally { setActioningId(null); } } }}
+                                  onClick={async () => { if(onUpdateContractStatus) { setRejectingId(c.id); try { await onUpdateContractStatus(c.id, 'Rejected'); } finally { setRejectingId(null); } } }}
                                   className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                                  disabled={actioningId === c.id}
+                                  disabled={approvingId === c.id || rejectingId === c.id}
                                 >
-                                  {actioningId === c.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />} Annuler
+                                  {rejectingId === c.id ? <RefreshCw className='w-3 h-3 animate-spin' /> : <X className="w-3 h-3" />} Annuler
                                 </button>
                               </>
                             ) : (

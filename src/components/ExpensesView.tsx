@@ -47,6 +47,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   // View state
   const [activeSubTab, setActiveSubTab] = useState<'expenses' | 'allocations'>('expenses');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [filterProject, setFilterProject] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [filterAcheteur, setFilterAcheteur] = useState<string>('ALL');
@@ -724,12 +726,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 >
                   {t('cancel')}
                 </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors font-semibold"
-                >
-                  {t('reject')}
-                </button>
+                <button type="submit" className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors font-semibold inline-flex items-center gap-2" disabled={rejectingId !== null}> {rejectingId !== null ? <RefreshCw className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} {t('reject')} </button>
               </div>
             </form>
           </div>
