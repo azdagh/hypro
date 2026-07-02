@@ -1,3 +1,21 @@
+
+function sanitizeError(error) {
+  if (error && error.message) {
+    error.message = error.message
+      .replace(/Ã©/g, 'é')
+      .replace(/Ã\xA0/g, 'à')
+      .replace(/Ã /g, 'à')
+      .replace(/Ã¨/g, 'è')
+      .replace(/Ãª/g, 'ê')
+      .replace(/Ã§/g, 'ç')
+      .replace(/Ã´/g, 'ô')
+      .replace(/Ã®/g, 'î')
+      .replace(/Ã»/g, 'û')
+      .replace(/Ã¹/g, 'ù')
+      .replace(/Ã¢/g, 'â');
+  }
+  return error;
+}
 ﻿import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AsyncLocalStorage } from 'async_hooks';
 
@@ -94,7 +112,7 @@ export const SupabaseAuthService = {
       email,
       password: passwordInput,
     });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     // Fetch the linked profile
     const { data: profile, error: profileErr } = await supabaseAdmin
@@ -121,7 +139,7 @@ export const SupabaseAuthService = {
   async logout() {
     const supabase = getSupabase();
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async resetPassword(email: string, redirectUrl?: string) {
@@ -129,7 +147,7 @@ export const SupabaseAuthService = {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl || `${process.env.APP_URL || 'http://localhost:3000'}/reset-password`,
     });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   }
 };
@@ -146,7 +164,7 @@ export const SupabaseDbService = {
       .select('*')
       .ilike('email', email.trim())
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -157,7 +175,7 @@ export const SupabaseDbService = {
       .select('*')
       .eq('id', id)
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -167,7 +185,7 @@ export const SupabaseDbService = {
       .from('profiles')
       .select('*')
       .order('full_name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -179,7 +197,7 @@ export const SupabaseDbService = {
       .select('*')
       .eq('user_id', userId)
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data || { language: 'fr', theme: 'light', notification_settings: { email: true, push: true, realtime: true } };
   },
 
@@ -190,7 +208,7 @@ export const SupabaseDbService = {
       .upsert({ user_id: userId, ...prefs })
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
   // Assignments
@@ -200,7 +218,7 @@ export const SupabaseDbService = {
       .from('project_assignments')
       .select('*')
       .eq('user_id', userId);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -211,7 +229,7 @@ export const SupabaseDbService = {
       .from('projects')
       .select('*')
       .order('code', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -222,7 +240,7 @@ export const SupabaseDbService = {
       .select('*')
       .eq('id', id)
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -248,7 +266,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -275,7 +293,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -285,7 +303,7 @@ export const SupabaseDbService = {
       .from('projects')
       .delete()
       .eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return true;
   },
 
@@ -296,7 +314,7 @@ export const SupabaseDbService = {
       .from('allocations')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     const projectIds = [...new Set((data || []).map((a: any) => a.project_id).filter(Boolean))];
     const profileIds = [
@@ -353,7 +371,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -363,7 +381,7 @@ export const SupabaseDbService = {
       .from('allocations')
       .delete()
       .eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   // Categories
@@ -373,7 +391,7 @@ export const SupabaseDbService = {
       .from('expense_categories')
       .select('*')
       .order('name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     
     // Auto-seed if empty
     if (data.length === 0) {
@@ -401,7 +419,7 @@ export const SupabaseDbService = {
       .insert([{ name: catData.name }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -411,7 +429,7 @@ export const SupabaseDbService = {
       .from('expense_categories')
       .delete()
       .eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   // Expenses with TRANSACTION-SAFE BUDGET VALIDATION RPC
@@ -421,7 +439,7 @@ export const SupabaseDbService = {
       .from('expenses')
       .select('*, projects(name), expense_categories(name), profiles(full_name)')
       .order('submitted_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -439,7 +457,7 @@ export const SupabaseDbService = {
       p_receipt_url: expenseData.receipt_url || null
     });
 
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -455,7 +473,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -465,7 +483,7 @@ export const SupabaseDbService = {
       .from('expenses')
       .delete()
       .eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   // Suppliers & Subcontractors
@@ -475,7 +493,7 @@ export const SupabaseDbService = {
       .from('suppliers')
       .select('*')
       .order('company_name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data.map((s: any) => ({ ...s, name: s.company_name }));
   },
 
@@ -492,14 +510,14 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
   async deleteSupplier(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('suppliers').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async getSubcontractors() {
@@ -508,7 +526,7 @@ export const SupabaseDbService = {
       .from('subcontractors')
       .select('*')
       .order('company_name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data.map((s: any) => ({ ...s, name: s.company_name }));
   },
 
@@ -524,14 +542,14 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
   async deleteSubcontractor(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('subcontractors').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   // Purchase Requests
@@ -541,7 +559,7 @@ export const SupabaseDbService = {
       .from('purchase_requests')
       .select('*, projects(name), profiles(full_name)')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data.map((item: any) => ({
       ...item,
       item_description: item.description,
@@ -566,7 +584,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -578,7 +596,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -589,7 +607,7 @@ export const SupabaseDbService = {
       .from('purchase_orders')
       .select('*, suppliers(company_name), projects(name)')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data.map((item: any) => ({
       ...item,
       supplier_name: item.suppliers?.company_name,
@@ -612,7 +630,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -623,7 +641,7 @@ export const SupabaseDbService = {
       .from('contracts')
       .select('*, subcontractors(company_name), projects(name)')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data.map((item: any) => ({
       ...item,
       contractor_name: item.subcontractors?.company_name,
@@ -648,7 +666,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -660,7 +678,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -672,7 +690,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -683,7 +701,7 @@ export const SupabaseDbService = {
       .from('stocks')
       .select('*, projects(name)')
       .order('item_name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -700,7 +718,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -715,7 +733,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -726,7 +744,7 @@ export const SupabaseDbService = {
       .from('equipment')
       .select('*, projects(name)')
       .order('equipment_name', { ascending: true });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -742,7 +760,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -757,38 +775,38 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
   async deletePurchaseRequest(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('purchase_requests').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async deletePurchaseOrder(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('purchase_orders').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async deleteContract(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('contracts').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async deleteStock(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('stocks').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   async deleteEquipment(id: string, userId: string) {
     const supabase = getSupabase();
     const { error } = await supabase.from('equipment').delete().eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
   },
 
   // Notifications
@@ -799,7 +817,7 @@ export const SupabaseDbService = {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -812,7 +830,7 @@ export const SupabaseDbService = {
       .eq('user_id', userId)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -823,7 +841,7 @@ export const SupabaseDbService = {
       .from('audit_logs')
       .select('*, profiles(full_name)')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -936,7 +954,7 @@ export const SupabaseDbService = {
     const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
       ban_duration: '87600h'
     });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     await supabaseAdmin.from('audit_logs').insert([{
       user_id: adminUserId,
@@ -954,7 +972,7 @@ export const SupabaseDbService = {
     const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
       ban_duration: 'none'
     });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     await supabaseAdmin.from('audit_logs').insert([{
       user_id: adminUserId,
@@ -972,7 +990,7 @@ export const SupabaseDbService = {
     const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
       password: newPasswordInput
     });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     await supabaseAdmin.from('audit_logs').insert([{
       user_id: adminUserId,
@@ -993,7 +1011,7 @@ export const SupabaseDbService = {
       .from('user_invitations')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -1011,7 +1029,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -1023,7 +1041,7 @@ export const SupabaseDbService = {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -1036,7 +1054,7 @@ export const SupabaseDbService = {
       .from('project_assignments')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
 
     const projectIds = [...new Set((data || []).map((a: any) => a.project_id).filter(Boolean))];
     const profileIds = [
@@ -1079,7 +1097,7 @@ export const SupabaseDbService = {
       }])
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return data;
   },
 
@@ -1089,7 +1107,7 @@ export const SupabaseDbService = {
       .from('project_assignments')
       .delete()
       .eq('id', id);
-    if (error) throw error;
+    if (error) throw sanitizeError(error);
     return { success: true };
   }
 };
