@@ -356,10 +356,13 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       return;
     }
 
+    setApprovingId(id);
     try {
       await onUpdateExpenseStatus(id, 'Approved');
     } catch (err: any) {
       alert(err.message || 'Erreur d\'approbation');
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -367,11 +370,14 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     e.preventDefault();
     if (!rejectionExpenseId) return;
 
+    setRejectingId(rejectionExpenseId);
     try {
       await onUpdateExpenseStatus(rejectionExpenseId, 'Rejected', rejectionReason);
       setRejectionExpenseId(null);
     } catch (err: any) {
       alert(err.message || 'Erreur de rejet');
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -423,7 +429,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         <div className="flex gap-2">
           {activeSubTab === 'expenses' && isManagerOrEmployee && (
             <button 
-              onClick={() => setIsExpenseFormOpen(true)}
+              onClick={() => { setIsExpenseFormOpen(true); setUploadedFileName(null); setExpReceiptFileId(''); setExpReceiptUrl(''); setLocalImageForScan(''); setUploadError(null); setScanStatus('idle'); }}
               className="inline-flex items-center justify-center bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-xs"
               id="btn-trigger-expense-form"
             >
@@ -432,7 +438,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           )}
           {activeSubTab === 'allocations' && isApprover && (
             <button 
-              onClick={() => setIsAllocFormOpen(true)}
+              onClick={() => { setIsAllocFormOpen(true); setUploadedFileName(null); setAllocReceiptFileId(''); setAllocReceiptUrl(''); setLocalImageForScan(''); setUploadError(null); setScanStatus('idle'); }}
               className="inline-flex items-center justify-center bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-xs"
               id="btn-trigger-alloc-form"
             >
@@ -628,7 +634,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[10px]">
-                  <th className="p-4 font-semibold">Projet Destinataire</th>
+                  
                   <th className="p-4 font-semibold">Date & Heure</th>
                   <th className="p-4 font-semibold">Alloué par & Bénéficiaire</th>
                   <th className="p-4 font-semibold">Notes / Objet</th>
