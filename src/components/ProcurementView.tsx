@@ -246,13 +246,13 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   };
 
   const handleApprovePR = async (id: string, status: 'Approved' | 'Rejected') => {
-    setActioningId(id);
+    if (status === 'Approved') setApprovingId(id); else setRejectingId(id);
     try {
       await onUpdatePRStatus(id, status);
     } catch (err: any) {
       alert(err.message || 'Erreur lors du Traitement de la DA');
     } finally {
-      setActioningId(null);
+      setApprovingId(null); setRejectingId(null);
     }
   };
 

@@ -827,7 +827,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 {isScanning && !isUploading && (
                   <div className="text-slate-500 inline-flex items-center gap-1.5 text-[10px]">
                     <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-500" />
-                    <span>Lancement de l'Analyse d'Image par IA (Gemini)...</span>
+                    <span>Lancement de l'Analyse d'Image par Ià(Gemini)...</span>
                   </div>
                 )}
                 {isUploading && (
