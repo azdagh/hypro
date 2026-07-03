@@ -648,10 +648,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   const proj = projects.find(p => p.id === a.project_id);
                   return (
                     <tr key={a.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20" id={`alloc-row-${a.id}`}>
-                      <td className="p-4 font-semibold">
-                        {proj ? proj.name : 'Projet Supprimé'}
-                        <span className="text-[10px] text-slate-400 font-mono block">{proj ? proj.code : ''}</span>
-                      </td>
+                      
                       <td className="p-4 text-slate-500 font-mono">
                         {new Date(a.created_at).toLocaleString()}
                       </td>
