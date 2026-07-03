@@ -49,7 +49,7 @@ const fr = {
   viewDetails: 'Détails',
   uploadReceipt: 'Télécharger le reçu',
   cameraScan: 'Capturer le reçu (Caméra)',
-  aiScanner: 'Analyse Automatique par Ià(Gemini)',
+  aiScanner: 'Analyse Automatique par IA (Gemini)',
   scanning: 'Analyse en cours par l\'IA...',
   scanSuccess: 'Reçu analysé avec succès !',
   scanError: 'Échec de l\'analyse par l\'IA.',
