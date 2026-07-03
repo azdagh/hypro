@@ -451,8 +451,105 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Project Form Modal - also needed on details page */}
+        {isFormOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="project-form-overlay-details">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+                  {editingProject ? t('editProject') : t('createProject')}
+                </h3>
+                <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-semibold">✕</button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">{t('code')} *</label>
+                    <input type="text" value={code} onChange={e => setCode(e.target.value)} placeholder="e.g. HY-AL-04" className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">Nom du Projet *</label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Nom officiel" className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-500">{t('description')}</label>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Notes et détails du chantier..." className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">{t('location')} *</label>
+                    <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Chéraga, Alger" className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">{t('budget')} (DZD) *</label>
+                    <input type="number" value={budget} onChange={e => setBudget(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 font-mono font-semibold" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 dark:bg-slate-800/30 rounded-xl">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">{t('totalLandArea')}</label>
+                    <input type="number" value={totalLandArea} onChange={e => setTotalLandArea(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">{t('builtArea')}</label>
+                    <input type="number" value={builtArea} onChange={e => setBuiltArea(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Bâtiments</label>
+                    <input type="number" value={numberofBuildings} onChange={e => setNumberofBuildings(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Blocs</label>
+                    <input type="number" value={numberofBlocks} onChange={e => setNumberofBlocks(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Étages (R+x)</label>
+                    <input type="number" value={numberofFloors} onChange={e => setNumberofFloors(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Appartements</label>
+                    <input type="number" value={numberofApartments} onChange={e => setNumberofApartments(Number(e.target.value))} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5 font-mono" />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Statut de Chantier</label>
+                    <select value={status} onChange={e => setStatus(e.target.value as any)} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1.5">
+                      <option value="Planning">En Planification</option>
+                      <option value="Active">Actif / En cours</option>
+                      <option value="Completed">Terminé</option>
+                      <option value="Delayed">Retardé</option>
+                      <option value="Archived">Archivé</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">{t('startDate')} *</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">{t('plannedEndDate')} *</label>
+                    <input type="date" value={plannedEndDate} onChange={e => setPlannedEndDate(e.target.value)} className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" required />
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-colors">
+                    {t('cancel')}
+                  </button>
+                  <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+                    {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                    {editingProject ? t('edit') : t('create')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
+
   }
 
   return (
