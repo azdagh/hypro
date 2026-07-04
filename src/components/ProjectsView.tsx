@@ -113,6 +113,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   };
 
   const canManage = ['Super Admin', 'Financial Director'].includes(userRole);
+  const canViewFiles = ['Super Admin', 'Financial Director', 'Site Manager', 'Auditor'].includes(userRole);
 
   const resetForm = () => {
     setCode('');
@@ -323,7 +324,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               </div>
               
               {/* Display technical files if any */}
-              {p.technical_files && p.technical_files.length > 0 && (
+              {canViewFiles && p.technical_files && p.technical_files.length > 0 && (
                 <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <h4 className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Fichiers Techniques</h4>
                   <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
@@ -523,6 +524,53 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                       <option value="Archived">Archivé</option>
                     </select>
                   </div>
+
+                  {/* File Upload Field */}
+                  <div className="space-y-2 col-span-2 md:col-span-4 mt-2">
+                    <label className="font-semibold text-slate-500 text-[10px] block">Fichiers Techniques (PDF)</label>
+                    
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <label className="relative cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 rounded-lg px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-all text-slate-600 dark:text-slate-300 w-full sm:w-auto">
+                          <input 
+                            type="file" 
+                            accept=".pdf"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={handleFileUpload}
+                            disabled={isUploadingFile}
+                          />
+                          {isUploadingFile ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                          {isUploadingFile ? 'Chargement...' : 'Ajouter un PDF'}
+                        </label>
+                        {uploadError && <span className="text-rose-500 text-[10px] font-semibold">{uploadError}</span>}
+                      </div>
+
+                      {technicalFiles.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                          {technicalFiles.map(file => (
+                            <div key={file.id} className="flex items-center justify-between p-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg group">
+                              <button type="button" onClick={() => setPreviewUrl(file.url)} className="flex items-center gap-2 overflow-hidden hover:opacity-80 flex-1 text-left">
+                                <FileText className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                                <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono">
+                                  {file.name}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFile(file.id)}
+                                className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded ml-2 flex-shrink-0 disabled:opacity-50"
+                                title="Supprimer"
+                                disabled={deletingFileId === file.id}
+                              >
+                                {deletingFileId === file.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">

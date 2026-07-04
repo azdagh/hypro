@@ -251,14 +251,28 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     e.preventDefault();
     const amountVal = Number(expAmount);
 
-    if (isDuplicateSubmission(expProject, expCategory, amountVal)) {
+    let finalProject = expProject;
+    const cat = categories.find(c => c.id === expCategory);
+    if (cat && (cat.name.includes('Frais Administratifs') || cat.name.includes('Bureau'))) {
+      const defaultProject = projects.find(p => p.code === 'GEN-00');
+      if (defaultProject) {
+        finalProject = defaultProject.id;
+      }
+    }
+
+    if (!finalProject) {
+      alert("Veuillez sélectionner un projet.");
+      return;
+    }
+
+    if (isDuplicateSubmission(finalProject, expCategory, amountVal)) {
       setDuplicateAlert(true);
       setTimeout(() => setDuplicateAlert(false), 5000);
       return;
     }
 
     const payload = {
-      project_id: expProject,
+      project_id: finalProject,
       category_id: expCategory,
       submitted_by: userId,
       amount_dzd: amountVal,
@@ -406,6 +420,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       .reduce((sum, e) => sum + Number(e.amount_dzd), 0);
     soldeAcheteur = totalAlloc - totalExp;
   }
+
+  // Compute isPersonalCategory for expense form
+  const selectedCat = categories.find(c => c.id === expCategory);
+  const isPersonalCategory = selectedCat && (selectedCat.name.includes('Frais Administratifs') || selectedCat.name.includes('Bureau'));
 
   return (
     <div className="space-y-6" id="expenses-and-pettycash-panel">
@@ -755,21 +773,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             )}
 
             <form onSubmit={handleExpenseSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-500">Sélectionner Projet *</label>
-                  <select 
-                    value={expProject} 
-                    onChange={e => setExpProject(e.target.value)} 
-                    className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
-                    required
-                  >
-                    <option value="">-- Choisir --</option>
-                    {projects.filter(p => p.code !== 'GEN-00').map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className={`grid grid-cols-1 ${isPersonalCategory ? '' : 'md:grid-cols-2'} gap-4`}>
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-500">Catégorie de Dépense *</label>
                   <select 
@@ -784,6 +788,22 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     ))}
                   </select>
                 </div>
+                {!isPersonalCategory && (
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-500">Sélectionner Projet *</label>
+                    <select 
+                      value={expProject} 
+                      onChange={e => setExpProject(e.target.value)} 
+                      className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5" 
+                      required={!isPersonalCategory}
+                    >
+                      <option value="">-- Choisir --</option>
+                      {projects.filter(p => p.code !== 'GEN-00').map(p => (
+                        <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Justification Upload Card with Camera capture="environment" */}
