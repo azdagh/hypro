@@ -1,5 +1,13 @@
 // Types and Interfaces for HYPRO ERP (Fonds de Roulement & Construction Management)
 
+export interface Company {
+  id: string;
+  name: string;
+  logo_url?: string;
+  subscription_status?: string;
+  created_at: string;
+}
+
 export type UserRole = 
   | 'Super Admin'
   | 'Financial Director'
@@ -21,6 +29,8 @@ export type ApprovalStatus =
   | 'Rejected';
 
 export interface Profile {
+  company_id?: string;
+  company_name?: string;
   id: string;
   email: string;
   full_name: string;
@@ -46,6 +56,7 @@ export interface UserPreference {
 }
 
 export interface Project {
+  company_id?: string;
   id: string;
   code: string;
   name: string;
@@ -68,6 +79,7 @@ export interface Project {
 }
 
 export interface Allocation {
+  company_id?: string;
   id: string;
   project_id: string;
   amount_dzd: number;
@@ -83,12 +95,14 @@ export interface Allocation {
 }
 
 export interface ExpenseCategory {
+  company_id?: string;
   id: string;
   name: string;
   is_personal?: boolean;
 }
 
 export interface Expense {
+  company_id?: string;
   id: string;
   project_id: string;
   project_name?: string;
@@ -108,6 +122,7 @@ export interface Expense {
 }
 
 export interface Supplier {
+  company_id?: string;
   id: string;
   company_name: string;
   contact_name?: string;
@@ -118,6 +133,7 @@ export interface Supplier {
 }
 
 export interface Subcontractor {
+  company_id?: string;
   id: string;
   company_name: string;
   contact_name?: string;
@@ -127,6 +143,7 @@ export interface Subcontractor {
 }
 
 export interface PurchaseRequest {
+  company_id?: string;
   id: string;
   project_id: string;
   project_name?: string;
@@ -141,6 +158,7 @@ export interface PurchaseRequest {
 }
 
 export interface PurchaseOrder {
+  company_id?: string;
   id: string;
   supplier_id: string;
   supplier_name?: string;
@@ -154,6 +172,7 @@ export interface PurchaseOrder {
 }
 
 export interface Contract {
+  company_id?: string;
   id: string;
   project_id: string;
   project_name?: string;
@@ -168,6 +187,7 @@ export interface Contract {
 }
 
 export interface Stock {
+  company_id?: string;
   id: string;
   project_id: string;
   project_name?: string;
@@ -182,6 +202,7 @@ export type StockItem = Stock;
 
 
 export interface Equipment {
+  company_id?: string;
   id: string;
   project_id: string;
   project_name?: string;

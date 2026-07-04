@@ -462,7 +462,8 @@ app.get('/api/projects/:id', async (req, res) => {
 app.post('/api/projects', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createProject(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createProject({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -502,7 +503,8 @@ app.get('/api/allocations', async (req, res) => {
 app.post('/api/allocations', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createAllocation(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createAllocation({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -531,7 +533,8 @@ app.get('/api/categories', async (req, res) => {
 
 app.post('/api/categories', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   try {
-    const data = await SupabaseDbService.createCategory(req.body);
+    const companyId = await SupabaseDbService.getCompanyId((req as any).user?.id);
+    const data = await SupabaseDbService.createCategory({ ...req.body, company_id: companyId });
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -601,7 +604,8 @@ app.get('/api/suppliers', async (req, res) => {
 app.post('/api/suppliers', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createSupplier(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createSupplier({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -630,7 +634,8 @@ app.get('/api/subcontractors', async (req, res) => {
 app.post('/api/subcontractors', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createSubcontractor(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createSubcontractor({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -660,7 +665,8 @@ app.get('/api/purchase-requests', async (req, res) => {
 app.post('/api/purchase-requests', requireRole(['Super Admin', 'Financial Director', 'Site Manager', 'Employee']), requireProjectAccess, async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createPurchaseRequest(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createPurchaseRequest({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -712,7 +718,8 @@ app.get('/api/purchase-orders', async (req, res) => {
 app.post('/api/purchase-orders', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createPurchaseOrder(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createPurchaseOrder({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -753,7 +760,8 @@ app.get('/api/contracts', async (req, res) => {
 app.post('/api/contracts', requireRole(['Super Admin', 'Financial Director']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createContract(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createContract({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -803,7 +811,8 @@ app.get('/api/stock-items', async (req, res) => {
 app.post('/api/stocks', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createStock(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createStock({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -875,7 +884,8 @@ app.get('/api/equipment', async (req, res) => {
 app.post('/api/equipment', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createEquipment(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createEquipment({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });

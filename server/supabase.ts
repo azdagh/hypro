@@ -156,6 +156,45 @@ export const SupabaseAuthService = {
  * REAL DATABASE SERVICE (Supabase PostgreSQL CRUD Operations)
  */
 export const SupabaseDbService = {
+  // Multi-tenant: get company_id for a user
+  async getCompanyId(userId: string): Promise<string | null> {
+    if (!userId) return null;
+    const supabase = getServiceRoleSupabase();
+    const { data } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    return data?.company_id || null;
+  },
+
+  // Companies (Master Admin only)
+  async getCompanies() {
+    const supabase = getServiceRoleSupabase();
+    const { data, error } = await supabase.from('companies').select('*').order('name', { ascending: true });
+    if (error) throw sanitizeError(error);
+    return data || [];
+  },
+
+  async createCompany(companyData: { name: string, logo_url?: string }) {
+    const supabase = getServiceRoleSupabase();
+    const { data, error } = await supabase
+      .from('companies')
+      .insert([{ name: companyData.name, logo_url: companyData.logo_url || null, subscription_status: 'active' }])
+      .select().single();
+    if (error) throw sanitizeError(error);
+    return data;
+  },
+
+  async updateCompany(id: string, updates: { name?: string, logo_url?: string, subscription_status?: string }) {
+    const supabase = getServiceRoleSupabase();
+    const { data, error } = await supabase.from('companies').update(updates).eq('id', id).select().single();
+    if (error) throw sanitizeError(error);
+    return data;
+  },
+
+  async deleteCompany(id: string) {
+    const supabase = getServiceRoleSupabase();
+    const { error } = await supabase.from('companies').delete().eq('id', id);
+    if (error) throw sanitizeError(error);
+  },
+
   // Profiles
   async getProfileByEmail(email: string) {
     const supabase = getServiceRoleSupabase();
@@ -417,6 +456,18 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('expense_categories')
       .insert([{ name: catData.name }])
+      .select()
+      .single();
+    if (error) throw sanitizeError(error);
+    return data;
+  },
+
+  async updateCategory(id: string, catData: { name: string, is_personal?: boolean }) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('expense_categories')
+      .update({ name: catData.name, is_personal: !!catData.is_personal })
+      .eq('id', id)
       .select()
       .single();
     if (error) throw sanitizeError(error);

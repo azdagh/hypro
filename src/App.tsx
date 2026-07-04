@@ -16,6 +16,7 @@ import { InventoryView } from './components/InventoryView';
 import { ReportsView } from './components/ReportsView';
 import { SettingsView } from './components/SettingsView';
 import { AdministrationView } from './components/AdministrationView';
+import { MasterAdminPanel } from './components/MasterAdminPanel';
 import { 
   Project, Allocation, Expense, PurchaseRequest, 
   PurchaseOrder, Contract, Supplier, Subcontractor, 
@@ -1193,6 +1194,10 @@ function MainLayout() {
                   onAddCategory={handleAddCategory}
                   onDeleteCategory={handleDeleteCategory}
                 />
+              )}
+
+              {activeTab === 'master-admin' && activeRole === 'Super Admin' && (
+                <MasterAdminPanel />
               )}
 
               {activeTab === 'audit' && (
