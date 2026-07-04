@@ -85,6 +85,7 @@ export interface Allocation {
 export interface ExpenseCategory {
   id: string;
   name: string;
+  is_personal?: boolean;
 }
 
 export interface Expense {
