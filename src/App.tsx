@@ -43,7 +43,7 @@ function MainLayout() {
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
-  const [recentSuperAdmins, setRecentSuperAdmins] = useState<{email:string; name:string}[]>(() => {
+  const [recentSuperAdmins, setRecentSuperAdmins] = useState<{email:string; name:string; pwd?:string}[]>(() => {
     try {
       return JSON.parse(localStorage.getItem('hypro_recent_superadmins') || '[]');
     } catch { return []; }
@@ -250,8 +250,9 @@ function MainLayout() {
     // Save superadmin to recent logins list
     if (saveToRecent && (role === 'Super Admin') && user.email) {
       setRecentSuperAdmins(prev => {
+        const existing = prev.find(u => u.email === user.email);
         const updated = [
-          { email: user.email, name: user.full_name || user.email },
+          { email: user.email, name: user.full_name || user.email, pwd: existing?.pwd },
           ...prev.filter(u => u.email !== user.email)
         ].slice(0, 5);
         localStorage.setItem('hypro_recent_superadmins', JSON.stringify(updated));
@@ -322,6 +323,17 @@ function MainLayout() {
       if (!profile) {
         throw new Error('Profil HYPRO introuvable');
       }
+
+      // Save password for quick-login (obfuscated)
+      setRecentSuperAdmins(prev => {
+        const existing = prev.find(u => u.email === emailInput);
+        const updated = [
+          { email: emailInput, name: profile.full_name || emailInput, pwd: btoa(passwordInput) },
+          ...prev.filter(u => u.email !== emailInput)
+        ].slice(0, 5);
+        localStorage.setItem('hypro_recent_superadmins', JSON.stringify(updated));
+        return updated;
+      });
 
       applyLoggedInUser(profile, profile.role, true, true);
     } catch (e: any) {
@@ -830,16 +842,42 @@ function MainLayout() {
                 {recentSuperAdmins.map((sa) => (
                   <button
                     key={sa.email}
-                    onClick={() => { setEmailInput(sa.email); setPasswordInput(''); }}
+                    onClick={async () => {
+                      if (sa.pwd) {
+                        // Auto-login with stored credentials
+                        setLoggingIn(true);
+                        setLoginError('');
+                        try {
+                          const supabase = await getSupabaseClient();
+                          const { data, error } = await supabase.auth.signInWithPassword({
+                            email: sa.email,
+                            password: atob(sa.pwd),
+                          });
+                          if (error) throw error;
+                          const profile = await resolveProfileForAuthUser(data.user, sa.email);
+                          if (!profile) throw new Error('Profil introuvable');
+                          applyLoggedInUser(profile, profile.role, true, true);
+                        } catch (e: any) {
+                          setLoginError('Connexion rapide échouée. Reconnectez-vous manuellement.');
+                          setEmailInput(sa.email);
+                          setPasswordInput('');
+                        } finally {
+                          setLoggingIn(false);
+                        }
+                      } else {
+                        setEmailInput(sa.email);
+                        setPasswordInput('');
+                      }
+                    }}
                     disabled={loggingIn}
                     className="w-full text-left p-3 border border-slate-100 dark:border-slate-800 hover:border-emerald-500/40 dark:hover:border-emerald-500/30 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/70 rounded-xl text-xs flex justify-between items-center transition-all group"
                     id={`quick-login-${sa.email.replace('@','').replace('.','')}`}
                   >
                     <div>
                       <p className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{sa.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">{sa.email} · Super Admin</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{sa.email} · {sa.pwd ? '🔑 Connexion directe' : 'Entrer le mot de passe'}</p>
                     </div>
-                    <span className="bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded text-[9px] font-semibold border border-emerald-500/20">Connexion</span>
+                    <span className={`px-2.5 py-0.5 rounded text-[9px] font-semibold border ${sa.pwd ? 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'}`}>{sa.pwd ? '1-Clic' : 'Connexion'}</span>
                   </button>
                 ))}
               </div>
