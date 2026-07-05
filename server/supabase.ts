@@ -520,11 +520,15 @@ export const SupabaseDbService = {
     return data;
   },
 
-  async createCategory(catData: { name: string }) {
+  async createCategory(catData: { name: string, is_personal?: boolean, company_id?: string | null }) {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('expense_categories')
-      .insert([{ name: catData.name }])
+      .insert([{ 
+        name: catData.name,
+        is_personal: !!catData.is_personal,
+        company_id: catData.company_id || null
+      }])
       .select()
       .single();
     if (error) throw sanitizeError(error);
