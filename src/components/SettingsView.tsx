@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   User, Shield, Settings, Monitor, Globe, Bell, 
-  Smartphone, Laptop, Compass, Key, Tag, Plus, Trash2, Settings as SettingsIcon
+  Smartphone, Laptop, Compass, Key, Tag, Plus, Trash2, Settings as SettingsIcon, RefreshCw
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useTheme } from '../theme';
@@ -251,6 +251,7 @@ const CategoriesPanel: React.FC<{
   const [editName, setEditName] = useState('');
   const [editPersonal, setEditPersonal] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,10 +284,13 @@ const CategoriesPanel: React.FC<{
   const handleDelete = async (id: string, name: string) => {
     if (!onDeleteCategory) return;
     if (!confirm(`Supprimer la catégorie "${name}" ?`)) return;
+    setDeletingCategoryId(id);
     try {
       await onDeleteCategory(id);
     } catch (err: any) {
       alert(err.message || 'Erreur lors de la suppression');
+    } finally {
+      setDeletingCategoryId(null);
     }
   };
 
@@ -404,10 +408,11 @@ const CategoriesPanel: React.FC<{
                     {onDeleteCategory && (
                       <button
                         onClick={() => handleDelete(cat.id, cat.name)}
-                        className="p-1.5 text-rose-400 hover:text-rose-600 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-sm"
+                        className="p-1.5 text-rose-400 hover:text-rose-600 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-sm disabled:opacity-50"
                         title="Supprimer"
+                        disabled={deletingCategoryId === cat.id}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deletingCategoryId === cat.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                       </button>
                     )}
                   </div>

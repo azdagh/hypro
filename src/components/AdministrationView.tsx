@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, Mail, ShieldAlert, Key, Ban, UserCheck, 
   Layers, Plus, Trash2, CheckCircle2, ShieldCheck, HelpCircle, 
-  FileText, ArrowRight, Lock, Eye, AlertCircle
+  FileText, ArrowRight, Lock, Eye, AlertCircle, RefreshCw, Send, Link, X, Check
 } from 'lucide-react';
 import { formatCurrencyDZD } from '../i18n';
 import { secureFetch } from '../lib/api';
