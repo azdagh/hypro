@@ -253,16 +253,16 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
     let finalProject = expProject;
     const cat = categories.find(c => c.id === expCategory);
-    if (cat && (cat.name.includes('Frais Administratifs') || cat.name.includes('Bureau'))) {
+    
+    // Auto-assign to default project if category is personal or administrative
+    if (cat && (cat.is_personal || cat.name.includes('Frais Administratifs') || cat.name.includes('Bureau'))) {
       const defaultProject = projects.find(p => p.code === 'GEN-00');
       if (defaultProject) {
         finalProject = defaultProject.id;
       }
     }
 
-    const isPersonal = cat?.is_personal;
-
-    if (!finalProject && !isPersonal) {
+    if (!finalProject) {
       alert("Veuillez sélectionner un projet.");
       return;
     }

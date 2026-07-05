@@ -113,7 +113,15 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   };
 
   const canManage = ['Super Admin', 'Financial Director'].includes(userRole);
-  const canViewFiles = ['Super Admin', 'Financial Director', 'Site Manager', 'Auditor'].includes(userRole);
+
+  const parseTechnicalFiles = (files: any) => {
+    if (!files) return [];
+    if (Array.isArray(files)) return files;
+    if (typeof files === 'string') {
+      try { return JSON.parse(files); } catch { return []; }
+    }
+    return [];
+  };
 
   const resetForm = () => {
     setCode('');
@@ -156,7 +164,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setStartDate(p.start_date);
     setPlannedEndDate(p.planned_end_date);
     setStatus(p.status);
-    setTechnicalFiles(p.technical_files || []);
+    setTechnicalFiles(parseTechnicalFiles(p.technical_files));
     setUploadError(null);
     setIsFormOpen(true);
   };
@@ -323,31 +331,34 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 </div>
               </div>
               
-              {/* Display technical files if any */}
-              {canViewFiles && (
-                <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-                  <h4 className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Fichiers Techniques</h4>
-                  {p.technical_files && p.technical_files.length > 0 ? (
-                    <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
-                      {p.technical_files.map(file => (
-                        <button
-                          key={file.id}
-                          type="button"
-                          onClick={() => setPreviewUrl(file.url)}
-                          className="flex items-center gap-2 p-2 border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors w-full text-left"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono group-hover:text-emerald-600 transition-colors">
-                            {file.name}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-slate-400 italic">Aucun fichier technique attaché à ce projet.</p>
-                  )}
-                </div>
-              )}
+              {/* Display technical files */}
+              <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <h4 className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Fichiers Techniques</h4>
+                {(() => {
+                  const techFiles = parseTechnicalFiles(p.technical_files);
+                  if (techFiles.length > 0) {
+                    return (
+                      <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                        {techFiles.map((file: any) => (
+                          <button
+                            key={file.id}
+                            type="button"
+                            onClick={() => setPreviewUrl(file.url)}
+                            className="flex items-center gap-2 p-2 border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors w-full text-left"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                            <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono group-hover:text-emerald-600 transition-colors">
+                              {file.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  } else {
+                    return <p className="text-[11px] text-slate-400 italic">Aucun fichier technique attaché à ce projet.</p>;
+                  }
+                })()}
+              </div>
           </div>
 
           {/* Timeline & Status */}

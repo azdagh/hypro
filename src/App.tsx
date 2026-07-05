@@ -240,7 +240,7 @@ function MainLayout() {
     }
   };
 
-  const applyLoggedInUser = (user: any, role = user.role, saveToRecent = false, resetTab = false) => {
+  const applyLoggedInUser = (user: any, role = user.role, saveToRecent = false, resetTab = false, passwordToSave?: string) => {
     setCurrentUser(user);
     setActiveRole(role);
     if (resetTab) setActiveTab('dashboard'); // only on fresh login
@@ -250,10 +250,11 @@ function MainLayout() {
     // Save superadmin to recent logins list
     if (saveToRecent && (role === 'Super Admin') && user.email) {
       setRecentSuperAdmins(prev => {
-        const existing = prev.find(u => u.email === user.email);
+        const emailLower = user.email.toLowerCase();
+        const existing = prev.find(u => u.email.toLowerCase() === emailLower);
         const updated = [
-          { email: user.email, name: user.full_name || user.email, pwd: existing?.pwd },
-          ...prev.filter(u => u.email !== user.email)
+          { email: emailLower, name: user.full_name || emailLower, pwd: passwordToSave ? btoa(passwordToSave) : existing?.pwd },
+          ...prev.filter(u => u.email.toLowerCase() !== emailLower)
         ].slice(0, 5);
         localStorage.setItem('hypro_recent_superadmins', JSON.stringify(updated));
         return updated;
@@ -324,18 +325,7 @@ function MainLayout() {
         throw new Error('Profil HYPRO introuvable');
       }
 
-      // Save password for quick-login (obfuscated)
-      setRecentSuperAdmins(prev => {
-        const existing = prev.find(u => u.email === emailInput);
-        const updated = [
-          { email: emailInput, name: profile.full_name || emailInput, pwd: btoa(passwordInput) },
-          ...prev.filter(u => u.email !== emailInput)
-        ].slice(0, 5);
-        localStorage.setItem('hypro_recent_superadmins', JSON.stringify(updated));
-        return updated;
-      });
-
-      applyLoggedInUser(profile, profile.role, true, true);
+      applyLoggedInUser(profile, profile.role, true, true, passwordInput);
     } catch (e: any) {
       setLoginError('Échec de la connexion : ' + (e.message || e));
     } finally {
@@ -856,7 +846,7 @@ function MainLayout() {
                           if (error) throw error;
                           const profile = await resolveProfileForAuthUser(data.user, sa.email);
                           if (!profile) throw new Error('Profil introuvable');
-                          applyLoggedInUser(profile, profile.role, true, true);
+                          applyLoggedInUser(profile, profile.role, true, true, atob(sa.pwd));
                         } catch (e: any) {
                           setLoginError('Connexion rapide échouée. Reconnectez-vous manuellement.');
                           setEmailInput(sa.email);

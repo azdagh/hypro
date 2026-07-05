@@ -599,9 +599,9 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-colors mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
                 id="btn-submit-invitation"
-                disabled={submittingInvitation}
+                disabled={submittingInvitation || !invitationForm.email.trim()}
               >
-                {submittingInvitation ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {submittingInvitation ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Mail className="w-4 h-4" />}
                 {submittingInvitation ? 'Envoi en cours...' : 'Envoyer l\'Invitation'}
               </button>
             </form>
