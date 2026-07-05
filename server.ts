@@ -982,7 +982,8 @@ app.post('/api/stocks', requireRole(['Super Admin', 'Financial Director', 'Accou
 app.post('/api/stock-items', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Site Manager']), async (req, res) => {
   const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createStock(req.body, userId);
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.createStock({ ...req.body, company_id: companyId }, userId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });

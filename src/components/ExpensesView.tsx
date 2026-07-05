@@ -260,7 +260,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       }
     }
 
-    if (!finalProject) {
+    const isPersonal = cat?.is_personal;
+
+    if (!finalProject && !isPersonal) {
       alert("Veuillez sélectionner un projet.");
       return;
     }

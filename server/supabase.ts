@@ -180,23 +180,17 @@ export const SupabaseDbService = {
       .select().single();
     if (error) throw sanitizeError(error);
 
-    // Seed default categories for this new client
-    const defaultCategories = [
-      { name: 'Matériaux de construction', is_personal: false },
-      { name: 'Main d\'œuvre', is_personal: false },
-      { name: 'Transport et logistique', is_personal: false },
-      { name: 'Équipement (location/achat)', is_personal: false },
-      { name: 'Frais de sous-traitance', is_personal: false },
-      { name: 'Carburant', is_personal: false },
-      { name: 'Fournitures de bureau', is_personal: false },
-      { name: 'Frais administratifs', is_personal: false },
-      { name: 'Dépenses personnelles', is_personal: true }
-    ];
-
+    // Seed default categories for this new client based on the Super Admin's categories
     try {
-      await supabase.from('expense_categories').insert(
-        defaultCategories.map(cat => ({ ...cat, company_id: data.id }))
-      );
+      const { data: adminProfile } = await supabase.from('profiles').select('company_id').ilike('email', 'Hypromotion16@gmail.com').maybeSingle();
+      if (adminProfile?.company_id) {
+        const { data: adminCategories } = await supabase.from('expense_categories').select('name, is_personal').eq('company_id', adminProfile.company_id);
+        if (adminCategories && adminCategories.length > 0) {
+          await supabase.from('expense_categories').insert(
+            adminCategories.map(cat => ({ name: cat.name, is_personal: cat.is_personal, company_id: data.id }))
+          );
+        }
+      }
     } catch (e) {
       console.error('Failed to seed categories for company', data.id, e);
     }
@@ -593,9 +587,11 @@ export const SupabaseDbService = {
 
     if (isPersonal) {
       // Bypass budget check for personal expenses, just insert directly (no project required)
+      const companyId = await SupabaseDbService.getCompanyId(userId);
       const { data, error } = await supabase
         .from('expenses')
         .insert([{
+          company_id: companyId,
           project_id: null, // personal expenses don't belong to a project
           category_id: expenseData.category_id,
           amount_dzd: Number(expenseData.amount_dzd),
@@ -666,6 +662,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('suppliers')
       .insert([{
+        company_id: supplierData.company_id || null,
         company_name: supplierData.name || supplierData.company_name,
         contact_name: supplierData.contact_name || '',
         phone: supplierData.phone || '',
@@ -698,6 +695,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('subcontractors')
       .insert([{
+        company_id: subData.company_id || null,
         company_name: subData.name || subData.company_name,
         contact_name: subData.contact_name || '',
         phone: subData.phone || '',
@@ -736,6 +734,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('purchase_requests')
       .insert([{
+        company_id: prData.company_id || null,
         project_id: prData.project_id,
         requester_id: userId,
         description: prData.item_description + (prData.quantity ? '\nQuantitÃ©: ' + prData.quantity + ' ' + prData.unit : '') + (prData.suggested_supplier_name ? '\nFournisseur SuggÃ©rÃ©: ' + prData.suggested_supplier_name : ''),
@@ -782,6 +781,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('purchase_orders')
       .insert([{
+        company_id: poData.company_id || null,
         supplier_id: poData.supplier_id,
         project_id: poData.project_id,
         amount_dzd: Number(poData.total_amount_dzd || poData.amount_dzd || 0),
@@ -816,6 +816,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('contracts')
       .insert([{
+        company_id: contractData.company_id || null,
         project_id: contractData.project_id,
         contractor_id: contractData.subcontractor_id || contractData.contractor_id,
         amount_dzd: Number(contractData.total_amount_dzd || contractData.amount_dzd || 0),
