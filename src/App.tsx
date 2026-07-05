@@ -434,8 +434,8 @@ function MainLayout() {
     }
   };
 
-  const handleDeleteProject = async (id: string) => {
-    if (!confirm('Voulez-vous vraiment archiver ce projet de construction ?')) return;
+  const handleDeleteProject = async (id: string, skipConfirm = false) => {
+    if (!skipConfirm && !confirm('Voulez-vous vraiment archiver ce projet de construction ?')) return;
     try {
       const res = await secureFetch(`/api/projects/${id}`, {
         method: 'DELETE'

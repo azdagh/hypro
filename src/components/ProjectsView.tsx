@@ -774,7 +774,16 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button 
-                        onClick={async () => { setDeletingId(p.id); try { await (onDeleteProject as any)(p.id); } finally { setDeletingId(null); } }}
+                        onClick={async () => {
+                          if (window.confirm("Voulez-vous vraiment archiver ce projet de construction ?")) {
+                            setDeletingId(p.id); 
+                            try { 
+                              await (onDeleteProject as any)(p.id, true); 
+                            } finally { 
+                              setDeletingId(null); 
+                            }
+                          }
+                        }}
                         className="p-1.5 border border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded text-rose-600 transition-colors"
                         title={t('delete')}
                         id={`btn-delete-${p.code}`}
