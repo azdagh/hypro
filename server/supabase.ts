@@ -337,7 +337,8 @@ export const SupabaseDbService = {
         budget: Number(projectData.budget || 0),
         start_date: projectData.start_date,
         planned_end_date: projectData.planned_end_date,
-        status: projectData.status || 'Planning'
+        status: projectData.status || 'Planning',
+        technical_files: projectData.technical_files || []
       }])
       .select()
       .single();
@@ -351,7 +352,8 @@ export const SupabaseDbService = {
     const allowed = [
       'code', 'name', 'description', 'location', 'total_land_area', 'built_area',
       'number_of_buildings', 'number_of_blocks', 'number_of_floors',
-      'number_of_apartments', 'budget', 'start_date', 'planned_end_date', 'status'
+      'number_of_apartments', 'budget', 'start_date', 'planned_end_date', 'status',
+      'technical_files'
     ];
     for (const key of allowed) {
       if (updates[key] !== undefined) {

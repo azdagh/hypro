@@ -324,24 +324,28 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               </div>
               
               {/* Display technical files if any */}
-              {canViewFiles && p.technical_files && p.technical_files.length > 0 && (
+              {canViewFiles && (
                 <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <h4 className="text-[10px] font-semibold text-slate-500 uppercase mb-2">Fichiers Techniques</h4>
-                  <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
-                    {p.technical_files.map(file => (
-                      <button
-                        key={file.id}
-                        type="button"
-                        onClick={() => setPreviewUrl(file.url)}
-                        className="flex items-center gap-2 p-2 border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors w-full text-left"
-                      >
-                        <FileText className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                        <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono group-hover:text-emerald-600 transition-colors">
-                          {file.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  {p.technical_files && p.technical_files.length > 0 ? (
+                    <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                      {p.technical_files.map(file => (
+                        <button
+                          key={file.id}
+                          type="button"
+                          onClick={() => setPreviewUrl(file.url)}
+                          className="flex items-center gap-2 p-2 border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors w-full text-left"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate font-mono group-hover:text-emerald-600 transition-colors">
+                            {file.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 italic">Aucun fichier technique attaché à ce projet.</p>
+                  )}
                 </div>
               )}
           </div>
@@ -592,6 +596,54 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+        {/* Full-screen Technical File Preview Modal */}
+        {previewUrl && (
+          <div
+            onClick={() => setPreviewUrl(null)}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-2 sm:p-4 z-[9999]"
+            id="tech-file-preview-overlay-details"
+          >
+            <div className="w-full max-w-5xl flex justify-between items-center mb-3 px-1">
+              <span className="text-white/70 text-xs sm:text-sm font-medium">Aperçu du Fichier Technique</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-white hover:text-emerald-400 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                >
+                  <ArrowUpRight className="w-4 h-4" /> <span className="hidden sm:inline">Ouvrir</span>
+                </a>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPreviewUrl(null); }}
+                  className="bg-white/10 hover:bg-rose-500 text-white p-1.5 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div
+              className="w-full max-w-5xl h-[85vh] bg-slate-100 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 flex-shrink-0"
+              onClick={(e) => e.stopPropagation()}
+              id="tech-file-preview-container-details"
+            >
+              <iframe
+                src={(() => {
+                  const url = previewUrl || '';
+                  const m1 = url.match(/\/file\/d\/([^/]+)/);
+                  if (m1) return `https://drive.google.com/file/d/${m1[1]}/preview`;
+                  const m2 = url.match(/[?&]id=([^&]+)/);
+                  if (m2) return `https://drive.google.com/file/d/${m2[1]}/preview`;
+                  return url.replace(/\/view(\?.*)?$/, '/preview');
+                })()}
+                className="w-full h-full border-0"
+                allow="autoplay"
+                title="Technical File Preview"
+              />
             </div>
           </div>
         )}

@@ -34,6 +34,9 @@ ALTER TABLE public.audit_logs       ADD COLUMN IF NOT EXISTS company_id UUID REF
 ALTER TABLE public.project_assignments ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES public.companies(id);
 ALTER TABLE public.notifications    ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES public.companies(id);
 
+-- Add technical_files JSONB column to projects (stores array of {id, name, url})
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS technical_files JSONB DEFAULT '[]'::jsonb;
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- STEP 3: Create default company and assign ALL existing data to it
 -- ─────────────────────────────────────────────────────────────────────────
