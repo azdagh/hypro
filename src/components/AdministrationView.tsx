@@ -58,6 +58,10 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
   const [assignments, setAssignments] = useState<ProjectAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [submittingUser, setSubmittingUser] = useState(false);
+  const [submittingInvitation, setSubmittingInvitation] = useState(false);
+  const [submittingAssignment, setSubmittingAssignment] = useState(false);
 
   // Forms states
   const [userForm, setUserForm] = useState({ email: '', full_name: '', password: '', role: 'Employee', phone: '' });
@@ -101,6 +105,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmittingUser(true);
     try {
       const res = await secureFetch('/api/admin/users', {
         method: 'POST',
@@ -119,6 +124,7 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
 
   const handleCreateInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmittingInvitation(true);
     try {
       const res = await secureFetch('/api/admin/invitations', {
         method: 'POST',
@@ -132,11 +138,14 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       fetchAdminData();
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setSubmittingInvitation(false);
     }
   };
 
   const handleCreateAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmittingAssignment(true);
     try {
       const res = await secureFetch('/api/admin/project-assignments', {
         method: 'POST',
@@ -150,11 +159,14 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       fetchAdminData();
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setSubmittingAssignment(false);
     }
   };
 
   const handleRemoveAssignment = async (id: string) => {
     if (!window.confirm('Voulez-vous vraiment révoquer cette affectation de projet ?')) return;
+    setActionLoading(`remove_assignment_${id}`);
     try {
       const res = await secureFetch(`/api/admin/project-assignments/${id}`, {
         method: 'DELETE'
@@ -167,6 +179,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       fetchAdminData();
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -176,8 +190,13 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       ? `Voulez-vous réactiver le compte de ${user.full_name} ?`
       : `Voulez-vous vraiment désactiver (bannir) temporairement le compte de ${user.full_name} ?`;
     
+    if (user.email === 'Hypromotion16@gmail.com') {
+      showMsg('Impossible de désactiver le Super Admin principal.', 'error');
+      return;
+    }
     if (!window.confirm(confirmMsg)) return;
 
+    setActionLoading(`toggle_ban_${user.id}`);
     try {
       const res = await secureFetch(`/api/admin/users/${user.id}/${action}`, {
         method: 'POST'
@@ -190,13 +209,20 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       fetchAdminData();
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleDeleteUser = async (user: AdminUser) => {
+    if (user.email === 'Hypromotion16@gmail.com') {
+      showMsg('Impossible de supprimer le Super Admin principal.', 'error');
+      return;
+    }
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT l'utilisateur ${user.full_name} ? Cette action est irréversible.`)) {
       return;
     }
+    setActionLoading(`delete_user_${user.id}`);
     try {
       const res = await secureFetch(`/api/admin/users/${user.id}`, { method: 'DELETE' });
       if (!res.ok) {
@@ -207,12 +233,15 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       fetchAdminData();
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
+    setActionLoading(`reset_pwd`);
     try {
       const res = await secureFetch(`/api/admin/users/${selectedUser.id}/reset-password`, {
         method: 'POST',
@@ -227,6 +256,8 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
       setNewPassword('');
     } catch (err: any) {
       showMsg(err.message, 'error');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -395,9 +426,11 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
 
               <button 
                 type="submit"
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
+                disabled={submittingUser}
               >
-                <Plus className="w-4 h-4" /> Enregistrer le Collaborateur
+                {submittingUser ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} 
+                {submittingUser ? "Création..." : "Enregistrer le Collaborateur"}
               </button>
             </form>
           </div>
@@ -481,21 +514,21 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                                 u.banned 
                                   ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400' 
                                   : 'bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
-                              }`}
+                              } disabled:opacity-50`}
                               title={u.banned ? 'Réactiver' : 'Désactiver'}
-                              disabled={u.id === currentUserId}
+                              disabled={u.id === currentUserId || actionLoading === `toggle_ban_${u.id}`}
                             >
-                              {u.banned ? <UserCheck className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                              {actionLoading === `toggle_ban_${u.id}` ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : u.banned ? <UserCheck className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
                             </button>
 
                             {/* Hard Delete */}
                             <button 
                               onClick={() => handleDeleteUser(u)}
-                              className="p-1.5 rounded-lg transition-colors bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:text-red-400"
+                              className="p-1.5 rounded-lg transition-colors bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:text-red-400 disabled:opacity-50"
                               title="Supprimer définitivement"
-                              disabled={u.id === currentUserId}
+                              disabled={u.id === currentUserId || actionLoading === `delete_user_${u.id}`}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {actionLoading === `delete_user_${u.id}` ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                             </button>
                           </div>
                         </td>
@@ -564,9 +597,12 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
 
               <button 
                 type="submit"
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-colors mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
+                id="btn-submit-invitation"
+                disabled={submittingInvitation}
               >
-                <Mail className="w-4 h-4" /> Créer & Envoyer l'Invitation
+                {submittingInvitation ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {submittingInvitation ? 'Envoi en cours...' : 'Envoyer l\'Invitation'}
               </button>
             </form>
           </div>
@@ -683,9 +719,11 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
 
               <button 
                 type="submit"
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
+                disabled={submittingAssignment}
               >
-                <Plus className="w-4 h-4" /> Enregistrer l'affectation
+                {submittingAssignment ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                {submittingAssignment ? "Affectation..." : "Enregistrer l'affectation"}
               </button>
             </form>
           </div>
@@ -735,10 +773,12 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                         <td className="p-4 text-right">
                           <button 
                             onClick={() => handleRemoveAssignment(a.id)}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-lg transition-colors inline-flex"
+                            className="p-1 text-slate-400 hover:text-rose-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded shadow-sm disabled:opacity-50"
                             title="Révoquer l'accès"
+                            id={`btn-revoke-assignment-${a.id}`}
+                            disabled={actionLoading === `remove_assignment_${a.id}`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            {actionLoading === `remove_assignment_${a.id}` ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                           </button>
                         </td>
                       </tr>
@@ -959,8 +999,10 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                 </button>
                 <button 
                   type="submit" 
-                  className="px-3.5 py-1.5 bg-slate-900 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 font-bold rounded-lg"
+                  className="px-3.5 py-1.5 bg-indigo-600 text-white font-bold rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                  disabled={actionLoading === 'reset_pwd'}
                 >
+                  {actionLoading === 'reset_pwd' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Valider
                 </button>
               </div>

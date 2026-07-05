@@ -49,6 +49,8 @@ export const MasterAdminPanel: React.FC = () => {
   const [showAddCompany, setShowAddCompany] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deletingCompanyId, setDeletingCompanyId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   // Provision user form
   const [provisioningFor, setProvisioningFor] = useState<string | null>(null);
@@ -140,6 +142,7 @@ export const MasterAdminPanel: React.FC = () => {
 
   const handleDeleteCompany = async (company: Company) => {
     if (!confirm(`Supprimer définitivement "${company.name}" et tous ses utilisateurs ? Cette action est irréversible.`)) return;
+    setDeletingCompanyId(company.id);
     try {
       const res = await masterFetch(`/master/companies/${company.id}`, { method: 'DELETE' });
       if (!res.ok) {
@@ -151,11 +154,14 @@ export const MasterAdminPanel: React.FC = () => {
       setExpandedCompanies(prev => { const n = new Set(prev); n.delete(company.id); return n; });
     } catch (e: any) {
       alert('Erreur: ' + e.message);
+    } finally {
+      setDeletingCompanyId(null);
     }
   };
 
   const handleDeleteUser = async (userId: string, companyId: string, userName: string) => {
     if (!confirm(`Supprimer l'utilisateur "${userName}" ?`)) return;
+    setDeletingUserId(userId);
     try {
       const res = await masterFetch(`/master/users/${userId}`, { method: 'DELETE' });
       if (!res.ok) {
@@ -168,6 +174,8 @@ export const MasterAdminPanel: React.FC = () => {
       }));
     } catch (e: any) {
       alert('Erreur: ' + e.message);
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -193,7 +201,7 @@ export const MasterAdminPanel: React.FC = () => {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('Erreur modification utilisateur');
-      
+
       // Refresh users for that company
       const companyId = editingUser.company_id || Object.keys(companyUsers).find(cid => companyUsers[cid].some(u => u.id === editingUser.id));
       if (companyId) {
@@ -361,16 +369,16 @@ export const MasterAdminPanel: React.FC = () => {
                 <form onSubmit={handleProvisionUser} className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-slate-500 block mb-1">Nom Complet *</label>
-                    <input type="text" value={provName} onChange={e => setProvName(e.target.value)} placeholder="Mohamed Amine Belabed" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
+                    <input type="text" value={provName} onChange={e => setProvName(e.target.value)} placeholder="Seif El Islam" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-slate-500 block mb-1">Email *</label>
                     <input type="email" value={provEmail} onChange={e => setProvEmail(e.target.value)} placeholder="admin@client.dz" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-500 block mb-1">Mot de Passe (défaut: Hypro2024!)</label>
+                    <label className="text-xs font-semibold text-slate-500 block mb-1">Mot de Passe (défaut: Hypro2026!)</label>
                     <div className="relative">
-                      <input type={showPassword ? 'text' : 'password'} value={provPassword} onChange={e => setProvPassword(e.target.value)} placeholder="Hypro2024!" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 pr-8" />
+                      <input type={showPassword ? 'text' : 'password'} value={provPassword} onChange={e => setProvPassword(e.target.value)} placeholder="Hypro2026!" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 pr-8" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-slate-400">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -410,19 +418,19 @@ export const MasterAdminPanel: React.FC = () => {
             <form onSubmit={handleEditUser} className="space-y-3">
               <div>
                 <label className="text-xs font-semibold text-slate-500 block mb-1">Nom Complet *</label>
-                <input type="text" value={editUserForm.name} onChange={e => setEditUserForm({...editUserForm, name: e.target.value})} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
+                <input type="text" value={editUserForm.name} onChange={e => setEditUserForm({ ...editUserForm, name: e.target.value })} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 block mb-1">Email *</label>
-                <input type="email" value={editUserForm.email} onChange={e => setEditUserForm({...editUserForm, email: e.target.value})} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
+                <input type="email" value={editUserForm.email} onChange={e => setEditUserForm({ ...editUserForm, email: e.target.value })} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 block mb-1">Nouveau Mot de Passe (laisser vide pour ne pas changer)</label>
-                <input type="text" value={editUserForm.password} onChange={e => setEditUserForm({...editUserForm, password: e.target.value})} placeholder="********" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                <input type="text" value={editUserForm.password} onChange={e => setEditUserForm({ ...editUserForm, password: e.target.value })} placeholder="********" className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 block mb-1">Rôle</label>
-                <select value={editUserForm.role} onChange={e => setEditUserForm({...editUserForm, role: e.target.value})} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+                <select value={editUserForm.role} onChange={e => setEditUserForm({ ...editUserForm, role: e.target.value })} className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
                   <option>Super Admin</option>
                   <option>Financial Director</option>
                   <option>Accountant</option>
@@ -514,10 +522,11 @@ export const MasterAdminPanel: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDeleteCompany(company)}
-                        className="p-1.5 text-rose-400 hover:text-rose-600 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
-                        title="Supprimer"
+                        className="text-slate-400 hover:text-rose-500 p-2"
+                        title="Supprimer la société"
+                        disabled={deletingCompanyId === company.id}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deletingCompanyId === company.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -560,10 +569,11 @@ export const MasterAdminPanel: React.FC = () => {
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(user.id, company.id, user.full_name)}
-                                className="p-1 text-rose-400 hover:text-rose-600 rounded transition-colors"
+                                className="p-1 text-slate-400 hover:text-rose-500 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm disabled:opacity-50"
                                 title="Supprimer l'utilisateur"
+                                disabled={deletingUserId === user.id}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                {deletingUserId === user.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                               </button>
                             </div>
                           </div>

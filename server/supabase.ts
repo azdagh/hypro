@@ -484,11 +484,14 @@ export const SupabaseDbService = {
         if (masterProfile?.company_id) {
           const { data: masterCats } = await supabaseAdmin.from('expense_categories').select('name, is_personal').eq('company_id', masterProfile.company_id);
           if (masterCats && masterCats.length > 0) {
-            defaultCategoriesToInsert = masterCats.map(c => ({
-              name: c.name,
-              is_personal: c.is_personal,
-              company_id: companyId || null
-            }));
+            defaultCategoriesToInsert = masterCats.map(c => {
+              const forcePersonal = c.name === 'Frais Administratifs & Bureau' || c.name === 'Personal';
+              return {
+                name: c.name,
+                is_personal: forcePersonal ? true : c.is_personal,
+                company_id: companyId || null
+              };
+            });
           }
         }
       } catch (e) {
@@ -504,7 +507,7 @@ export const SupabaseDbService = {
           { name: 'Location Engins & Camions', is_personal: false, company_id: companyId || null },
           { name: 'Carburant & Logistique', is_personal: false, company_id: companyId || null },
           { name: 'Sécurité & Équipements (EPI)', is_personal: false, company_id: companyId || null },
-          { name: 'Frais Administratifs & Bureau', is_personal: false, company_id: companyId || null },
+          { name: 'Frais Administratifs & Bureau', is_personal: true, company_id: companyId || null },
           { name: 'Personal', is_personal: true, company_id: companyId || null }
         ];
       }
