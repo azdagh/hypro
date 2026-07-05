@@ -179,6 +179,28 @@ export const SupabaseDbService = {
       .insert([{ name: companyData.name, logo_url: companyData.logo_url || null, subscription_status: 'active' }])
       .select().single();
     if (error) throw sanitizeError(error);
+
+    // Seed default categories for this new client
+    const defaultCategories = [
+      { name: 'Matériaux de construction', is_personal: false },
+      { name: 'Main d\'œuvre', is_personal: false },
+      { name: 'Transport et logistique', is_personal: false },
+      { name: 'Équipement (location/achat)', is_personal: false },
+      { name: 'Frais de sous-traitance', is_personal: false },
+      { name: 'Carburant', is_personal: false },
+      { name: 'Fournitures de bureau', is_personal: false },
+      { name: 'Frais administratifs', is_personal: false },
+      { name: 'Dépenses personnelles', is_personal: true }
+    ];
+
+    try {
+      await supabase.from('expense_categories').insert(
+        defaultCategories.map(cat => ({ ...cat, company_id: data.id }))
+      );
+    } catch (e) {
+      console.error('Failed to seed categories for company', data.id, e);
+    }
+
     return data;
   },
 
@@ -191,6 +213,21 @@ export const SupabaseDbService = {
 
   async deleteCompany(id: string) {
     const supabase = getServiceRoleSupabase();
+    
+    // Fetch all users associated with this company
+    const { data: users } = await supabase.from('profiles').select('id').eq('company_id', id);
+    
+    // Hard delete them from auth (this will also trigger cascades or manual cleanup on profiles if needed)
+    if (users && users.length > 0) {
+      for (const u of users) {
+        await supabase.auth.admin.deleteUser(u.id);
+      }
+      // Also delete from profiles just in case
+      await supabase.from('profiles').delete().eq('company_id', id);
+    }
+
+    // Clean up company-owned data
+    await supabase.from('expense_categories').delete().eq('company_id', id);
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) throw sanitizeError(error);
   },
@@ -218,12 +255,11 @@ export const SupabaseDbService = {
     return data;
   },
 
-  async getProfiles() {
+  async getProfiles(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('full_name', { ascending: true });
+    let q = supabase.from('profiles').select('*').order('full_name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -262,12 +298,11 @@ export const SupabaseDbService = {
   },
 
   // Projects
-  async getProjects() {
+  async getProjects(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('code', { ascending: true });
+    let q = supabase.from('projects').select('*').order('code', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -288,6 +323,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('projects')
       .insert([{
+        company_id: projectData.company_id || null,
         code: projectData.code,
         name: projectData.name,
         description: projectData.description || '',
@@ -347,12 +383,17 @@ export const SupabaseDbService = {
   },
 
   // Allocations
-  async getAllocations() {
+  async getAllocations(companyId?: string | null) {
     const supabase = getServiceRoleSupabase();
-    const { data, error } = await supabase
-      .from('allocations')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let q = supabase.from('allocations').select('*').order('created_at', { ascending: false });
+    if (companyId) {
+      // Filter allocations by company's user IDs
+      const { data: profileIds } = await supabase.from('profiles').select('id').eq('company_id', companyId);
+      const uIds = (profileIds || []).map((u: any) => u.id);
+      if (uIds.length > 0) q = q.in('allocated_by', uIds);
+      else q = q.in('allocated_by', ['00000000-0000-0000-0000-000000000000']);
+    }
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
 
     const projectIds = [...new Set((data || []).map((a: any) => a.project_id).filter(Boolean))];
@@ -424,28 +465,51 @@ export const SupabaseDbService = {
   },
 
   // Categories
-  async getCategories() {
+  async getCategories(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('expense_categories')
-      .select('*')
-      .order('name', { ascending: true });
+    const supabaseAdmin = getServiceRoleSupabase();
+    let q = supabase.from('expense_categories').select('*').order('name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     
     // Auto-seed if empty
-    if (data.length === 0) {
-      const defaultCategories = [
-        { name: 'Gros Å’uvre & Fondations' },
-        { name: 'Second Å’uvre & PlÃ¢tre' },
-        { name: 'MatÃ©riaux & Ciment' },
-        { name: 'Main d\'Å’uvre & Journaliers' },
-        { name: 'Location Engins & Camions' },
-        { name: 'Carburant & Logistique' },
-        { name: 'SÃ©curitÃ© & Ã‰quipements (EPI)' },
-        { name: 'Frais Administratifs & Bureau' }
-      ];
-      await supabase.from('expense_categories').insert(defaultCategories);
-      const { data: newData } = await supabase.from('expense_categories').select('*').order('name', { ascending: true });
+    if ((data || []).length === 0) {
+      let defaultCategoriesToInsert = [];
+      try {
+        // Find master company id
+        const { data: masterProfile } = await supabaseAdmin.from('profiles').select('company_id').eq('email', 'Hypromotion16@gmail.com').maybeSingle();
+        if (masterProfile?.company_id) {
+          const { data: masterCats } = await supabaseAdmin.from('expense_categories').select('name, is_personal').eq('company_id', masterProfile.company_id);
+          if (masterCats && masterCats.length > 0) {
+            defaultCategoriesToInsert = masterCats.map(c => ({
+              name: c.name,
+              is_personal: c.is_personal,
+              company_id: companyId || null
+            }));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch master categories", e);
+      }
+
+      if (defaultCategoriesToInsert.length === 0) {
+        defaultCategoriesToInsert = [
+          { name: 'Gros Œuvre & Fondations', is_personal: false, company_id: companyId || null },
+          { name: 'Second Œuvre & Plâtre', is_personal: false, company_id: companyId || null },
+          { name: 'Matériaux & Ciment', is_personal: false, company_id: companyId || null },
+          { name: 'Main d\'Œuvre & Journaliers', is_personal: false, company_id: companyId || null },
+          { name: 'Location Engins & Camions', is_personal: false, company_id: companyId || null },
+          { name: 'Carburant & Logistique', is_personal: false, company_id: companyId || null },
+          { name: 'Sécurité & Équipements (EPI)', is_personal: false, company_id: companyId || null },
+          { name: 'Frais Administratifs & Bureau', is_personal: false, company_id: companyId || null },
+          { name: 'Personal', is_personal: true, company_id: companyId || null }
+        ];
+      }
+      await supabase.from('expense_categories').insert(defaultCategoriesToInsert);
+      let q2 = supabase.from('expense_categories').select('*').order('name', { ascending: true });
+      if (companyId) q2 = q2.eq('company_id', companyId);
+      const { data: newData } = await q2;
       return newData || [];
     }
     return data;
@@ -484,12 +548,19 @@ export const SupabaseDbService = {
   },
 
   // Expenses with TRANSACTION-SAFE BUDGET VALIDATION RPC
-  async getExpenses() {
+  async getExpenses(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*, projects(name), expense_categories(name), profiles(full_name)')
-      .order('submitted_at', { ascending: false });
+    let q = supabase.from('expenses').select('*, projects(name), expense_categories(name), profiles(full_name)').order('submitted_at', { ascending: false });
+    if (companyId) {
+      // Filter by projects belonging to this company OR by submitted_by user belonging to this company
+      const { data: projectIds } = await supabase.from('projects').select('id').eq('company_id', companyId);
+      const { data: profileIds } = await getServiceRoleSupabase().from('profiles').select('id').eq('company_id', companyId);
+      const pIds = (projectIds || []).map((p: any) => p.id);
+      const uIds = (profileIds || []).map((u: any) => u.id);
+      if (uIds.length > 0) q = q.in('submitted_by', uIds);
+      else q = q.in('submitted_by', ['00000000-0000-0000-0000-000000000000']); // no match
+    }
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -497,6 +568,30 @@ export const SupabaseDbService = {
   async createExpense(expenseData: any, userId: string) {
     const supabase = getSupabase();
     
+    // Check if the category is personal
+    const { data: catData } = await supabase.from('expense_categories').select('is_personal').eq('id', expenseData.category_id).maybeSingle();
+    const isPersonal = catData?.is_personal;
+
+    if (isPersonal) {
+      // Bypass budget check for personal expenses, just insert directly (no project required)
+      const { data, error } = await supabase
+        .from('expenses')
+        .insert([{
+          project_id: null, // personal expenses don't belong to a project
+          category_id: expenseData.category_id,
+          amount_dzd: Number(expenseData.amount_dzd),
+          description: expenseData.description,
+          submitted_by: userId,
+          receipt_file_id: expenseData.receipt_file_id || null,
+          receipt_url: expenseData.receipt_url || null,
+          status: 'Pending'
+        }])
+        .select()
+        .single();
+      if (error) throw sanitizeError(error);
+      return data;
+    }
+
     // Call the PostgreSQL transaction-safe stored procedure that performs checks and records atomically.
     const { data, error } = await supabase.rpc('record_expense_with_budget_check', {
       p_project_id: expenseData.project_id,
@@ -538,14 +633,13 @@ export const SupabaseDbService = {
   },
 
   // Suppliers & Subcontractors
-  async getSuppliers() {
+  async getSuppliers(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('suppliers')
-      .select('*')
-      .order('company_name', { ascending: true });
+    let q = supabase.from('suppliers').select('*').order('company_name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
-    return data.map((s: any) => ({ ...s, name: s.company_name }));
+    return (data || []).map((s: any) => ({ ...s, name: s.company_name }));
   },
 
   async createSupplier(supplierData: any, userId: string) {
@@ -571,14 +665,13 @@ export const SupabaseDbService = {
     if (error) throw sanitizeError(error);
   },
 
-  async getSubcontractors() {
+  async getSubcontractors(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('subcontractors')
-      .select('*')
-      .order('company_name', { ascending: true });
+    let q = supabase.from('subcontractors').select('*').order('company_name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
-    return data.map((s: any) => ({ ...s, name: s.company_name }));
+    return (data || []).map((s: any) => ({ ...s, name: s.company_name }));
   },
 
   async createSubcontractor(subData: any, userId: string) {
@@ -604,14 +697,13 @@ export const SupabaseDbService = {
   },
 
   // Purchase Requests
-  async getPurchaseRequests() {
+  async getPurchaseRequests(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('purchase_requests')
-      .select('*, projects(name), profiles(full_name)')
-      .order('created_at', { ascending: false });
+    let q = supabase.from('purchase_requests').select('*, projects(name), profiles(full_name)').order('created_at', { ascending: false });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
-    return data.map((item: any) => ({
+    return (data || []).map((item: any) => ({
       ...item,
       item_description: item.description,
       estimated_amount_dzd: item.amount_dzd,
@@ -652,14 +744,13 @@ export const SupabaseDbService = {
   },
 
   // Purchase Orders
-  async getPurchaseOrders() {
+  async getPurchaseOrders(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('purchase_orders')
-      .select('*, suppliers(company_name), projects(name)')
-      .order('created_at', { ascending: false });
+    let q = supabase.from('purchase_orders').select('*, suppliers(company_name), projects(name)').order('created_at', { ascending: false });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
-    return data.map((item: any) => ({
+    return (data || []).map((item: any) => ({
       ...item,
       supplier_name: item.suppliers?.company_name,
       project_name: item.projects?.name,
@@ -686,14 +777,13 @@ export const SupabaseDbService = {
   },
 
   // Contracts
-  async getContracts() {
+  async getContracts(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('contracts')
-      .select('*, subcontractors(company_name), projects(name)')
-      .order('created_at', { ascending: false });
+    let q = supabase.from('contracts').select('*, subcontractors(company_name), projects(name)').order('created_at', { ascending: false });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
-    return data.map((item: any) => ({
+    return (data || []).map((item: any) => ({
       ...item,
       contractor_name: item.subcontractors?.company_name,
       project_name: item.projects?.name,
@@ -746,12 +836,11 @@ export const SupabaseDbService = {
   },
 
   // Stocks
-  async getStocks() {
+  async getStocks(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('stocks')
-      .select('*, projects(name)')
-      .order('item_name', { ascending: true });
+    let q = supabase.from('stocks').select('*, projects(name)').order('item_name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -761,6 +850,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('stocks')
       .insert([{
+        company_id: stockData.company_id || null,
         project_id: stockData.project_id,
         item_name: stockData.item_name,
         quantity: Number(stockData.quantity),
@@ -789,12 +879,11 @@ export const SupabaseDbService = {
   },
 
   // Equipment
-  async getEquipment() {
+  async getEquipment(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('equipment')
-      .select('*, projects(name)')
-      .order('equipment_name', { ascending: true });
+    let q = supabase.from('equipment').select('*, projects(name)').order('equipment_name', { ascending: true });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -804,6 +893,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('equipment')
       .insert([{
+        company_id: eqData.company_id || null,
         project_id: eqData.project_id,
         equipment_name: eqData.equipment_name,
         status: eqData.status || 'Active',
@@ -886,12 +976,16 @@ export const SupabaseDbService = {
   },
 
   // Audit Logs (Triggers write these automatically! Read here)
-  async getAuditLogs() {
+  async getAuditLogs(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select('*, profiles(full_name)')
-      .order('created_at', { ascending: false });
+    let q = supabase.from('audit_logs').select('*, profiles(full_name)').order('created_at', { ascending: false });
+    if (companyId) {
+      const { data: profileIds } = await getServiceRoleSupabase().from('profiles').select('id').eq('company_id', companyId);
+      const uIds = (profileIds || []).map((u: any) => u.id);
+      if (uIds.length > 0) q = q.in('user_id', uIds);
+      else q = q.in('user_id', ['00000000-0000-0000-0000-000000000000']);
+    }
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -899,18 +993,17 @@ export const SupabaseDbService = {
   // -------------------------------------------------------------------------
   // USER ADMINISTRATION MODULE METHODS
   // -------------------------------------------------------------------------
-  async getAdminUsers() {
+  async getAdminUsers(companyId?: string | null) {
     const supabaseAdmin = getServiceRoleSupabase();
-    const { data: profiles, error: pErr } = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let q = supabaseAdmin.from('profiles').select('*').order('created_at', { ascending: false });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data: profiles, error: pErr } = await q;
     if (pErr) throw pErr;
 
     const { data: authUsers, error: aErr } = await supabaseAdmin.auth.admin.listUsers();
     const usersList = (authUsers?.users || []) as any[];
     
-    return profiles.map(p => {
+    return (profiles || []).map(p => {
       const au = usersList.find(u => u.id === p.id);
       return {
         ...p,
@@ -940,6 +1033,7 @@ export const SupabaseDbService = {
       full_name: userData.full_name,
       role: userData.role || 'Employee',
       phone: userData.phone || null,
+      company_id: userData.company_id || null,
     };
 
     const { error: profileError } = await supabaseAdmin
@@ -1053,8 +1147,26 @@ export const SupabaseDbService = {
     return { success: true };
   },
 
+  async adminDeleteUser(id: string, adminUserId: string) {
+    const supabaseAdmin = getServiceRoleSupabase();
+    // Delete profile first (handle FKs)
+    await supabaseAdmin.from('profiles').delete().eq('id', id);
+    // Delete from auth
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+    if (error) throw sanitizeError(error);
+
+    await supabaseAdmin.from('audit_logs').insert([{
+      user_id: adminUserId,
+      entity: 'profiles',
+      entity_id: id,
+      action: 'DELETE',
+      old_value: { id }
+    }]);
+
+    return { success: true };
+  },
   // -------------------------------------------------------------------------
-  // USER INVITATION MODULE METHODS
+  // USER ADMINISTRATION MODULE METHODS
   // -------------------------------------------------------------------------
   async getInvitations() {
     const supabase = getSupabase();
@@ -1099,12 +1211,18 @@ export const SupabaseDbService = {
   // -------------------------------------------------------------------------
   // PROJECT ASSIGNMENTS METHODS
   // -------------------------------------------------------------------------
-  async getProjectAssignments() {
+  async getProjectAssignments(companyId?: string | null) {
     const supabase = getServiceRoleSupabase();
-    const { data, error } = await supabase
+    let q = supabase
       .from('project_assignments')
       .select('*')
       .order('created_at', { ascending: false });
+    
+    if (companyId) {
+      q = q.eq('company_id', companyId);
+    }
+    
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
 
     const projectIds = [...new Set((data || []).map((a: any) => a.project_id).filter(Boolean))];

@@ -193,6 +193,23 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
     }
   };
 
+  const handleDeleteUser = async (user: AdminUser) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT l'utilisateur ${user.full_name} ? Cette action est irréversible.`)) {
+      return;
+    }
+    try {
+      const res = await secureFetch(`/api/admin/users/${user.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+      showMsg(`Utilisateur ${user.full_name} supprimé définitivement.`, 'success');
+      fetchAdminData();
+    } catch (err: any) {
+      showMsg(err.message, 'error');
+    }
+  };
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
@@ -297,16 +314,6 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
           }`}
         >
           <Layers className="w-4 h-4" /> Affectation Projets
-        </button>
-        <button
-          onClick={() => setSubTab('security')}
-          className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
-            subTab === 'security' 
-              ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5' 
-              : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" /> Conformité & RLS
         </button>
       </div>
 
@@ -479,6 +486,16 @@ export function AdministrationView({ currentUserId, projects }: AdministrationVi
                               disabled={u.id === currentUserId}
                             >
                               {u.banned ? <UserCheck className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                            </button>
+
+                            {/* Hard Delete */}
+                            <button 
+                              onClick={() => handleDeleteUser(u)}
+                              className="p-1.5 rounded-lg transition-colors bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:text-red-400"
+                              title="Supprimer définitivement"
+                              disabled={u.id === currentUserId}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>

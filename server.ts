@@ -4,6 +4,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { SupabaseDbService, SupabaseAuthService, bootstrapSuperAdmin } from './server/supabase';
 import { 
   authenticateJWT, 
@@ -21,6 +23,35 @@ const PORT = 3000;
 // Enable JSON body parsing with large limit for receipt photos
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security: HTTP headers with helmet
+app.use(helmet({
+  contentSecurityPolicy: false, // disabled because Vite injects inline scripts in dev
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Security: rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // max 30 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+  skip: () => process.env.NODE_ENV !== 'production', // only enforce in prod for dev convenience
+});
+
+// Security: general API rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 200, // max 200 requests/min per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de requêtes. Veuillez patienter.' },
+  skip: () => process.env.NODE_ENV !== 'production',
+});
+
+// Security: Apply global API rate limiting to all /api routes
+app.use('/api', apiLimiter);
 
 // Global Zero-Trust JWT Authentication Middleware for API endpoints
 app.use((req, res, next) => {
@@ -222,7 +253,7 @@ app.get('/api/auth/config', (req, res) => {
 });
 
 // Authentication using Supabase Auth (signInWithPassword)
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'L\'adresse email est requise.' });
@@ -263,8 +294,10 @@ app.post('/api/auth/dev-superadmin-login', async (req, res) => {
 });
 
 app.get('/api/auth/profiles', async (req, res) => {
+  const userId = req.user?.id;
   try {
-    const data = await SupabaseDbService.getProfiles();
+    const companyId = userId ? await SupabaseDbService.getCompanyId(userId) : null;
+    const data = await SupabaseDbService.getProfiles(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -287,8 +320,10 @@ const verifySuperAdmin = (req: express.Request, res: express.Response, next: exp
 
 // Users management
 app.get('/api/admin/users', verifySuperAdmin, async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const users = await SupabaseDbService.getAdminUsers();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const users = await SupabaseDbService.getAdminUsers(companyId);
     res.json(users);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -329,6 +364,16 @@ app.post('/api/admin/users/:id/reactivate', verifySuperAdmin, async (req, res) =
   const adminUserId = req.user!.id;
   try {
     const data = await SupabaseDbService.adminReactivateUser(req.params.id, adminUserId);
+    res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', verifySuperAdmin, async (req, res) => {
+  const adminUserId = req.user!.id;
+  try {
+    const data = await SupabaseDbService.adminDeleteUser(req.params.id, adminUserId);
     res.json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -383,7 +428,9 @@ app.put('/api/admin/invitations/:id', verifySuperAdmin, async (req, res) => {
 // Project assignments management
 app.get('/api/admin/project-assignments', verifySuperAdmin, async (req, res) => {
   try {
-    const data = await SupabaseDbService.getProjectAssignments();
+    const userId = req.user!.id;
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getProjectAssignments(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -442,8 +489,10 @@ app.post('/api/preferences/:userId', requireOwnershipOrPrivileged, async (req, r
 
 // Projects CRUD
 app.get('/api/projects', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getProjects();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getProjects(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -492,8 +541,10 @@ app.delete('/api/projects/:id', requireRole(['Super Admin']), async (req, res) =
 
 // Allocations
 app.get('/api/allocations', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getAllocations();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getAllocations(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -521,10 +572,94 @@ app.delete('/api/allocations/:id', requireRole(['Super Admin', 'Financial Direct
   }
 });
 
+// ── MASTER ADMIN ENDPOINTS (your private endpoints to manage clients) ──────────
+const MASTER_ADMIN_KEY = process.env.MASTER_ADMIN_KEY || 'hypro-master-secret-2024';
+
+function requireMasterAdmin(req: any, res: any, next: any) {
+  const key = req.headers['x-master-admin-key'];
+  if (key !== MASTER_ADMIN_KEY) return res.status(403).json({ error: 'Forbidden' });
+  next();
+}
+
+app.get('/master/companies', requireMasterAdmin, async (req, res) => {
+  try {
+    const data = await SupabaseDbService.getCompanies();
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/master/companies', requireMasterAdmin, async (req, res) => {
+  try {
+    const data = await SupabaseDbService.createCompany(req.body);
+    res.status(201).json(data);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+app.put('/master/companies/:id', requireMasterAdmin, async (req, res) => {
+  try {
+    const data = await SupabaseDbService.updateCompany(req.params.id, req.body);
+    res.json(data);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+app.delete('/master/companies/:id', requireMasterAdmin, async (req, res) => {
+  try {
+    await SupabaseDbService.deleteCompany(req.params.id);
+    res.json({ success: true });
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+app.get('/master/companies/:id/users', requireMasterAdmin, async (req, res) => {
+  try {
+    const users = await SupabaseDbService.getAdminUsers(req.params.id);
+    res.json(users);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/master/users/:id', requireMasterAdmin, async (req, res) => {
+  try {
+    const result = await SupabaseDbService.adminDeleteUser(req.params.id, 'master-admin');
+    res.json(result);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+app.put('/master/users/:id', requireMasterAdmin, async (req, res) => {
+  try {
+    const data = await SupabaseDbService.adminUpdateUser(req.params.id, req.body, 'master-admin');
+    // If password provided, update auth password separately
+    if (req.body.password) {
+      await SupabaseDbService.adminResetPassword(req.params.id, req.body.password, 'master-admin');
+    }
+    res.json(data);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+// Provision a new user under a specific company (Master Admin creates the first Super Admin for a client)
+app.post('/master/provision-user', requireMasterAdmin, async (req, res) => {
+  try {
+    const result = await SupabaseDbService.adminCreateUser({ ...req.body, role: req.body.role || 'Super Admin' }, 'master-admin');
+    res.status(201).json(result);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+// User-facing: get the current user's company info
+app.get('/api/my-company', async (req: any, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const companyId = await SupabaseDbService.getCompanyId(req.user.id);
+    if (!companyId) return res.json(null);
+    const companies = await SupabaseDbService.getCompanies();
+    const company = companies.find((c: any) => c.id === companyId);
+    res.json(company || null);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
 // Categories
 app.get('/api/categories', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getCategories();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getCategories(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -550,10 +685,21 @@ app.delete('/api/categories/:id', requireRole(['Super Admin', 'Financial Directo
   }
 });
 
+app.put('/api/categories/:id', requireRole(['Super Admin', 'Financial Director', 'Accountant']), async (req, res) => {
+  try {
+    const data = await SupabaseDbService.updateCategory(req.params.id, req.body);
+    res.json(data);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Expenses
 app.get('/api/expenses', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getExpenses();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getExpenses(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -593,8 +739,10 @@ app.delete('/api/expenses/:id', requireRole(['Super Admin', 'Financial Director'
 
 // Suppliers & Subcontractors
 app.get('/api/suppliers', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getSuppliers();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getSuppliers(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -623,8 +771,10 @@ app.delete('/api/suppliers/:id', requireRole(['Super Admin', 'Financial Director
 });
 
 app.get('/api/subcontractors', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getSubcontractors();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getSubcontractors(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -654,8 +804,10 @@ app.delete('/api/subcontractors/:id', requireRole(['Super Admin', 'Financial Dir
 
 // Purchase Requests
 app.get('/api/purchase-requests', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getPurchaseRequests();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getPurchaseRequests(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -707,8 +859,10 @@ app.delete('/api/purchase-requests/:id', requireRole(['Super Admin', 'Financial 
 
 // Purchase Orders
 app.get('/api/purchase-orders', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getPurchaseOrders();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getPurchaseOrders(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -749,8 +903,10 @@ app.delete('/api/purchase-orders/:id', requireRole(['Super Admin', 'Financial Di
 
 // Contracts
 app.get('/api/contracts', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getContracts();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getContracts(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -791,8 +947,10 @@ app.delete('/api/contracts/:id', requireRole(['Super Admin', 'Financial Director
 
 // Stocks
 app.get('/api/stocks', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getStocks();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getStocks(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -800,8 +958,10 @@ app.get('/api/stocks', async (req, res) => {
 });
 
 app.get('/api/stock-items', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getStocks();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getStocks(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -873,8 +1033,10 @@ app.delete('/api/stock-items/:id', requireRole(['Super Admin', 'Financial Direct
 
 // Equipment
 app.get('/api/equipment', async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getEquipment();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getEquipment(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -936,8 +1098,10 @@ app.put('/api/notifications/:id/read', async (req, res) => {
 
 // Audit Logs
 app.get('/api/audit-logs', requireRole(['Super Admin', 'Financial Director', 'Accountant', 'Auditor']), async (req, res) => {
+  const userId = req.user!.id;
   try {
-    const data = await SupabaseDbService.getAuditLogs();
+    const companyId = await SupabaseDbService.getCompanyId(userId);
+    const data = await SupabaseDbService.getAuditLogs(companyId);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });

@@ -43,8 +43,10 @@ function MainLayout() {
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
-  const [quickLoginEnabled, setQuickLoginEnabled] = useState(() => {
-    return localStorage.getItem('hypro_quick_login_enabled') === 'true';
+  const [recentSuperAdmins, setRecentSuperAdmins] = useState<{email:string; name:string}[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('hypro_recent_superadmins') || '[]');
+    } catch { return []; }
   });
 
   // Forgot / Reset Password state
@@ -182,12 +184,12 @@ function MainLayout() {
       try {
         const supabase = await getSupabaseClient();
         
-        // 1. Get initial session
+        // 1. Get initial session (restoring existing session - do NOT reset tab)
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const profile = await resolveProfileForAuthUser(session.user);
           if (profile) {
-            applyLoggedInUser(profile, profile.role);
+            applyLoggedInUser(profile, profile.role, false, false); // false = don't reset tab
           }
         }
 
@@ -196,7 +198,8 @@ function MainLayout() {
           if (session?.user) {
             const profile = await resolveProfileForAuthUser(session.user);
             if (profile) {
-              applyLoggedInUser(profile, profile.role);
+              // Never reset tab on auth state change (like restoring tab focus)
+              applyLoggedInUser(profile, profile.role, false, false);
             }
           } else {
             setCurrentUser(null);
@@ -237,15 +240,23 @@ function MainLayout() {
     }
   };
 
-  const applyLoggedInUser = (user: any, role = user.role, enableQuickLogin = false) => {
+  const applyLoggedInUser = (user: any, role = user.role, saveToRecent = false, resetTab = false) => {
     setCurrentUser(user);
     setActiveRole(role);
+    if (resetTab) setActiveTab('dashboard'); // only on fresh login
     localStorage.setItem('hypro_current_user', JSON.stringify(user));
     localStorage.setItem('hypro_active_role', role);
     localStorage.setItem('hypro_user_id', user.id);
-    if (enableQuickLogin) {
-      setQuickLoginEnabled(true);
-      localStorage.setItem('hypro_quick_login_enabled', 'true');
+    // Save superadmin to recent logins list
+    if (saveToRecent && (role === 'Super Admin') && user.email) {
+      setRecentSuperAdmins(prev => {
+        const updated = [
+          { email: user.email, name: user.full_name || user.email },
+          ...prev.filter(u => u.email !== user.email)
+        ].slice(0, 5);
+        localStorage.setItem('hypro_recent_superadmins', JSON.stringify(updated));
+        return updated;
+      });
     }
   };
 
@@ -272,7 +283,7 @@ function MainLayout() {
         });
       }
 
-      applyLoggedInUser(result.user, 'Super Admin');
+      applyLoggedInUser(result.user, 'Super Admin', false, true);
     } catch (e: any) {
       setLoginError('Échec de la connexion Super Admin : ' + (e.message || e));
     } finally {
@@ -300,7 +311,7 @@ function MainLayout() {
         if (!passwordInput) {
           const profile = await resolveProfileForAuthUser(null, emailInput);
           if (profile) {
-            applyLoggedInUser(profile, profile.role);
+            applyLoggedInUser(profile, profile.role, false, true);
             return;
           }
         }
@@ -312,7 +323,7 @@ function MainLayout() {
         throw new Error('Profil HYPRO introuvable');
       }
 
-      applyLoggedInUser(profile, profile.role, true);
+      applyLoggedInUser(profile, profile.role, true, true);
     } catch (e: any) {
       setLoginError('Échec de la connexion : ' + (e.message || e));
     } finally {
@@ -644,6 +655,18 @@ function MainLayout() {
     await fetchData(false);
   };
 
+  const handleEditCategory = async (id: string, name: string, is_personal: boolean) => {
+    const res = await secureFetch(`/api/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, is_personal })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Erreur modification catégorie');
+    }
+    await fetchData(false);
+  };
+
   // -------------------------------------------------------------------------
   // RENDER SELECTION SCREEN (IF NOT AUTHENTICATED)
   // -------------------------------------------------------------------------
@@ -799,23 +822,26 @@ function MainLayout() {
             </form>
           )}
 
-          {quickLoginEnabled && (
+          {recentSuperAdmins.length > 0 && (
             <>
               <div className="h-px bg-slate-150 dark:bg-slate-800/80"></div>
-
-              <div className="space-y-3" id="demo-logins-box">
+              <div className="space-y-2" id="recent-logins-box">
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase tracking-wider text-center">Connexion rapide disponible</span>
-                <button 
-                  onClick={handleSuperAdminAutoLogin}
-                  disabled={loggingIn}
-                  className="w-full text-left p-3 border border-slate-100 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/70 rounded-xl text-xs flex justify-between items-center transition-all"
-                >
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">HYPRO Super Admin</p>
-                    <p className="text-[10px] text-slate-400 font-mono">Hypromotion16@gmail.com - Super Admin</p>
-                  </div>
-                  <span className="bg-slate-950 dark:bg-emerald-500 text-white dark:text-slate-950 px-2.5 py-0.5 rounded text-[9px] font-semibold">1 clic</span>
-                </button>
+                {recentSuperAdmins.map((sa) => (
+                  <button
+                    key={sa.email}
+                    onClick={() => { setEmailInput(sa.email); setPasswordInput(''); }}
+                    disabled={loggingIn}
+                    className="w-full text-left p-3 border border-slate-100 dark:border-slate-800 hover:border-emerald-500/40 dark:hover:border-emerald-500/30 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/70 rounded-xl text-xs flex justify-between items-center transition-all group"
+                    id={`quick-login-${sa.email.replace('@','').replace('.','')}`}
+                  >
+                    <div>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{sa.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{sa.email} · Super Admin</p>
+                    </div>
+                    <span className="bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded text-[9px] font-semibold border border-emerald-500/20">Connexion</span>
+                  </button>
+                ))}
               </div>
             </>
           )}
@@ -915,6 +941,15 @@ function MainLayout() {
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400" /> Contrôle & Sécurité
+              </button>
+            )}
+
+            {currentUser?.email?.toLowerCase() === 'hypromotion16@gmail.com' && (
+              <button 
+                onClick={() => { setActiveTab('master-admin'); setIsMobileMenuOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${activeTab === 'master-admin' ? 'bg-violet-500/10 text-violet-400' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+              >
+                <Globe className="w-4 h-4 text-violet-400" /> Ajouter un Client
               </button>
             )}
 
@@ -1193,6 +1228,7 @@ function MainLayout() {
                   categories={categories}
                   onAddCategory={handleAddCategory}
                   onDeleteCategory={handleDeleteCategory}
+                  onEditCategory={handleEditCategory}
                 />
               )}
 

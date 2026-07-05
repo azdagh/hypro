@@ -423,7 +423,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
   // Compute isPersonalCategory for expense form
   const selectedCat = categories.find(c => c.id === expCategory);
-  const isPersonalCategory = selectedCat && (selectedCat.name.includes('Frais Administratifs') || selectedCat.name.includes('Bureau'));
+  const isPersonalCategory = selectedCat && selectedCat.is_personal === true;
 
   return (
     <div className="space-y-6" id="expenses-and-pettycash-panel">

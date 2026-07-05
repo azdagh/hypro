@@ -311,13 +311,13 @@ const CategoriesPanel: React.FC<{
           placeholder="Nom de la nouvelle catégorie..."
           className="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
-        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-          <input
-            type="checkbox"
-            checked={newCatPersonal}
-            onChange={(e) => setNewCatPersonal(e.target.checked)}
-            className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-          />
+        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer select-none">
+          <div 
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${newCatPersonal ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+            onClick={() => setNewCatPersonal(!newCatPersonal)}
+          >
+            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${newCatPersonal ? 'translate-x-5' : 'translate-x-1'}`} />
+          </div>
           Dépense personnelle ?
         </label>
         <button
@@ -350,13 +350,13 @@ const CategoriesPanel: React.FC<{
                     onChange={(e) => setEditName(e.target.value)}
                     className="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editPersonal}
-                      onChange={(e) => setEditPersonal(e.target.checked)}
-                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-                    />
+                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer select-none">
+                    <div 
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${editPersonal ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                      onClick={() => setEditPersonal(!editPersonal)}
+                    >
+                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${editPersonal ? 'translate-x-5' : 'translate-x-1'}`} />
+                    </div>
                     Personnelle
                   </label>
                   <div className="flex gap-2">
@@ -387,7 +387,7 @@ const CategoriesPanel: React.FC<{
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                  <div className="flex items-center transition-opacity gap-1">
                     {onEditCategory && (
                       <button
                         onClick={() => {
