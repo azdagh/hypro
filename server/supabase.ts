@@ -227,6 +227,16 @@ export const SupabaseDbService = {
     }
 
     // Clean up company-owned data
+    const { data: companyProjects } = await supabase.from('projects').select('id').eq('company_id', id);
+    if (companyProjects && companyProjects.length > 0) {
+      const projectIds = companyProjects.map(p => p.id);
+      await supabase.from('project_budget_lines').delete().in('project_id', projectIds);
+      await supabase.from('project_assignments').delete().in('project_id', projectIds);
+      await supabase.from('expenses').delete().in('project_id', projectIds);
+      await supabase.from('allocations').delete().in('project_id', projectIds);
+      await supabase.from('projects').delete().in('id', projectIds);
+    }
+
     await supabase.from('expense_categories').delete().eq('company_id', id);
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) throw sanitizeError(error);
