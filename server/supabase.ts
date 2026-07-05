@@ -1188,12 +1188,14 @@ export const SupabaseDbService = {
   // -------------------------------------------------------------------------
   // USER ADMINISTRATION MODULE METHODS
   // -------------------------------------------------------------------------
-  async getInvitations() {
+  async getInvitations(companyId?: string | null) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
+    let q = supabase
       .from('user_invitations')
       .select('*')
       .order('created_at', { ascending: false });
+    if (companyId) q = q.eq('company_id', companyId);
+    const { data, error } = await q;
     if (error) throw sanitizeError(error);
     return data;
   },
@@ -1203,6 +1205,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('user_invitations')
       .insert([{
+        company_id: invData.company_id || null,
         email: invData.email.toLowerCase(),
         full_name: invData.full_name,
         role: invData.role || 'Employee',
@@ -1279,6 +1282,7 @@ export const SupabaseDbService = {
     const { data, error } = await supabase
       .from('project_assignments')
       .insert([{
+        company_id: assignmentData.company_id || null,
         project_id: assignmentData.project_id,
         user_id: assignmentData.user_id,
         assignment_role: assignmentData.assignment_role || 'Site Manager',

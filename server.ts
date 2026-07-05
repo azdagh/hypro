@@ -333,7 +333,8 @@ app.get('/api/admin/users', verifySuperAdmin, async (req, res) => {
 app.post('/api/admin/users', verifySuperAdmin, async (req, res) => {
   const adminUserId = req.user!.id;
   try {
-    const data = await SupabaseDbService.adminCreateUser(req.body, adminUserId);
+    const companyId = await SupabaseDbService.getCompanyId(adminUserId);
+    const data = await SupabaseDbService.adminCreateUser({ ...req.body, company_id: companyId }, adminUserId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -396,8 +397,10 @@ app.post('/api/admin/users/:id/reset-password', verifySuperAdmin, async (req, re
 
 // Invitations management
 app.get('/api/admin/invitations', verifySuperAdmin, async (req, res) => {
+  const adminUserId = req.user!.id;
   try {
-    const invitations = await SupabaseDbService.getInvitations();
+    const companyId = await SupabaseDbService.getCompanyId(adminUserId);
+    const invitations = await SupabaseDbService.getInvitations(companyId);
     res.json(invitations);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -407,7 +410,8 @@ app.get('/api/admin/invitations', verifySuperAdmin, async (req, res) => {
 app.post('/api/admin/invitations', verifySuperAdmin, async (req, res) => {
   const adminUserId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createInvitation(req.body, adminUserId);
+    const companyId = await SupabaseDbService.getCompanyId(adminUserId);
+    const data = await SupabaseDbService.createInvitation({ ...req.body, company_id: companyId }, adminUserId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -440,7 +444,8 @@ app.get('/api/admin/project-assignments', verifySuperAdmin, async (req, res) => 
 app.post('/api/admin/project-assignments', verifySuperAdmin, async (req, res) => {
   const adminUserId = req.user!.id;
   try {
-    const data = await SupabaseDbService.createProjectAssignment(req.body, adminUserId);
+    const companyId = await SupabaseDbService.getCompanyId(adminUserId);
+    const data = await SupabaseDbService.createProjectAssignment({ ...req.body, company_id: companyId }, adminUserId);
     res.status(201).json(data);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
