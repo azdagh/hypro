@@ -406,19 +406,18 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   }).sort((a,b) => b.submitted_at.localeCompare(a.submitted_at));
 
   const filteredAllocations = allocations.filter(a => {
-    const matchesProj = filterProject === 'ALL' || a.project_id === filterProject;
     const matchesAcheteur = filterAcheteur === 'ALL' || a.allocated_to === filterAcheteur;
-    return matchesProj && matchesAcheteur;
+    return matchesAcheteur;
   }).sort((a,b) => b.created_at.localeCompare(a.created_at));
 
   // Compute Solde
   let soldeAcheteur = null;
   if (filterAcheteur !== 'ALL') {
     const totalAlloc = allocations
-      .filter(a => a.allocated_to === filterAcheteur && (filterProject === 'ALL' || a.project_id === filterProject))
+      .filter(a => a.allocated_to === filterAcheteur)
       .reduce((sum, a) => sum + Number(a.amount_dzd), 0);
     const totalExp = expenses
-      .filter(e => e.submitted_by === filterAcheteur && e.status !== 'Rejected' && (filterProject === 'ALL' || e.project_id === filterProject))
+      .filter(e => e.submitted_by === filterAcheteur && e.status !== 'Rejected')
       .reduce((sum, e) => sum + Number(e.amount_dzd), 0);
     soldeAcheteur = totalAlloc - totalExp;
   }
@@ -476,16 +475,18 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto text-xs" id="expenses-filters-inputs">
           {/* Project select */}
-          <select 
-            value={filterProject} 
-            onChange={e => setFilterProject(e.target.value)}
-            className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2 min-w-[150px]"
-          >
-            <option value="ALL">Tous les Projets</option>
-            {projects.filter(p => p.code !== 'GEN-00').map(p => (
-              <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-            ))}
-          </select>
+          {activeSubTab === 'expenses' && (
+            <select 
+              value={filterProject} 
+              onChange={e => setFilterProject(e.target.value)}
+              className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2 min-w-[150px]"
+            >
+              <option value="ALL">Tous les Projets</option>
+              {projects.filter(p => p.code !== 'GEN-00').map(p => (
+                <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+              ))}
+            </select>
+          )}
 
           {/* Status select (only for expenses sub tab) */}
           {activeSubTab === 'expenses' && (
