@@ -427,7 +427,7 @@ export const SupabaseDbService = {
       ...allocation,
       project_name: projectsById.get(allocation.project_id)?.name,
       allocated_by_name: profilesById.get(allocation.allocated_by)?.full_name,
-      allocated_to: profilesById.get(allocation.allocated_to)?.full_name || allocation.allocated_to,
+      allocated_to_name: profilesById.get(allocation.allocated_to)?.full_name || allocation.allocated_to,
     }));
   },
 

@@ -19,8 +19,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   profiles
 }) => {
   const { t } = useTranslation();
-  const [reportType, setReportType] = useState<'monthly' | 'annual' | 'cashflow' | 'budget'>('monthly');
+  const [reportType, setReportType] = useState<'monthly' | 'annual' | 'cashflow' | 'budget' | 'versement'>('monthly');
   const [selectedProject, setSelectedProject] = useState<string>('ALL');
+  const [selectedAcheteur, setSelectedAcheteur] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('2026');
   const [selectedMonth, setSelectedMonth] = useState<string>('06'); // June
   const [enterpriseName, setEnterpriseName] = useState('');
@@ -71,8 +72,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       const approvedExpenses = expenses.filter(e => e.status === 'Approved');
       
       let filteredExpenses = approvedExpenses;
+      let filteredAllocations = allocations;
+      
       if (selectedProject !== 'ALL') {
         filteredExpenses = filteredExpenses.filter(e => e.project_id === selectedProject);
+        filteredAllocations = filteredAllocations.filter(a => a.project_id === selectedProject);
+      }
+      if (selectedAcheteur !== 'ALL') {
+        filteredExpenses = filteredExpenses.filter(e => e.submitted_by === selectedAcheteur);
+        filteredAllocations = filteredAllocations.filter(a => a.allocated_to === selectedAcheteur);
       }
       
       // Filter by Month / Year
@@ -109,16 +117,35 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       });
 
       const totalSpent = filteredExpenses.reduce((sum, e) => sum + e.amount_dzd, 0);
+      const totalAllocated = filteredAllocations.reduce((sum, a) => sum + a.amount_dzd, 0);
+      
+      let transactionList = [];
+      if (reportType === 'versement') {
+        const mappedExpenses = filteredExpenses.map(e => ({ ...e, transaction_type: 'Dépense', sort_date: e.submitted_at }));
+        const mappedAllocations = filteredAllocations.map(a => ({ 
+          ...a, 
+          transaction_type: 'Versement',
+          sort_date: a.created_at || a.submitted_at || new Date().toISOString(),
+          submitted_at: a.created_at || a.submitted_at || new Date().toISOString(), 
+          submitted_by: a.allocated_to,
+          description: a.notes || 'Versement de fonds',
+          category_id: null
+        }));
+        transactionList = [...mappedExpenses, ...mappedAllocations].sort((a, b) => new Date(b.sort_date).getTime() - new Date(a.sort_date).getTime());
+      }
 
       setGeneratedReport({
         title: reportType === 'monthly' ? `Rapport Financier Mensuel - ${selectedMonth}/${selectedYear}` :
                reportType === 'annual' ? `Bilan Comptable Annuel - Exercice ${selectedYear}` :
                reportType === 'cashflow' ? `Analyse de Trésorerie & Flux de Caisse` :
+               reportType === 'versement' ? `Rapport de Versement & Dépenses` :
                `Rapport d'Utilisation Budgétaire des Projets`,
         timestamp: new Date().toLocaleString(),
         type: reportType,
         totalExpenses: totalSpent,
+        totalAllocated: totalAllocated,
         expensesList: filteredExpenses,
+        transactionList: transactionList,
         projectSummaries: summaryByProject,
         enterpriseName: enterpriseName.trim(),
         enterpriseLogo,
@@ -145,6 +172,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       csvContent += "Code Projet,Nom Projet,Budget Global (DZD),Allocations Caisse (DZD),Depenses Justifiees (DZD),Solde Caisse (DZD)\n";
       generatedReport.projectSummaries.forEach((s: any) => {
         csvContent += `"${s.code}","${s.name}",${s.budget},${s.allocated},${s.spent},${s.balance}\n`;
+      });
+    } else if (generatedReport.type === 'versement') {
+      csvContent += "Date,Type,Chantier,Description,Montant (DZD),Soumis par\n";
+      generatedReport.transactionList.forEach((t: any) => {
+        const projName = projects.find(p => p.id === t.project_id)?.code || t.project_code || '';
+        const subName = (t as any).profiles?.full_name || profiles.find(p => p.id === t.submitted_by)?.full_name || t.submitted_by_name || t.allocated_to_name || '';
+        csvContent += `"${new Date(t.submitted_at).toLocaleDateString()}","${t.transaction_type}","${projName}","${t.description}",${t.amount_dzd},"${subName}"\n`;
       });
     } else {
       csvContent += "Date,Projet,Categorie,Description,Montant (DZD),Soumis par\n";
@@ -182,6 +216,19 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <td align="right">${s.allocated.toLocaleString()} DZD</td>
             <td align="right" style="color: #b45309;">${s.spent.toLocaleString()} DZD</td>
             <td align="right" style="font-weight: bold;">${s.balance.toLocaleString()} DZD</td>
+          </tr>
+        `;
+      });
+    } else if (generatedReport.type === 'versement') {
+      generatedReport.transactionList.forEach((t: any) => {
+        const projName = projects.find(p => p.id === t.project_id)?.code || t.project_code || '';
+        tableRowsHtml += `
+          <tr>
+            <td>${new Date(t.submitted_at).toLocaleDateString()}</td>
+            <td><b>${t.transaction_type}</b></td>
+            <td>${t.projects?.name || projName}</td>
+            <td>${t.description}</td>
+            <td align="right"><b>${t.amount_dzd.toLocaleString()} DZD</b></td>
           </tr>
         `;
       });
@@ -248,6 +295,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                       <th style="text-align: right">Dépenses Justifiées</th>
                       <th style="text-align: right">Solde Disponible</th>
                   </tr>
+                ` : generatedReport.type === 'versement' ? `
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Chantier</th>
+                    <th>Description</th>
+                    <th style="text-align: right">Montant (DZD)</th>
+                  </tr>
                 ` : `
                     <tr>
                       <th>Date</th>
@@ -265,8 +320,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           <div class="summary-box">
-              <div class="summary-title">TOTAL DES DÉCAISSEMENTS CONSOLIDÉS</div>
-              <div class="summary-val">${generatedReport.totalExpenses.toLocaleString()} DZD</div>
+              <div class="summary-title">${generatedReport.type === 'versement' ? 'SOLDE ACTUEL' : 'TOTAL DES DÉCAISSEMENTS CONSOLIDÉS'}</div>
+              <div class="summary-val">${generatedReport.type === 'versement' ? (generatedReport.totalAllocated - generatedReport.totalExpenses).toLocaleString() : generatedReport.totalExpenses.toLocaleString()} DZD</div>
             </div>
             </div>
           
@@ -327,6 +382,22 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <option value="annual">{t('annualReport')}</option>
               <option value="budget">{t('budgetReport')}</option>
               <option value="cashflow">{t('cashFlowReport')}</option>
+              <option value="versement">Rapport de versement</option>
+            </select>
+          </div>
+
+          {/* Acheteur filter */}
+          <div className="space-y-1 lg:col-span-2">
+            <label className="font-semibold text-slate-500">Acheteur / Bénéficiaire</label>
+            <select 
+              value={selectedAcheteur} 
+              onChange={e => setSelectedAcheteur(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5"
+            >
+              <option value="ALL">Tous les acheteurs</option>
+              {profiles.filter(p => p.role !== 'Super Admin').map(p => (
+                <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
+              ))}
             </select>
           </div>
 
@@ -374,7 +445,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           {/* Action Trigger button */}
-          <div className="flex items-end lg:col-span-2">
+          <div className="flex items-end lg:col-span-6 mt-2">
             <button 
               onClick={handleGenerateReport}
               className="w-full bg-slate-900 dark:bg-slate-50 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-50 dark:text-slate-900 py-2.5 px-4 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors"
@@ -421,29 +492,95 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" id="report-summary-metrics">
-            <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div className="space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Décaissements Validés Période</span>
-                <span className="text-xl font-bold font-mono text-amber-700 dark:text-amber-400">{formatCurrencyDZD(generatedReport.totalExpenses)}</span>
+          {generatedReport.type === 'versement' ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4" id="report-summary-metrics">
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Total Versements Reçus</span>
+                  <span className="text-xl font-bold font-mono text-emerald-700 dark:text-emerald-400">{formatCurrencyDZD(generatedReport.totalAllocated)}</span>
+                </div>
               </div>
-              <TrendingUp className="w-8 h-8 text-amber-600/20" />
+              <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-xl border border-rose-200 dark:border-rose-800/50 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-rose-600 dark:text-rose-400 uppercase tracking-wider block">Total Dépenses Justifiées</span>
+                  <span className="text-xl font-bold font-mono text-rose-700 dark:text-rose-400">{formatCurrencyDZD(generatedReport.totalExpenses)}</span>
+                </div>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Solde Actuel</span>
+                  <span className={`text-xl font-bold font-mono ${generatedReport.totalAllocated - generatedReport.totalExpenses < 0 ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                    {formatCurrencyDZD(generatedReport.totalAllocated - generatedReport.totalExpenses)}
+                  </span>
+                </div>
+              </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" id="report-summary-metrics">
+              <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Décaissements Validés Période</span>
+                  <span className="text-xl font-bold font-mono text-amber-700 dark:text-amber-400">{formatCurrencyDZD(generatedReport.totalExpenses)}</span>
+                </div>
+                <TrendingUp className="w-8 h-8 text-amber-600/20" />
+              </div>
 
-            <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div className="space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Volume de Justificatifs</span>
-                <span className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">
-                  {generatedReport.type === 'budget' || generatedReport.type === 'annual' ? generatedReport.projectSummaries.length : generatedReport.expensesList.length} lignes
-                </span>
+              <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Volume de Justificatifs</span>
+                  <span className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">
+                    {generatedReport.type === 'budget' || generatedReport.type === 'annual' ? generatedReport.projectSummaries.length : generatedReport.expensesList.length} lignes
+                  </span>
+                </div>
+                <Calendar className="w-8 h-8 text-slate-400/25" />
               </div>
-              <Calendar className="w-8 h-8 text-slate-400/25" />
             </div>
-          </div>
+          )}
 
           {/* Report Data Table Preview */}
           <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs" id="report-preview-table-container">
-            {generatedReport.type === 'budget' || generatedReport.type === 'annual' ? (
+            {generatedReport.type === 'versement' ? (
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold uppercase text-[10px]">
+                      <th className="p-3">Date</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Chantier</th>
+                      <th className="p-3">Description / Objet</th>
+                      <th className="p-3 text-right">Montant (DZD)</th>
+                      <th className="p-3">Soumis Par / Bénéficiaire</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {generatedReport.transactionList.map((t: any) => {
+                      const projCode = (t as any).projects?.name || projects.find(p => p.id === t.project_id)?.name || t.project_code || '';
+                      const subName = (t as any).profiles?.full_name || profiles.find(p => p.id === t.submitted_by)?.full_name || t.submitted_by_name || t.allocated_to_name || '';
+                      const isVersement = t.transaction_type === 'Versement';
+                      return (
+                      <tr key={t.id} className={`hover:bg-slate-50/20 dark:hover:bg-slate-800/10 ${isVersement ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}>
+                        <td className="p-3 text-slate-500 font-mono">{new Date(t.submitted_at).toLocaleDateString()}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold ${isVersement ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {t.transaction_type}
+                          </span>
+                        </td>
+                        <td className="p-3 font-semibold">{projCode}</td>
+                        <td className="p-3 text-slate-700 dark:text-slate-300 font-medium max-w-[200px] truncate" title={t.description}>{t.description}</td>
+                        <td className={`p-3 text-right font-mono font-bold ${isVersement ? 'text-emerald-600' : 'text-slate-900 dark:text-slate-50'}`}>{formatCurrencyDZD(t.amount_dzd)}</td>
+                        <td className="p-3 font-medium text-slate-600 dark:text-slate-400">{subName}</td>
+                      </tr>
+                      );
+                    })}
+                    {generatedReport.transactionList.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Aucune transaction trouvée sur cette période.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : generatedReport.type === 'budget' || generatedReport.type === 'annual' ? (
               <div className="overflow-x-auto w-full">
 <table className="w-full text-left border-collapse">
                 <thead>

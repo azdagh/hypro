@@ -674,7 +674,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                       </td>
                       <td className="p-4">
                         <span className="font-medium text-slate-700 dark:text-slate-300 block">De: {a.allocated_by_name}</span>
-                        <span className="text-[10px] text-slate-400 block">Pour: {profiles?.find(p => p.id === a.allocated_to)?.full_name || a.allocated_to}</span>
+                        <span className="text-[10px] text-slate-400 block">Pour: {a.allocated_to_name || profiles?.find(p => p.id === a.allocated_to)?.full_name || a.allocated_to}</span>
                       </td>
                       <td className="p-4 max-w-[250px] truncate" title={a.notes}>
                         {a.notes || <span className="text-slate-400 italic">Sans notes</span>}
