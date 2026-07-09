@@ -1151,6 +1151,8 @@ function MainLayout() {
                         allocations={filteredAllocations}
                         expenses={filteredExpenses}
                         purchaseRequests={filteredPurchaseRequests}
+                        userRole={activeRole}
+                        profiles={profiles}
                       />
                     )}
 
