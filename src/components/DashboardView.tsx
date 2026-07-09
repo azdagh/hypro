@@ -121,65 +121,65 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* ── KPI Cards Row ──────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" id="dashboard-stats-grid">
         {/* Total Allocations */}
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-500/20 flex flex-col justify-between min-h-[130px]" id="card-total-allocations">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-3 sm:p-5 shadow-lg shadow-emerald-500/20 flex flex-col justify-between min-h-[120px]" id="card-total-allocations">
           <div className="flex items-start justify-between">
-            <p className="text-xs font-semibold text-emerald-100 uppercase tracking-widest">{t('totalAllocations')}</p>
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Wallet className="w-4 h-4 text-white" />
+            <p className="text-[10px] sm:text-xs font-semibold text-emerald-100 uppercase tracking-widest leading-tight">{t('totalAllocations')}</p>
+            <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0 ml-1">
+              <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold font-mono text-white leading-tight">{formatCurrencyDZD(totalAllocatedAmount)}</h3>
-            <span className="text-xs text-emerald-100 flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3" /> Fonds injectés
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-xl md:text-2xl font-bold font-mono text-white leading-tight break-all">{formatCurrencyDZD(totalAllocatedAmount)}</h3>
+            <span className="text-[10px] sm:text-xs text-emerald-100 flex items-center gap-1 mt-1">
+              <TrendingUp className="w-3 h-3 flex-shrink-0" /> Fonds injectés
             </span>
           </div>
         </div>
 
         {/* Total Approved Expenses */}
-        <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl p-5 shadow-lg shadow-violet-500/20 flex flex-col justify-between min-h-[130px]" id="card-total-expenses">
+        <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl p-3 sm:p-5 shadow-lg shadow-violet-500/20 flex flex-col justify-between min-h-[120px]" id="card-total-expenses">
           <div className="flex items-start justify-between">
-            <p className="text-xs font-semibold text-violet-100 uppercase tracking-widest">{t('totalExpenses')}</p>
-            <div className="bg-white/20 p-2 rounded-lg">
-              <ArrowDownRight className="w-4 h-4 text-white" />
+            <p className="text-[10px] sm:text-xs font-semibold text-violet-100 uppercase tracking-widest leading-tight">{t('totalExpenses')}</p>
+            <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0 ml-1">
+              <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold font-mono text-white leading-tight">{formatCurrencyDZD(totalApprovedExpensesAmount)}</h3>
-            <span className="text-xs text-violet-100 flex items-center gap-1 mt-1">
-              <CheckCircle className="w-3 h-3" /> Dépenses validées
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-xl md:text-2xl font-bold font-mono text-white leading-tight break-all">{formatCurrencyDZD(totalApprovedExpensesAmount)}</h3>
+            <span className="text-[10px] sm:text-xs text-violet-100 flex items-center gap-1 mt-1">
+              <CheckCircle className="w-3 h-3 flex-shrink-0" /> Dépenses validées
             </span>
           </div>
         </div>
 
         {/* Available Balance */}
-        <div className={`rounded-2xl p-5 shadow-lg flex flex-col justify-between min-h-[130px] ${availableBalance >= 0 ? 'bg-gradient-to-br from-slate-700 to-slate-800 shadow-slate-700/20' : 'bg-gradient-to-br from-rose-500 to-rose-600 shadow-rose-500/20'}`} id="card-available-balance">
+        <div className={`rounded-2xl p-3 sm:p-5 shadow-lg flex flex-col justify-between min-h-[120px] ${availableBalance >= 0 ? 'bg-gradient-to-br from-slate-700 to-slate-800 shadow-slate-700/20' : 'bg-gradient-to-br from-rose-500 to-rose-600 shadow-rose-500/20'}`} id="card-available-balance">
           <div className="flex items-start justify-between">
-            <p className="text-xs font-semibold text-slate-300 uppercase tracking-widest">{t('availableBalance')}</p>
-            <div className="bg-white/10 p-2 rounded-lg">
-              <Activity className="w-4 h-4 text-white" />
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-300 uppercase tracking-widest leading-tight">{t('availableBalance')}</p>
+            <div className="bg-white/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0 ml-1">
+              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold font-mono text-white leading-tight">{formatCurrencyDZD(availableBalance)}</h3>
-            <span className="text-xs text-slate-300 flex items-center gap-1 mt-1">
-              <ShieldCheck className="w-3 h-3" /> Trésorerie nette
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-xl md:text-2xl font-bold font-mono text-white leading-tight break-all">{formatCurrencyDZD(availableBalance)}</h3>
+            <span className="text-[10px] sm:text-xs text-slate-300 flex items-center gap-1 mt-1">
+              <ShieldCheck className="w-3 h-3 flex-shrink-0" /> Trésorerie nette
             </span>
           </div>
         </div>
 
         {/* Pending Requests */}
-        <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 shadow-lg shadow-amber-500/20 flex flex-col justify-between min-h-[130px]" id="card-pending-requests">
+        <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-3 sm:p-5 shadow-lg shadow-amber-500/20 flex flex-col justify-between min-h-[120px]" id="card-pending-requests">
           <div className="flex items-start justify-between">
-            <p className="text-xs font-semibold text-amber-100 uppercase tracking-widest">{t('pendingRequests')}</p>
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Clock className="w-4 h-4 text-white" />
+            <p className="text-[10px] sm:text-xs font-semibold text-amber-100 uppercase tracking-widest leading-tight">{t('pendingRequests')}</p>
+            <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0 ml-1">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold font-mono text-white leading-tight">{pendingRequestsCount}</h3>
-            <span className="text-xs text-amber-100 flex items-center gap-1 mt-1">
-              <AlertCircle className="w-3 h-3" /> En attente de validation
+          <div className="min-w-0">
+            <h3 className="text-2xl sm:text-3xl font-bold font-mono text-white leading-tight">{pendingRequestsCount}</h3>
+            <span className="text-[10px] sm:text-xs text-amber-100 flex items-center gap-1 mt-1">
+              <AlertCircle className="w-3 h-3 flex-shrink-0" /> En attente
             </span>
           </div>
         </div>
