@@ -1079,14 +1079,12 @@ function MainLayout() {
                 // 1. Filtered Expenses
                 const filteredExpenses = expenses.filter(e => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (myAssignments.some(a => a.project_id === e.project_id)) return true;
                   return e.submitted_by === currentUser?.id;
                 });
 
                 // 2. Filtered Allocations
                 const filteredAllocations = allocations.filter(a => {
                   if (isFdOrAccountantOrAdmin) return true;
-                  if (myAssignments.some(pa => pa.project_id === a.project_id)) return true;
                   const matchesName = currentUser?.full_name && (
                     a.allocated_to?.toLowerCase().includes(currentUser.full_name.toLowerCase()) ||
                     a.allocated_to_name?.toLowerCase().includes(currentUser.full_name.toLowerCase())
