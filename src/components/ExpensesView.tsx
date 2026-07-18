@@ -548,7 +548,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   <tr key={e.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20" id={`expense-row-${e.id}`}>
                     {/* Project & Category */}
                     <td className="p-4">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">{(e as any).projects?.name || projects.find(p => p.id === e.project_id)?.name || 'N/A'}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">{e.project_id === null ? 'Personnelle' : ((e as any).projects?.name || projects.find(p => p.id === e.project_id)?.name || 'N/A')}</span>
                       <span className="text-[10px] text-slate-400 font-mono block">{(e as any).expense_categories?.name || categories.find(c => c.id === e.category_id)?.name || '—'}</span>
                     </td>
                     {/* Submitter & Date */}
