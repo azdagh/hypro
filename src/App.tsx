@@ -77,6 +77,7 @@ function MainLayout() {
   const [profiles, setProfiles] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch all business data
   const fetchData = async (showLoader = true) => {
@@ -121,7 +122,14 @@ function MainLayout() {
     } catch (err) {  console.error('Error loading HYPRO ERP data:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    if (refreshing || !currentUser) return;
+    setRefreshing(true);
+    await fetchData(false);
   };
 
   useEffect(() => {
@@ -1033,6 +1041,17 @@ function MainLayout() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Refresh data button */}
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-50"
+              title="Actualiser les données"
+              id="btn-refresh-data"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-emerald-500' : ''}`} />
+            </button>
+
             {/* Quick Lang switch */}
             <button 
               onClick={() => setLang(lang === 'fr' ? 'ar' : 'fr')}

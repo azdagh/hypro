@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   Plus, Camera, Sparkles, Check, X, Filter, FileText, 
-  AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign, Trash2
+  AlertTriangle, Clock, RefreshCw, Eye, ArrowUpRight, DollarSign, Trash2, Image as ImageIcon
 } from 'lucide-react';
 import { Expense, Project, ExpenseCategory, Allocation } from '../types';
 import { formatCurrencyDZD, useTranslation } from '../i18n';
@@ -42,7 +42,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   enqueueOffline
 }) => {
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // View state
   const [activeSubTab, setActiveSubTab] = useState<'expenses' | 'allocations'>('expenses');
@@ -809,7 +810,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 )}
               </div>
 
-              {/* Justification Upload Card with Camera capture="environment" */}
+              {/* Justification Upload Card (Camera or Gallery) */}
               <div className="border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-slate-50 dark:bg-slate-950/20 text-center space-y-3">
                 <div className="flex flex-col items-center">
                   {localImageForScan ? (
@@ -818,35 +819,56 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                     </div>
                   ) : (
                     <>
-                      <Camera className="w-8 h-8 text-slate-400 mb-2" />
-                      <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu de Chantier</p>
+                      <div className="flex items-center gap-2 mb-2 text-slate-400">
+                        <Camera className="w-7 h-7" />
+                        <ImageIcon className="w-7 h-7" />
+                      </div>
+                      <p className="font-medium text-slate-700 dark:text-slate-300">Numériser Reçu / Bon de Chantier</p>
                       <p className="text-[10px] text-slate-400 mt-1 max-w-[320px]">
-                        Capturez directement via la caméra de votre smartphone (Compression automatique 70% pour limiter le trafic Naftal/chantiers).
+                        Prenez une photo en direct ou choisissez une image scannée depuis votre galerie (Compression automatique 70%).
                       </p>
                     </>
                   )}
                 </div>
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {/* Camera file input */}
                   <input 
                     type="file" 
                     accept="image/*" 
                     capture="environment" 
                     onChange={handleFileChange} 
-                    ref={fileInputRef}
+                    ref={cameraInputRef}
                     className="hidden" 
                   />
+                  {/* Gallery / File input (No capture attribute, lets user pick from photos/gallery) */}
+                  <input 
+                    type="file" 
+                    accept="image/*,application/pdf" 
+                    onChange={handleFileChange} 
+                    ref={galleryInputRef}
+                    className="hidden" 
+                  />
+
                   <button 
                     type="button" 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 rounded-lg py-2 px-4 font-semibold text-slate-700 dark:text-slate-200"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg py-2 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
                     disabled={isUploading}
                   >
-                    {isUploading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5" />}
-                    {localImageForScan ? 'Changer Photo' : uploadedFileName ? 'Changer Fichier' : 'Prendre Photo / Charger'}
+                    {isUploading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Camera className="w-3.5 h-3.5 mr-1.5 text-indigo-500" />}
+                    {localImageForScan ? 'Reprendre Caméra' : 'Caméra'}
                   </button>
 
-
+                  <button 
+                    type="button" 
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg py-2 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5 mr-1.5 text-emerald-500" />}
+                    {localImageForScan ? 'Choisir Galerie' : uploadedFileName ? 'Changer Fichier' : 'Galerie / Photo'}
+                  </button>
                 </div>
 
                 {/* Scan Status banner */}
